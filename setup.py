@@ -8,8 +8,9 @@ from setuptools.command.develop import develop as _develop
 
 
 # Import the version from the release module
-project_name = 'xopgi.addons.xopgi_base'
+project_name = 'xopgi.base'
 parts = project_name.split('.')
+parts[-1] = '_'.join(parts)  # Addons should be ns_named!!!
 _current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(_current_dir, *parts))
 from _release import VERSION as version
@@ -55,6 +56,6 @@ setup(name=project_name,
       ],
       entry_points="""
       [xoeuf.addons]
-      xopgi_base = xopgi.addons.xopgi_base
+      xopgi_base = xopgi.xopgi_base
       """,
       )

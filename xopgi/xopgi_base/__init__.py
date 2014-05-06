@@ -102,7 +102,4 @@ be showed only once with internal list of each concrete object.
 
 from __future__ import absolute_import
 
-
-from . import utils
 from . import res_users
-# from . import res_partner
