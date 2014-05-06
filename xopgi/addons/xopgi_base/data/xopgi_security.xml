@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data noupdate="1">
+    <record model="res.groups" id="group_hidden_features">
+      <field name="name">Technical Hidden Features</field>
+      <field name="category_id" ref="base.module_category_usability"/>
+      <field name="comment">Users of this group can see hidden usability features.</field>
+      <!-- TODO: This will require a litle more implementation. -->
+    </record>
+  </data>
+</openerp>

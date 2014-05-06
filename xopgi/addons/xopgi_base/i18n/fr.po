@@ -1,0 +1,64 @@
+# Translation of OpenERP Server.
+# This file contains the translation of the following modules:
+#	* xopgi_base
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: OpenERP Server 7.0-20130806-231058\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-10-18 10:40+0000\n"
+"PO-Revision-Date: 2013-10-18 06:44-0500\n"
+"Last-Translator: Laya del Carmen <layadelcarmen@gmail.com>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+
+#. module: xopgi_base
+#: model:ir.model,name:xopgi_base.model_res_users
+msgid "Users"
+msgstr "Utilisateurs"
+
+#. module: xopgi_base
+#: field:export.xml,field_ids:0
+msgid "Fields"
+msgstr "Champs"
+
+#. module: xopgi_base
+#: field:export.xml,module_id:0
+msgid "Module"
+msgstr "Module"
+
+#. module: xopgi_base
+#: view:export.xml:0
+#: model:ir.actions.act_window,name:xopgi_base.export_xml_action_form
+#: model:ir.ui.menu,name:xopgi_base.export_xml_menu_action_form
+msgid "Export XML"
+msgstr "Exporter XML"
+
+#. module: xopgi_base
+#: model:ir.model,name:xopgi_base.model_export_xml
+msgid "export.xml"
+msgstr "export.xml"
+
+#. module: xopgi_base
+#: view:export.xml:0
+msgid "Export"
+msgstr "Exporter"
+
+#. module: xopgi_base
+#: field:export.xml,file_id:0
+msgid "File"
+msgstr "Fichier"
+
+#. module: xopgi_base
+#: model:ir.model,name:xopgi_base.model_res_partner
+msgid "Partner"
+msgstr "Partenaire"
+
+#. module: xopgi_base
+#: field:export.xml,model_id:0
+msgid "Model"
+msgstr "Modèle"
+
