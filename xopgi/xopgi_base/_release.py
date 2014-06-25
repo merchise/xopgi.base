@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #----------------------------------------------------------------------
-# xopgi.addons.account._release
+# xopgi.base._release
 #----------------------------------------------------------------------
 # Copyright (c) 2013, 2014 Merchise Autrement and Contributors
 # All rights reserved.
