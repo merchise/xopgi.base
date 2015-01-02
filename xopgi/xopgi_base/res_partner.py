@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-#----------------------------------------------------------------------
-# xhg.xopgi.xopgi_base.partner
-#----------------------------------------------------------------------
-# Copyright (c) 2013, 2014 Merchise Autrement
+# ---------------------------------------------------------------------
+# xopgi_base.partner
+# ---------------------------------------------------------------------
+# Copyright (c) 2013-2015 Merchise Autrement
 # All rights reserved.
 #
 # This is free software; you can redistribute it and/or modify it under the
@@ -10,10 +10,6 @@
 # package.
 #
 # @created: 2013-04-23
-
-'''
-doc
-'''
 
 from __future__ import (division as _py3_division,
                         print_function as _py3_print,

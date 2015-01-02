@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-#----------------------------------------------------------------------
+# ---------------------------------------------------------------------
 # xopgi.addons.xopgi_base.__init__
-#----------------------------------------------------------------------
-# Copyright (c) 2013, 2014 Merchise Autrement
+# ---------------------------------------------------------------------
+# Copyright (c) 2013-2015 Merchise Autrement
 # All rights reserved.
 #
 # This is free software; you can redistribute it and/or modify it under the
@@ -102,4 +102,4 @@ be showed only once with internal list of each concrete object.
 
 from __future__ import absolute_import
 
-from . import res_users
+from . import res_users  # noqa
