@@ -50,9 +50,9 @@ class res_users(Model):
 
         '''
         password = vals.pop('password', False)
-        user_id = super(res_users, self).create(cr, uid, vals, context)
+        user_id = super(res_users, self).create(cr, uid, vals, context=context)
         if password:
-            self.write(cr, uid, user_id, {'password': password}, context)
+            self.write(cr, uid, user_id, {'password': password}, context=context)
         return user_id
 
     def deactivate(self, cr, uid, ids, context=None):
@@ -77,8 +77,8 @@ class res_users(Model):
         if isinstance(ids, (int, long)):
             ids = [ids]
         vals = {'active': False}
-        res = self.write(cr, uid, ids, vals, context)
-        pids = [u.partner_id.id for u in self.browse(cr, uid, ids, context)]
+        res = self.write(cr, uid, ids, vals, context=context)
+        pids = [u.partner_id.id for u in self.browse(cr, uid, ids, context=context)]
         partner_obj = self.pool['res.partner']
-        _res = partner_obj.write(cr, uid, pids, vals, context)
+        _res = partner_obj.write(cr, uid, pids, vals, context=context)
         return res
