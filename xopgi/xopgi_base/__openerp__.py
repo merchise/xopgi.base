@@ -13,7 +13,7 @@
 
 {
     "name": "XOPGI Base",
-    "version": "1.4",
+    "version": "1.5",
     "author": "Merchise Autrement",
     "website": "http://xhg.ca.merchise.org/addons/xopgi_base",
     "category": "Hidden",
