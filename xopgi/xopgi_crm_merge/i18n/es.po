@@ -1,0 +1,29 @@
+# Translation of OpenERP Server.
+# This file contains the translation of the following modules:
+#	* xopgi_crm_merge
+#
+msgid ""
+msgstr ""
+"Report-Msgid-Bugs-To: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+
+#. module: xopgi_crm_merge
+#: view:crm.configuration:0
+msgid "Merge limit"
+msgstr "Límite a mezclar"
+
+#. module: xopgi_crm_merge
+#: view:crm.configuration:0
+#: field:crm.configuration,leads_to_merge:0
+msgid "Leads to merge limit"
+msgstr "Límite de Iniciativas/Oportunidades a mezclar"
+
+#. module: xopgi_crm_merge
+#: view:crm.configuration:0
+#: field:crm.configuration,leads_to_merge:0
+msgid "Limit quantity of leads to allow merge at one time."
+msgstr "Límite máximo de Iniciativas/Oportunidades que se podrán mezclar de una vez."
