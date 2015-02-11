@@ -1,0 +1,40 @@
+# Translation of OpenERP Server.
+# This file contains the translation of the following modules:
+#	* xopgi_object_merge
+#
+msgid ""
+msgstr ""
+"Report-Msgid-Bugs-To: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+
+#. module: xopgi_object_merge
+#: view:object.merger.settings:0
+#: field:object.merger.settings,limit:0
+msgid "Object to merge limit"
+msgstr "Límite de objetos a mezclar"
+
+#. module: xopgi_object_merge
+#: code:addons/xopgi_object_merger/object_merger.py:0
+#, python-format
+msgid "Warning!"
+msgstr "¡Advertencia!"
+
+#. module: xopgi_object_merge
+#: code:addons/xopgi_object_merger/object_merger.py:0
+#, python-format
+msgid "You can`t merge so much objects at one time."
+msgstr "Usted no puede mezclar tantos objetos de una vez."
+
+#. module: xopgi_object_merge
+#: model:res.groups,name:xopgi_object_merge.group_merger_manager
+msgid "Object Merger Manager"
+msgstr "Responsable de mezcla de objetos"
+
+#. module: xopgi_object_merge
+#: model:ir.module.category,name:xopgi_object_merge.merger_category
+msgid "Object Merger"
+msgstr "Mezclar objetos"
