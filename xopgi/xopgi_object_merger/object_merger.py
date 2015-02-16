@@ -15,7 +15,7 @@
 
 from openerp import SUPERUSER_ID
 
-from openerp.osv import orm, osv
+from openerp.osv import orm, osv, fields
 
 from openerp.tools.translate import _
 
@@ -65,6 +65,46 @@ class object_merger(orm.TransientModel):
                                  _('You can`t merge so much objects '
                                    'at one time.'))
         return True
+
+    def action_merge(self, cr, uid, ids, context=None):
+        """Check if any of merged object_ids are referenced on any mail.alias
+        and on this case update the references to the destination object_id
+        """
+        res = super(object_merger, self).action_merge(cr, uid, ids, context=context)
+        active_model = context.get('active_model')
+        object_ids = context.get('active_ids', [])
+        field_to_read = context.get('field_to_read')
+        object = self.read(cr, uid, ids[0], [field_to_read], context=context)
+        object_id = object[field_to_read][0]
+        query = """SELECT id, alias_defaults FROM mail_alias
+                 WHERE alias_model_id = {model}
+                 AND (alias_defaults LIKE '%''{field}''%')"""
+        cr.execute(
+            "SELECT name, model, model_id, ttype FROM ir_model_fields WHERE "
+            "relation=%s;",
+            (active_model, )
+        )
+        read = cr.fetchall()
+        for field, model, model_id, ttype in read:
+            pool = self.pool[model]
+            if hasattr(pool, '_columns'):
+                col = pool._columns[field]
+                if isinstance(col, fields.many2one):
+                    cr.execute(query.format(model=model_id, field=field))
+                    for alias, defaults in cr.fetchall():
+                        try:
+                            defaults = dict(eval(defaults))
+                            val = defaults[field]
+                            if val in object_ids and val != object_id:
+                                defaults[field] = object_id
+                                upd = self.pool['mail.alias'].write
+                                vals = {'alias_defaults': str(defaults)}
+                                upd(cr, SUPERUSER_ID, alias, vals, context=context)
+                        except Exception:
+                            pass
+                # TODO: tambien hay que darle tratamiento a los one2many y
+                # many2many
+        return res
 
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
