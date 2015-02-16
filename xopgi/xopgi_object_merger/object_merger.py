@@ -104,6 +104,9 @@ class object_merger(orm.TransientModel):
                             pass
                 # TODO: tambien hay que darle tratamiento a los one2many y
                 # many2many
+
+                # TODO: refactorizar el módulo original para liminar el
+                # error de violación de restricciones en la BD.
         return res
 
 
