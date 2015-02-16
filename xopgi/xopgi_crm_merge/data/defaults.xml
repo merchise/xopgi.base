@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<openerp>
-  <data noupdate="1">
-    <record model="ir.config_parameter" id="ir_config_parameter_leads_to_merge">
-      <field name="key">leads_to_merge</field>
-      <field name="value">3</field>
-    </record>
-  </data>
-</openerp>
