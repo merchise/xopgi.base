@@ -1,9 +1,9 @@
-openerp.web_widget = function (instance) {
+openerp.widget_m2o_selection = function (instance) {
     var _t = instance.web._t,
         _lt = instance.web._lt;
     var QWeb = instance.web.qweb;
 
-    instance.web_widget.FieldMany2OneSelection = instance.web.form.FieldMany2One.extend({
+    instance.web.form.FieldMany2OneSelection = instance.web.form.FieldMany2One.extend({
         template: "FieldMany2OneSelection",
 
         init: function() {
@@ -52,7 +52,7 @@ openerp.web_widget = function (instance) {
 
     });
 
-    instance.web.form.widgets.add('many2one_selection', 'instance.web_widget.FieldMany2OneSelection');
+    instance.web.form.widgets.add('many2one_selection', 'instance.web.form.FieldMany2OneSelection');
 
 };
 
