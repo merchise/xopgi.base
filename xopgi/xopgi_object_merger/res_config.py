@@ -29,8 +29,8 @@ class object_merger_settings(osv.osv_memory):
 
     def _get_objects_to_merge(self, cr, uid, ids, name, arg, context=None):
         obj = self.pool['ir.config_parameter']
-        q = obj.get_param(cr, uid, 'objects_to_merge', DEFAULT_LIMIT_VALUE,
-                          context=context)
+        q = int(obj.get_param(cr, uid, 'objects_to_merge',
+                              DEFAULT_LIMIT_VALUE, context=context))
         return {i: q for i in ids}
 
     def _set_objects_to_merge(self, cr, uid, _id, field_name, field_value,
@@ -48,4 +48,11 @@ class object_merger_settings(osv.osv_memory):
                 help='Limit quantity of objects to allow merge at one time.'),
     }
 
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+    _defaults = {
+        'limit': lambda self, cr, uid, c: (
+            self._get_objects_to_merge(cr, uid, [0], None, None, context=c)[0]
+        )
+    }
+
+
+    # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
