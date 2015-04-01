@@ -31,14 +31,14 @@ class object_merger(orm.TransientModel):
                         context=None, toolbar=False, submenu=False):
         if context is None:
             context = {}
-        object_ids = context.get('active_ids',[])
-        self._check_quantity(cr, uid, object_ids, context=context)
+        object_ids = context.get('active_ids', [])
+        if object_ids:
+            self._check_quantity(cr, uid, object_ids, context=context)
         res = super(object_merger, self).fields_view_get(cr, uid, view_id,
                                                          view_type,
                                                          context=context,
                                                          toolbar=toolbar,
                                                          submenu=submenu)
-        object_ids = context.get('active_ids', [])
         active_model = context.get('active_model')
         field_name = 'x_' + (
             active_model and active_model.replace('.', '_') or '') + '_id'
