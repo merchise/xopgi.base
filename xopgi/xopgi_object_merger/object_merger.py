@@ -64,6 +64,11 @@ class object_merger(orm.TransientModel):
         limit quantity of objects to merge.
 
         '''
+        if len(ids) < 2:
+            raise osv.except_osv(
+                _('Information!'),
+                _('At less two items are necessary for merge.')
+            )
         if uid == SUPERUSER_ID:
             return True
         pool = self.pool.get('ir.model.data')
