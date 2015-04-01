@@ -42,6 +42,12 @@ msgid "You can`t merge so much objects at one time."
 msgstr "Usted no puede mezclar tantos objetos de una vez."
 
 #. module: xopgi_object_merge
+#: code:addons/xopgi_object_merger/object_merger.py:0
+#, python-format
+msgid "The limit must be a positive number."
+msgstr "El límite debe ser un número positivo"
+
+#. module: xopgi_object_merge
 #: model:res.groups,name:xopgi_object_merge.group_merger_manager
 msgid "Object Merger Manager"
 msgstr "Responsable de mezcla de objetos"

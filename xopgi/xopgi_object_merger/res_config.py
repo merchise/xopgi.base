@@ -40,6 +40,10 @@ class object_merger_settings(osv.osv_memory):
 
     def _set_objects_to_merge(self, cr, uid, _id, field_name, field_value,
                             arg, context=None):
+        if field_value and field_value < 0:
+            raise osv.except_osv(
+                'Error!',
+                _('The limit must be a positive number.'))
         obj = self.pool['ir.config_parameter']
         return obj.set_param(cr, uid, 'objects_to_merge',
                              value=field_value or '0',
