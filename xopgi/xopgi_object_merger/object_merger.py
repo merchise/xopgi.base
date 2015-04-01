@@ -91,9 +91,8 @@ class object_merger(orm.TransientModel):
         return True
 
     def action_merge(self, cr, uid, ids, context=None):
-
         """
-        Merges two (or more objects
+        Merges two or more objects
         @param self: The object pointer
         @param cr: the current row, from the database cursor,
         @param uid: the current user’s ID for security checks,
@@ -118,6 +117,8 @@ class object_merger(orm.TransientModel):
             raise orm.except_orm(_('Configuration Error!'),
                                  _('Please select one value to keep'))
         self._merge(cr, active_model, object_id, object_ids, context=context)
+        # init a new transaction to check for references on alias_defaults.
+        cr.commit()
         self._check_on_alias_defaults(cr, uid, object_id, object_ids,
                                       active_model, context=context)
         return {'type': 'ir.actions.act_window_close'}
@@ -316,7 +317,7 @@ class object_merger(orm.TransientModel):
                          WHERE alias_model_id = {model}
                          AND (alias_defaults LIKE '%''{field}''%')"""
         cr.execute("SELECT name, model_id, ttype FROM ir_model_fields "
-                   "WHERE relation='%s';" (model,))
+                   "WHERE relation='%s';" % model)
         read = cr.fetchall()
         for field, model_id, ttype in read:
             cr.execute(query.format(model=model_id, field=field))
