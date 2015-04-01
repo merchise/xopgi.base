@@ -18,7 +18,8 @@ from openerp import SUPERUSER_ID
 from openerp.osv import orm, osv, fields
 
 from openerp.tools.translate import _
-from openerp.tools import ustr
+
+from six import integer_types
 
 
 class object_merger(orm.TransientModel):
@@ -119,57 +120,184 @@ class object_merger(orm.TransientModel):
         self._merge(cr, active_model, object_id, object_ids, context=context)
         self._check_on_alias_defaults(cr, uid, object_id, object_ids,
                                       active_model, context=context)
-                # TODO: refactorizar el módulo original para liminar el
-                # error de violación de restricciones en la BD.
         return {'type': 'ir.actions.act_window_close'}
 
     def _merge(self, cr, active_model, object_id, object_ids, context=None):
-        cr.execute(
-            "SELECT name, model FROM ir_model_fields WHERE relation=%s and ttype not in ('many2many', 'one2many');",
+        '''Do merge object_ids: first verify if at less 2 object_ids exist
+        and one of they are object_id, then update all references of any
+        object_ids to object_id and at the end deactivate or delete
+        object_ids.
 
-            (active_model, ))
-        for name, model_raw in cr.fetchall():
-            if hasattr(self.pool.get(model_raw), '_auto'):
-                if not self.pool.get(model_raw)._auto:
-                    continue
-            if hasattr(self.pool.get(model_raw), '_check_time'):
+        '''
+        model_pool = self.pool.get(active_model)
+        object_ids = model_pool.exists(cr, SUPERUSER_ID, object_ids,
+                                       context=context)
+        if object_ids and object_id in object_ids and len(object_ids) > 1:
+            object_ids.remove(object_id)
+            self._check_fks(cr, active_model, object_id, object_ids)
+            active_col = (model_pool._columns.get('active')
+                          if hasattr(model_pool, '_columns') else False)
+            if active_col and not isinstance(active_col, fields.function):
+                return model_pool.write(cr, SUPERUSER_ID, object_ids,
+                                        {'active': False}, context=context)
+            return model_pool.unlink(cr, SUPERUSER_ID, object_ids,
+                                     context=context)
+
+    def _get_contraints(self, cr, table, field):
+        '''
+        Get a list of unique constraints that involve column to update
+        (foreign key from merging model)
+        :param cr:
+        :param table: db table to update
+        :param field: column to update
+        :return: list of (list of fields involve on each constraint) or
+        empty list if not unique constraint involve column tu update
+        '''
+        cr.execute("""
+            SELECT
+              kcu.column_name,
+              tc.constraint_name
+            FROM
+              information_schema.key_column_usage kcu,
+              information_schema.key_column_usage kcuw,
+              information_schema.table_constraints tc
+            WHERE
+              kcu.constraint_catalog = tc.constraint_catalog AND
+              kcu.constraint_schema = tc.constraint_schema AND
+              kcu.constraint_name = tc.constraint_name AND
+              kcuw.constraint_catalog = tc.constraint_catalog AND
+              kcuw.constraint_schema = tc.constraint_schema AND
+              kcuw.constraint_name = tc.constraint_name AND
+              tc.constraint_type = 'UNIQUE' AND
+              tc.table_name = %s AND
+              kcuw.column_name = %s
+              """, (table, field))
+        constraints = {}
+        for constraint_name, column_name in cr.fetchall():
+            if constraint_name not in constraints:
+                constraints[constraint_name] = []
+            constraints[constraint_name].append(column_name)
+        return constraints.values()
+
+    def _check_fks(self, cr, active_model, object_id, object_ids):
+        '''Get all relational field with active_model and send to update it.
+        :param cr:
+        :param active_model:
+        :param object_id:
+        :param object_ids:
+        :return:
+        '''
+        cr.execute("SELECT name, model, ttype "
+                   "FROM ir_model_fields "
+                   "WHERE relation=%s and ttype not in ('one2many');",
+                   (active_model, ))
+        for field_name, model_name, ttype in cr.fetchall():
+            pool = self.pool.get(model_name)
+            if not pool:
                 continue
+            if ((not pool) or (hasattr(pool, '_auto') and not pool._auto) or
+                    hasattr(pool, '_check_time')):
+                continue
+            if hasattr(pool, '_columns'):
+                column = pool._columns.get(field_name, False)
+                if (not column) or (isinstance(column, fields.function) and
+                                    not column.store):
+                    continue
+                if ttype == 'many2one':
+                    if hasattr(pool, '_table'):
+                        model = pool._table
+                    else:
+                        model = model_name.replace('.', '_')
+                elif ttype == 'many2many':
+                    model, _, field_name = column._sql_names(pool)
+                else:
+                    continue
+                self._upd_fk(cr, table=model, field=field_name,
+                             value=object_id, ids=object_ids)
+
+    def _upd_fk(self, cr, table, field, value, ids):
+        '''Update foreign key (field) to destination value (value) where
+        actual field value are in merging object ids (ids).
+        if not constraint involve the field to update.
+            Update all matching rows
+        else
+            check one by one if can update and update it or delete.
+
+        '''
+        constraints = self._get_contraints(cr, table, field)
+        if not constraints:
+            query = """UPDATE {model} SET {field}={object_id}
+                           WHERE {field} IN ({filter});"""
+            cr.execute(query.format(
+                model=table,
+                field=field,
+                object_id=str(value),
+                filter=','.join([str(i) for i in ids])
+            ))
+            return
+        all_columns = []
+        for columns in constraints:
+            all_columns.extend(columns)
+        all_columns = set(all_columns)
+        value_parser = lambda val: (str(val) if isinstance(val, integer_types)
+                                    else "'%s'" % str(val))
+
+        def check_constraints(filters):
+            '''
+            Revisar si hay alguna fila que contenga los mismos valores que
+            la que se está intentando actualizar de forma que se viole
+            alguna restricción de tipo unique.
+
+            :return: False if any violation detected else True
+
+            '''
+            filters.append('%s=%s' % (field, str(value)))
+            for columns in constraints:
+                const_filters = [arg for arg in filters
+                                 if arg.split('=')[0] in columns]
+                cr.execute('''SELECT {field} FROM {model}
+                              WHERE {filters}'''.format(
+                    field=field,
+                    model=table,
+                    filters=' AND '.join(const_filters)
+                ))
+                if cr.rowcount:
+                    return False
+            return True
+
+        def upd_del(action_update, filters):
+            '''
+            Update or Delete rows matching with filters passed.
+            :param action_update: if True Update query are executed else
+            Delete query are executed
+            :return:
+            '''
+            filters.append('%s=%s' % (field, row.get(field)))
+            query_filters = ' AND '.join(filters)
+            if action_update:
+                query = """UPDATE {model} SET {field}={object_id}
+                           WHERE {filters};"""
+                cr.execute(query.format(model=table, field=field,
+                                        object_id=str(value),
+                                        filters=query_filters))
             else:
-                if hasattr(self.pool.get(model_raw), '_columns'):
-                    if self.pool.get(model_raw)._columns.get(name,
-                                                             False) and (
-                                isinstance(self.pool.get(model_raw
-                                )._columns[name],
-                                           fields.many2one) or isinstance(
-                                    self.pool.get(model_raw)._columns[name],
-                                    fields.function) and self.pool.get(model_raw)._columns[name].store):
-                        if hasattr(self.pool.get(model_raw), '_table'):
-                            model = self.pool.get(model_raw)._table
-                        else:
-                            model = model_raw.replace('.', '_')
-                        requete = "UPDATE " + model + " SET " + name + "=" + str(
-                            object_id) + " WHERE " + ustr(name) + " IN " + str(tuple(object_ids)) + ";"
-                        cr.execute(requete)
-        cr.execute(
-            "select name, model from ir_model_fields where relation=%s and ttype in ('many2many');",
-            (active_model, ))
-        for field, model in cr.fetchall():
-            field_data = self.pool.get(model) and self.pool.get(model)._columns.get(field, False) and (
-                isinstance(self.pool.get(model)._columns[field],
-                           fields.many2many) or isinstance(
-                    self.pool.get(model)._columns[field], fields.function) and
-                self.pool.get(model)._columns[field].store) and self.pool.get(model)._columns[field] or False
-            if field_data:
-                model_m2m, rel1, rel2 = field_data._sql_names(self.pool.get(model))
-                requete = "UPDATE " + model_m2m + " SET " + rel2 + "=" + str(
-                    object_id) + " WHERE " + ustr(rel2) + " IN " + str(tuple(object_ids)) + ";"
-                cr.execute(requete)
-        unactive_object_ids = model_pool.search(cr, SUPERUSER_ID,
-                                                [('id', 'in', object_ids),
-                                                 ('id', '<>', object_id)],
-                                                context=context)
-        model_pool.write(cr, SUPERUSER_ID, unactive_object_ids, {'active': False},
-                         context=context)
+                query = """DELETE FROM {model}
+                           WHERE {filters};"""
+                cr.execute(query.format(model=table,
+                                        filters=query_filters))
+        query = '''SELECT {fields} FROM {model}
+                   WHERE {field} IN ({filter})'''
+        cr.execute(query.format(
+            fields=', '.join(all_columns),
+            model=table,
+            field=field,
+            filter=','.join([str(i) for i in ids])
+        ))
+        for row in cr.dictfetchall():
+            filters = ['%s=%s' % (field_name, value_parser(field_value))
+                       for field_name, field_value in row.items()
+                       if field_name != field]
+            upd_del(check_constraints(list(filters)), filters)
 
     def _check_on_alias_defaults(self, cr, uid, dst_id,
                                  ids, model, context=None):
