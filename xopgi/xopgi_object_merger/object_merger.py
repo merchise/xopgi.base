@@ -174,7 +174,7 @@ class object_merger(orm.TransientModel):
               kcuw.column_name = %s
               """, (table, field))
         constraints = {}
-        for constraint_name, column_name in cr.fetchall():
+        for column_name, constraint_name in cr.fetchall():
             if constraint_name not in constraints:
                 constraints[constraint_name] = []
             constraints[constraint_name].append(column_name)
