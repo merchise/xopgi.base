@@ -308,10 +308,10 @@ class object_merger(orm.TransientModel):
             "SELECT name, model "
             "FROM ir_model_fields "
             "WHERE ttype = 'reference' AND model!=%s;", (active_model,))
-        _update = lambda t, f: (
+        _update = lambda t, f, mf=False: (
             self._upd_reference(cr, table=t, model=active_model,
                                 field=f, value=object_id,
-                                ids=object_ids))
+                                ids=object_ids, model_field=mf))
         for field_name, model_name in cr.fetchall():
             pool = self.pool.get(model_name)
             if not pool:
@@ -329,8 +329,34 @@ class object_merger(orm.TransientModel):
             else:
                 table = model_name.replace('.', '_')
             _update(table, field_name)
+        REFERECES = [
+            # (table_name, id_field, model_field)
+            ('mail_followers', 'res_id', 'res_model'),
+            ('ir_attachment', 'res_id', 'res_model'),
+            ('mail_message', 'res_id', 'model'),
+            ('ir_model_data', 'res_id', 'model'),
+            ('wkf_triggers', 'res_id', 'model'),
+            ('mail_compose_forward', 'res_id', 'model'),
+            ('mail_compose_message', 'res_id', 'model')
+        ]
 
-    def _upd_reference(self, cr, table, model, field, value, ids):
+        def _check_field_exist(table_name, column_names):
+            query = """
+              SELECT column_name
+              FROM information_schema.columns
+              WHERE table_schema='public' AND table_name=%s AND column_name=%s
+            """
+            for column_name in column_names:
+                cr.execute(query, (table_name, column_name))
+                if not cr.rowcount:
+                    return False
+            return True
+        for table, field, model_field in REFERECES:
+            if _check_field_exist(table, (field, model_field)):
+                _update(table, field, model_field)
+
+    def _upd_reference(self, cr, table, model, field, value, ids,
+                       model_field=False):
         '''Update reference (field) to destination value (value) where
         actual field value are in merging object ids (ids).
         if not constraint involve the field to update.
@@ -340,11 +366,23 @@ class object_merger(orm.TransientModel):
 
         '''
         constraints = self._get_contraints(cr, table, field)
+        SUBQUERY = (["{field} = {id}", "{model_field}='{model}'"]
+                    if model_field else ["{field} = '{model},{id}'"])
         if not constraints:
+            if model_field:
+                query = """UPDATE {table} SET {field}={object_id}
+                               WHERE {field} IN ({filter})
+                                  AND {model_field}='{model}';"""
+                cr.execute(query.format(table=table, field=field,
+                                        object_id=str(value),
+                                        filter=','.join([str(i) for i in ids]),
+                                        model_field=model_field,
+                                        model=model))
+                return
             for _id in ids:
                 query = ("UPDATE {table} "
-                         "SET {field}='{model},{dst_id}' "
-                         "WHERE {field}='{model},{id}'")
+                         "SET {field}='{model},{dst_id}' " +
+                         "WHERE " + SUBQUERY[0])
                 cr.execute(query.format(table=table, field=field, model=model,
                                         dst_id=str(value), id=str(_id)))
             return
@@ -365,7 +403,8 @@ class object_merger(orm.TransientModel):
 
             '''
             query_dict = dict(field=field, model=model, id=str(value))
-            filters.append("{field} = '{model},{id}'".format(**query_dict))
+            filters.append(SUBQUERY[0].format(**query_dict))
+            filters.append('%s=%s' % (field, str(value)))
             for columns in constraints:
                 const_filters = [arg for arg in filters if
                                  arg.split('=')[0] in columns]
@@ -388,10 +427,10 @@ class object_merger(orm.TransientModel):
             :return:
             '''
             query_dict = dict(field=field, model=model, id=str(_id))
-            filters.append("{field} = '{model},{id}'".format(**query_dict))
+            filters.append(SUBQUERY[0].format(**query_dict))
             query_filters = ' AND '.join(filters)
             if action_update:
-                query = ("UPDATE {table} SET {field} = '{model},{id}'"
+                query = ("UPDATE {table} SET " + SUBQUERY[0] +
                          " WHERE {filters};")
                 cr.execute(query.format(table=table, field=field,
                                         model=model, id=str(value),
@@ -400,12 +439,12 @@ class object_merger(orm.TransientModel):
                 query = """DELETE FROM {table}
                            WHERE {filters};"""
                 cr.execute(query.format(table=table, filters=query_filters))
-
-        query = "SELECT {fields} FROM {table} WHERE {field}='{model},{id}'"
+        query = ("SELECT {fields} FROM {table} WHERE " + ' AND '.join(SUBQUERY))
         for _id in ids:
             cr.execute(
                 query.format(fields=', '.join(all_columns), table=table,
-                             field=field, model=model, id=_id))
+                             field=field, model=model, id=_id,
+                             model_field=model_field))
             for row in cr.dictfetchall():
                 filters = ['%s=%s' % (field_name, value_parser(field_value))
                            for field_name, field_value in row.items()
