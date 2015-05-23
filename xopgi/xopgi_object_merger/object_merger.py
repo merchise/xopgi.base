@@ -181,6 +181,45 @@ class object_merger(orm.TransientModel):
             constraints[constraint_name].append(column_name)
         return constraints.values()
 
+    def check_constraints(self, cr, table, field, dst_id, filters,
+                          constraints, model='', subquery='{field}={id}'):
+        '''
+        Revisar si hay alguna fila que contenga los mismos valores que
+        la que se está intentando actualizar de forma que se viole
+        alguna restricción de tipo unique.
+
+        :return: False if any violation detected else True
+
+        '''
+        filters.append(subquery.format(field=field, model=model, id=str(dst_id)))
+        for columns in constraints:
+            const_filters = [arg for arg in filters if
+                             arg.split('=')[0] in columns]
+            cr.execute("SELECT {field} FROM {table} WHERE {filters}".format(
+                field=field, table=table,
+                filters=' AND '.join(const_filters)))
+            if cr.rowcount:
+                return False
+        return True
+
+    def upd_del(self, action_update, cr, table, field, dst_id, filters,
+                src_id, model='', subquery='{field}={id}'):
+        '''
+        Update or Delete rows matching with filters passed.
+        :param action_update: if True Update query are executed else
+        Delete query are executed
+        :return:
+        '''
+        filters.append(subquery.format(field=field, model=model, id=str(src_id)))
+        query_filters = ' AND '.join(filters)
+        if action_update:
+            query = "UPDATE {table} SET " + subquery + " WHERE {filters};"
+            cr.execute(query.format(table=table, field=field, model=model,
+                                    id=str(dst_id), filters=query_filters))
+        else:
+            query = """DELETE FROM {table} WHERE {filters};"""
+            cr.execute(query.format(table=table, filters=query_filters))
+
     def _check_fks(self, cr, active_model, object_id, object_ids):
         '''Get all relational field with active_model and send to update it.
         :param cr:
@@ -243,50 +282,6 @@ class object_merger(orm.TransientModel):
         all_columns = set(all_columns)
         value_parser = lambda val: (str(val) if isinstance(val, integer_types)
                                     else "'%s'" % str(val))
-
-        def check_constraints(filters):
-            '''
-            Revisar si hay alguna fila que contenga los mismos valores que
-            la que se está intentando actualizar de forma que se viole
-            alguna restricción de tipo unique.
-
-            :return: False if any violation detected else True
-
-            '''
-            filters.append('%s=%s' % (field, str(value)))
-            for columns in constraints:
-                const_filters = [arg for arg in filters
-                                 if arg.split('=')[0] in columns]
-                cr.execute('''SELECT {field} FROM {model}
-                              WHERE {filters}'''.format(
-                    field=field,
-                    model=table,
-                    filters=' AND '.join(const_filters)
-                ))
-                if cr.rowcount:
-                    return False
-            return True
-
-        def upd_del(action_update, filters):
-            '''
-            Update or Delete rows matching with filters passed.
-            :param action_update: if True Update query are executed else
-            Delete query are executed
-            :return:
-            '''
-            filters.append('%s=%s' % (field, row.get(field)))
-            query_filters = ' AND '.join(filters)
-            if action_update:
-                query = """UPDATE {model} SET {field}={object_id}
-                           WHERE {filters};"""
-                cr.execute(query.format(model=table, field=field,
-                                        object_id=str(value),
-                                        filters=query_filters))
-            else:
-                query = """DELETE FROM {model}
-                           WHERE {filters};"""
-                cr.execute(query.format(model=table,
-                                        filters=query_filters))
         query = '''SELECT {fields} FROM {model}
                    WHERE {field} IN ({filter})'''
         cr.execute(query.format(
@@ -295,11 +290,15 @@ class object_merger(orm.TransientModel):
             field=field,
             filter=','.join([str(i) for i in ids])
         ))
+        ck_ctr = lambda f: self.check_constraints(cr, table, field, value, f,
+                                                  constraints)
+        _upd_del = lambda a, f, src_id: self.upd_del(a, cr, table, field,
+                                                     value, f, src_id)
         for row in cr.dictfetchall():
             filters = ['%s=%s' % (field_name, value_parser(field_value))
                        for field_name, field_value in row.items()
                        if field_name != field]
-            upd_del(check_constraints(list(filters)), filters)
+            _upd_del(ck_ctr(filters), filters, row.get(field))
 
     def _check_references(self, cr, active_model, object_id, object_ids):
         '''Get all reference field and send to update it.
@@ -404,54 +403,12 @@ class object_merger(orm.TransientModel):
         all_columns = set(all_columns)
         value_parser = lambda val: (str(val) if isinstance(val, integer_types)
                                     else "'%s'" % str(val))
-
-        def check_constraints(filters):
-            '''
-            Revisar si hay alguna fila que contenga los mismos valores que
-            la que se está intentando actualizar de forma que se viole
-            alguna restricción de tipo unique.
-
-            :return: False if any violation detected else True
-
-            '''
-            query_dict = dict(field=field, model=model, id=str(value))
-            filters.append(SUBQUERY[0].format(**query_dict))
-            filters.append('%s=%s' % (field, str(value)))
-            for columns in constraints:
-                const_filters = [arg for arg in filters if
-                                 arg.split('=')[0] in columns]
-                cr.execute(
-                    "SELECT {field} FROM {table} WHERE {filters}".format(
-                        field=field,
-                        table=table,
-                        filters=' AND '.join(const_filters)
-                    )
-                )
-                if cr.rowcount:
-                    return False
-            return True
-
-        def upd_del(action_update, filters, _id):
-            '''
-            Update or Delete rows matching with filters passed.
-            :param action_update: if True Update query are executed else
-            Delete query are executed
-            :return:
-            '''
-            query_dict = dict(field=field, model=model, id=str(_id))
-            filters.append(SUBQUERY[0].format(**query_dict))
-            query_filters = ' AND '.join(filters)
-            if action_update:
-                query = ("UPDATE {table} SET " + SUBQUERY[0] +
-                         " WHERE {filters};")
-                cr.execute(query.format(table=table, field=field,
-                                        model=model, id=str(value),
-                                        filters=query_filters))
-            else:
-                query = """DELETE FROM {table}
-                           WHERE {filters};"""
-                cr.execute(query.format(table=table, filters=query_filters))
         query = ("SELECT {fields} FROM {table} WHERE " + ' AND '.join(SUBQUERY))
+        ck_ctr = lambda f: self.check_constraints(
+            cr, table, field, value, f, constraints, model, SUBQUERY[0])
+        _upd_del = lambda a, f, src_id: self.upd_del(a, cr, table, field,
+                                                     value, f, src_id,
+                                                     model, SUBQUERY[0])
         for _id in ids:
             cr.execute(
                 query.format(fields=', '.join(all_columns), table=table,
@@ -461,7 +418,7 @@ class object_merger(orm.TransientModel):
                 filters = ['%s=%s' % (field_name, value_parser(field_value))
                            for field_name, field_value in row.items()
                            if field_name != field]
-                upd_del(check_constraints(list(filters)), filters, _id)
+                _upd_del(ck_ctr(filters), filters, _id)
 
     def _check_on_alias_defaults(self, cr, uid, dst_id,
                                  ids, model, context=None):
