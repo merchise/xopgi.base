@@ -107,42 +107,42 @@ class object_merger(orm.TransientModel):
         if not active_model:
             raise orm.except_orm(_('Configuration Error!'),
                                  _('The is no active model defined!'))
-        object_ids = context.get('active_ids', [])
+        src_ids = context.get('active_ids', [])
         field_to_read = context.get('field_to_read')
         field_list = field_to_read and [field_to_read] or []
         object = self.read(cr, uid, ids[0], field_list, context=context)
         if object and field_list and object[field_to_read]:
-            object_id = object[field_to_read][0]
+            dst_id = object[field_to_read][0]
         else:
             raise orm.except_orm(_('Configuration Error!'),
                                  _('Please select one value to keep'))
-        self._merge(cr, active_model, object_id, object_ids, context=context)
+        self._merge(cr, active_model, dst_id, src_ids, context=context)
         # init a new transaction to check for references on alias_defaults.
         cr.commit()
-        self._check_on_alias_defaults(cr, uid, object_id, object_ids,
+        self._check_on_alias_defaults(cr, dst_id, src_ids,
                                       active_model, context=context)
         return {'type': 'ir.actions.act_window_close'}
 
-    def _merge(self, cr, active_model, object_id, object_ids, context=None):
-        '''Do merge object_ids: first verify if at less 2 object_ids exist
-        and one of they are object_id, then update all references of any
-        object_ids to object_id and at the end deactivate or delete
-        object_ids.
+    def _merge(self, cr, active_model, dst_id, src_ids, context=None):
+        '''Do merge src_ids: first verify if at less 2 src_ids exist
+        and one of they are dst_id, then update all references of any
+        src_ids to dst_id and at the end deactivate or delete
+        src_ids.
 
         '''
         model_pool = self.pool.get(active_model)
-        object_ids = model_pool.exists(cr, SUPERUSER_ID, object_ids,
+        src_ids = model_pool.exists(cr, SUPERUSER_ID, src_ids,
                                        context=context)
-        if object_ids and object_id in object_ids and len(object_ids) > 1:
-            object_ids.remove(object_id)
-            self._check_fks(cr, active_model, object_id, object_ids)
-            self._check_references(cr, active_model, object_id, object_ids)
+        if src_ids and dst_id in src_ids and len(src_ids) > 1:
+            src_ids.remove(dst_id)
+            self._check_fks(cr, active_model, dst_id, src_ids)
+            self._check_references(cr, active_model, dst_id, src_ids)
             active_col = (model_pool._columns.get('active')
                           if hasattr(model_pool, '_columns') else False)
             if active_col and not isinstance(active_col, fields.function):
-                return model_pool.write(cr, SUPERUSER_ID, object_ids,
+                return model_pool.write(cr, SUPERUSER_ID, src_ids,
                                         {'active': False}, context=context)
-            return model_pool.unlink(cr, SUPERUSER_ID, object_ids,
+            return model_pool.unlink(cr, SUPERUSER_ID, src_ids,
                                      context=context)
 
     def _get_contraints(self, cr, table, field):
@@ -181,7 +181,7 @@ class object_merger(orm.TransientModel):
             constraints[constraint_name].append(column_name)
         return constraints.values()
 
-    def check_constraints(self, cr, table, field, dst_id, filters,
+    def _check_constraints(self, cr, table, field, dst_id, filters,
                           constraints, model='', subquery='{field}={id}'):
         '''
         Revisar si hay alguna fila que contenga los mismos valores que
@@ -202,7 +202,7 @@ class object_merger(orm.TransientModel):
                 return False
         return True
 
-    def upd_del(self, action_update, cr, table, field, dst_id, filters,
+    def _upd_del(self, action_update, cr, table, field, dst_id, filters,
                 src_id, model='', subquery='{field}={id}'):
         '''
         Update or Delete rows matching with filters passed.
@@ -220,12 +220,12 @@ class object_merger(orm.TransientModel):
             query = """DELETE FROM {table} WHERE {filters};"""
             cr.execute(query.format(table=table, filters=query_filters))
 
-    def _check_fks(self, cr, active_model, object_id, object_ids):
+    def _check_fks(self, cr, active_model, dst_id, src_ids):
         '''Get all relational field with active_model and send to update it.
         :param cr:
         :param active_model:
-        :param object_id:
-        :param object_ids:
+        :param dst_id:
+        :param src_ids:
         :return:
         '''
         cr.execute("SELECT name, model, ttype "
@@ -254,11 +254,11 @@ class object_merger(orm.TransientModel):
                 else:
                     continue
                 self._upd_fk(cr, table=model, field=field_name,
-                             value=object_id, ids=object_ids)
+                             dst_id=dst_id, src_ids=src_ids)
 
-    def _upd_fk(self, cr, table, field, value, ids):
-        '''Update foreign key (field) to destination value (value) where
-        actual field value are in merging object ids (ids).
+    def _upd_fk(self, cr, table, field, dst_id, src_ids):
+        '''Update foreign key (field) to destination value (dst_id) where
+        actual field value are in merging object ids (src_ids).
         if not constraint involve the field to update.
             Update all matching rows
         else
@@ -267,13 +267,13 @@ class object_merger(orm.TransientModel):
         '''
         constraints = self._get_contraints(cr, table, field)
         if not constraints:
-            query = """UPDATE {model} SET {field}={object_id}
+            query = """UPDATE {model} SET {field}={dst_id}
                            WHERE {field} IN ({filter});"""
             cr.execute(query.format(
                 model=table,
                 field=field,
-                object_id=str(value),
-                filter=','.join([str(i) for i in ids])
+                dst_id=str(dst_id),
+                filter=','.join([str(i) for i in src_ids])
             ))
             return
         all_columns = []
@@ -288,19 +288,19 @@ class object_merger(orm.TransientModel):
             fields=', '.join(all_columns),
             model=table,
             field=field,
-            filter=','.join([str(i) for i in ids])
+            filter=','.join([str(i) for i in src_ids])
         ))
-        ck_ctr = lambda f: self.check_constraints(cr, table, field, value, f,
+        ck_ctr = lambda f: self.check_constraints(cr, table, field, dst_id, f,
                                                   constraints)
-        _upd_del = lambda a, f, src_id: self.upd_del(a, cr, table, field,
-                                                     value, f, src_id)
+        upd_del = lambda a, f, src_id: self._upd_del(a, cr, table, field,
+                                                     dst_id, f, src_id)
         for row in cr.dictfetchall():
             filters = ['%s=%s' % (field_name, value_parser(field_value))
                        for field_name, field_value in row.items()
                        if field_name != field]
-            _upd_del(ck_ctr(filters), filters, row.get(field))
+            upd_del(ck_ctr(filters), filters, row.get(field))
 
-    def _check_references(self, cr, active_model, object_id, object_ids):
+    def _check_references(self, cr, active_model, dst_id, src_ids):
         '''Get all reference field and send to update it.
         '''
         cr.execute(
@@ -309,8 +309,8 @@ class object_merger(orm.TransientModel):
             "WHERE ttype = 'reference' AND model!=%s;", (active_model,))
         _update = lambda t, f, mf=False, m=active_model: (
             self._upd_reference(cr, table=t, model=m,
-                                field=f, value=object_id,
-                                ids=object_ids, model_field=mf))
+                                field=f, dst_id=dst_id,
+                                src_ids=src_ids, model_field=mf))
         for field_name, model_name in cr.fetchall():
             pool = self.pool.get(model_name)
             if not pool:
@@ -366,10 +366,10 @@ class object_merger(orm.TransientModel):
                 else:
                     _update(table, field, model_field)
 
-    def _upd_reference(self, cr, table, model, field, value, ids,
+    def _upd_reference(self, cr, table, model, field, dst_id, src_ids,
                        model_field=False):
-        '''Update reference (field) to destination value (value) where
-        actual field value are in merging object ids (ids).
+        '''Update reference (field) to destination value (dst_id) where
+        actual field value are in merging object ids (src_ids).
         if not constraint involve the field to update.
             Update all matching rows
         else
@@ -381,21 +381,21 @@ class object_merger(orm.TransientModel):
                     if model_field else ["{field} = '{model},{id}'"])
         if not constraints:
             if model_field:
-                query = """UPDATE {table} SET {field}={object_id}
+                query = """UPDATE {table} SET {field}={dst_id}
                                WHERE {field} IN ({filter})
                                   AND {model_field}='{model}';"""
                 cr.execute(query.format(table=table, field=field,
-                                        object_id=str(value),
-                                        filter=','.join([str(i) for i in ids]),
+                                        dst_id=str(dst_id),
+                                        filter=','.join([str(i) for i in src_ids]),
                                         model_field=model_field,
                                         model=model))
                 return
-            for _id in ids:
+            for _id in src_ids:
                 query = ("UPDATE {table} "
                          "SET {field}='{model},{dst_id}' " +
                          "WHERE " + SUBQUERY[0])
                 cr.execute(query.format(table=table, field=field, model=model,
-                                        dst_id=str(value), id=str(_id)))
+                                        dst_id=str(dst_id), id=str(_id)))
             return
         all_columns = []
         for columns in constraints:
@@ -405,23 +405,23 @@ class object_merger(orm.TransientModel):
                                     else "'%s'" % str(val))
         query = ("SELECT {fields} FROM {table} WHERE " + ' AND '.join(SUBQUERY))
         ck_ctr = lambda f: self.check_constraints(
-            cr, table, field, value, f, constraints, model, SUBQUERY[0])
-        _upd_del = lambda a, f, src_id: self.upd_del(a, cr, table, field,
-                                                     value, f, src_id,
+            cr, table, field, dst_id, f, constraints, model, SUBQUERY[0])
+        upd_del = lambda a, f, src_id: self._upd_del(a, cr, table, field,
+                                                     dst_id, f, src_id,
                                                      model, SUBQUERY[0])
-        for _id in ids:
+        for src_id in src_ids:
             cr.execute(
                 query.format(fields=', '.join(all_columns), table=table,
-                             field=field, model=model, id=_id,
+                             field=field, model=model, id=src_id,
                              model_field=model_field))
             for row in cr.dictfetchall():
                 filters = ['%s=%s' % (field_name, value_parser(field_value))
                            for field_name, field_value in row.items()
                            if field_name != field]
-                _upd_del(ck_ctr(filters), filters, _id)
+                upd_del(ck_ctr(filters), filters, src_id)
 
-    def _check_on_alias_defaults(self, cr, uid, dst_id,
-                                 ids, model, context=None):
+    def _check_on_alias_defaults(self, cr, dst_id,
+                                 src_ids, model, context=None):
         """Check if any of merged partner_ids are referenced on any mail.alias
         and on this case update the references to the dst_partner_id.
         """
@@ -450,7 +450,7 @@ class object_merger(orm.TransientModel):
                 if not val:
                     continue
                 if ttype == 'many2one':
-                    if val in ids and val != dst_id:
+                    if val in src_ids and val != dst_id:
                         defaults_dict[field] = dst_id
                         _update_alias(alias_id, defaults_dict)
                 else:
@@ -458,10 +458,10 @@ class object_merger(orm.TransientModel):
                     for rel_item in val:
                         rel_ids = rel_item[-1]
                         if isinstance(rel_ids, (tuple, list)):
-                            wo_partner_ids = [i for i in rel_ids if i not in ids]
+                            wo_partner_ids = [i for i in rel_ids if i not in src_ids]
                             if wo_partner_ids != rel_ids:
                                 rel_ids = set(wo_partner_ids + [dst_id])
-                        elif rel_ids in ids and val != dst_id:
+                        elif rel_ids in src_ids and val != dst_id:
                             rel_ids = dst_id
                         res_val.append(tuple(rel_item[:-1]) + (rel_ids,))
                     if val != res_val:
