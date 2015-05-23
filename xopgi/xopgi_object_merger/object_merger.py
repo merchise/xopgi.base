@@ -136,6 +136,7 @@ class object_merger(orm.TransientModel):
         if object_ids and object_id in object_ids and len(object_ids) > 1:
             object_ids.remove(object_id)
             self._check_fks(cr, active_model, object_id, object_ids)
+            self._check_references(cr, active_model, object_id, object_ids)
             active_col = (model_pool._columns.get('active')
                           if hasattr(model_pool, '_columns') else False)
             if active_col and not isinstance(active_col, fields.function):
@@ -299,6 +300,117 @@ class object_merger(orm.TransientModel):
                        for field_name, field_value in row.items()
                        if field_name != field]
             upd_del(check_constraints(list(filters)), filters)
+
+    def _check_references(self, cr, active_model, object_id, object_ids):
+        '''Get all reference field and send to update it.
+        '''
+        cr.execute(
+            "SELECT name, model "
+            "FROM ir_model_fields "
+            "WHERE ttype = 'reference' AND model!=%s;", (active_model,))
+        _update = lambda t, f: (
+            self._upd_reference(cr, table=t, model=active_model,
+                                field=f, value=object_id,
+                                ids=object_ids))
+        for field_name, model_name in cr.fetchall():
+            pool = self.pool.get(model_name)
+            if not pool:
+                continue
+            if ((not pool) or (hasattr(pool, '_auto') and not pool._auto)
+                    or hasattr(pool, '_check_time')):
+                continue
+            if hasattr(pool, '_columns'):
+                column = pool._columns.get(field_name, False)
+                if (not column) or (isinstance(column, fields.function)
+                                    and not column.store):
+                    continue
+            if hasattr(pool, '_table'):
+                table = pool._table
+            else:
+                table = model_name.replace('.', '_')
+            _update(table, field_name)
+
+    def _upd_reference(self, cr, table, model, field, value, ids):
+        '''Update reference (field) to destination value (value) where
+        actual field value are in merging object ids (ids).
+        if not constraint involve the field to update.
+            Update all matching rows
+        else
+            check one by one if can update and update it or delete.
+
+        '''
+        constraints = self._get_contraints(cr, table, field)
+        if not constraints:
+            for _id in ids:
+                query = ("UPDATE {table} "
+                         "SET {field}='{model},{dst_id}' "
+                         "WHERE {field}='{model},{id}'")
+                cr.execute(query.format(table=table, field=field, model=model,
+                                        dst_id=str(value), id=str(_id)))
+            return
+        all_columns = []
+        for columns in constraints:
+            all_columns.extend(columns)
+        all_columns = set(all_columns)
+        value_parser = lambda val: (str(val) if isinstance(val, integer_types)
+                                    else "'%s'" % str(val))
+
+        def check_constraints(filters):
+            '''
+            Revisar si hay alguna fila que contenga los mismos valores que
+            la que se está intentando actualizar de forma que se viole
+            alguna restricción de tipo unique.
+
+            :return: False if any violation detected else True
+
+            '''
+            query_dict = dict(field=field, model=model, id=str(value))
+            filters.append("{field} = '{model},{id}'".format(**query_dict))
+            for columns in constraints:
+                const_filters = [arg for arg in filters if
+                                 arg.split('=')[0] in columns]
+                cr.execute(
+                    "SELECT {field} FROM {table} WHERE {filters}".format(
+                        field=field,
+                        table=table,
+                        filters=' AND '.join(const_filters)
+                    )
+                )
+                if cr.rowcount:
+                    return False
+            return True
+
+        def upd_del(action_update, filters, _id):
+            '''
+            Update or Delete rows matching with filters passed.
+            :param action_update: if True Update query are executed else
+            Delete query are executed
+            :return:
+            '''
+            query_dict = dict(field=field, model=model, id=str(_id))
+            filters.append("{field} = '{model},{id}'".format(**query_dict))
+            query_filters = ' AND '.join(filters)
+            if action_update:
+                query = ("UPDATE {table} SET {field} = '{model},{id}'"
+                         " WHERE {filters};")
+                cr.execute(query.format(table=table, field=field,
+                                        model=model, id=str(value),
+                                        filters=query_filters))
+            else:
+                query = """DELETE FROM {table}
+                           WHERE {filters};"""
+                cr.execute(query.format(table=table, filters=query_filters))
+
+        query = "SELECT {fields} FROM {table} WHERE {field}='{model},{id}'"
+        for _id in ids:
+            cr.execute(
+                query.format(fields=', '.join(all_columns), table=table,
+                             field=field, model=model, id=_id))
+            for row in cr.dictfetchall():
+                filters = ['%s=%s' % (field_name, value_parser(field_value))
+                           for field_name, field_value in row.items()
+                           if field_name != field]
+                upd_del(check_constraints(list(filters)), filters, _id)
 
     def _check_on_alias_defaults(self, cr, uid, dst_id,
                                  ids, model, context=None):
