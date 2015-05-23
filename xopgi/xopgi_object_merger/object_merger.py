@@ -308,8 +308,8 @@ class object_merger(orm.TransientModel):
             "SELECT name, model "
             "FROM ir_model_fields "
             "WHERE ttype = 'reference' AND model!=%s;", (active_model,))
-        _update = lambda t, f, mf=False: (
-            self._upd_reference(cr, table=t, model=active_model,
+        _update = lambda t, f, mf=False, m=active_model: (
+            self._upd_reference(cr, table=t, model=m,
                                 field=f, value=object_id,
                                 ids=object_ids, model_field=mf))
         for field_name, model_name in cr.fetchall():
@@ -330,14 +330,18 @@ class object_merger(orm.TransientModel):
                 table = model_name.replace('.', '_')
             _update(table, field_name)
         REFERECES = [
-            # (table_name, id_field, model_field)
-            ('mail_followers', 'res_id', 'res_model'),
-            ('ir_attachment', 'res_id', 'res_model'),
-            ('mail_message', 'res_id', 'model'),
-            ('ir_model_data', 'res_id', 'model'),
-            ('wkf_triggers', 'res_id', 'model'),
-            ('mail_compose_forward', 'res_id', 'model'),
-            ('mail_compose_message', 'res_id', 'model')
+            # (table_name, id_field, model_field, is_model_id)
+            # is_model_id = (False for model name and True for model id)
+            ('mail_followers', 'res_id', 'res_model', False),
+            ('ir_attachment', 'res_id', 'res_model', False),
+            ('mail_message', 'res_id', 'model', False),
+            ('ir_model_data', 'res_id', 'model', False),
+            ('wkf_triggers', 'res_id', 'model', False),
+            ('mail_compose_forward', 'res_id', 'model', False),
+            ('mail_compose_message', 'res_id', 'model', False),
+            ('mail_alias', 'alias_force_thread_id', 'alias_model_id', True),
+            ('mail_alias', 'alias_parent_thread_id', 'alias_parent_model_id',
+             True)
         ]
 
         def _check_field_exist(table_name, column_names):
@@ -351,9 +355,17 @@ class object_merger(orm.TransientModel):
                 if not cr.rowcount:
                     return False
             return True
-        for table, field, model_field in REFERECES:
+        for table, field, model_field, is_model_id in REFERECES:
             if _check_field_exist(table, (field, model_field)):
-                _update(table, field, model_field)
+                if is_model_id:
+                    args = [('model', '=', active_model)]
+                    model_id = self.pool['ir.model'].search(cr,
+                                                            SUPERUSER_ID,
+                                                            args)
+                    if model_id and model_id[0]:
+                        _update(table, field, model_field, str(model_id[0]))
+                else:
+                    _update(table, field, model_field)
 
     def _upd_reference(self, cr, table, model, field, value, ids,
                        model_field=False):
