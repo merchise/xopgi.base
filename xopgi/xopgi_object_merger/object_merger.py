@@ -22,6 +22,21 @@ from openerp.tools.translate import _
 from six import integer_types
 
 
+INFORMAL_REFERECES = [
+     # (table_name, id_field, model_field, is_model_id)
+     # is_model_id = (False for model name and True for model id)
+     ('mail_followers', 'res_id', 'res_model', False),
+     ('ir_attachment', 'res_id', 'res_model', False),
+     ('mail_message', 'res_id', 'model', False),
+     ('ir_model_data', 'res_id', 'model', False),
+     ('wkf_triggers', 'res_id', 'model', False),
+     ('mail_compose_forward', 'res_id', 'model', False),
+     ('mail_compose_message', 'res_id', 'model', False),
+     ('mail_alias', 'alias_force_thread_id', 'alias_model_id', True),
+     ('mail_alias', 'alias_parent_thread_id', 'alias_parent_model_id', True)
+]
+
+
 class object_merger(orm.TransientModel):
     _name = 'object.merger'
     _description = 'Merge objects'
@@ -328,20 +343,6 @@ class object_merger(orm.TransientModel):
             else:
                 table = model_name.replace('.', '_')
             _update(table, field_name)
-        REFERECES = [
-            # (table_name, id_field, model_field, is_model_id)
-            # is_model_id = (False for model name and True for model id)
-            ('mail_followers', 'res_id', 'res_model', False),
-            ('ir_attachment', 'res_id', 'res_model', False),
-            ('mail_message', 'res_id', 'model', False),
-            ('ir_model_data', 'res_id', 'model', False),
-            ('wkf_triggers', 'res_id', 'model', False),
-            ('mail_compose_forward', 'res_id', 'model', False),
-            ('mail_compose_message', 'res_id', 'model', False),
-            ('mail_alias', 'alias_force_thread_id', 'alias_model_id', True),
-            ('mail_alias', 'alias_parent_thread_id', 'alias_parent_model_id',
-             True)
-        ]
 
         def _check_field_exist(table_name, column_names):
             query = """
@@ -354,7 +355,7 @@ class object_merger(orm.TransientModel):
                 if not cr.rowcount:
                     return False
             return True
-        for table, field, model_field, is_model_id in REFERECES:
+        for table, field, model_field, is_model_id in INFORMAL_REFERECES:
             if _check_field_exist(table, (field, model_field)):
                 if is_model_id:
                     args = [('model', '=', active_model)]
