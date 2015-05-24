@@ -21,7 +21,7 @@ from openerp.tools.translate import _
 
 from six import integer_types
 
-
+# TODO: make a model and visual way to change INFORMAL_REFERECES.
 INFORMAL_REFERECES = [
      # (table_name, id_field, model_field, is_model_id)
      # is_model_id = (False for model name and True for model id)
