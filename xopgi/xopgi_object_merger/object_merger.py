@@ -405,7 +405,7 @@ class object_merger(orm.TransientModel):
         value_parser = lambda val: (str(val) if isinstance(val, integer_types)
                                     else "'%s'" % str(val))
         query = ("SELECT {fields} FROM {table} WHERE " + ' AND '.join(SUBQUERY))
-        ck_ctr = lambda f: self.check_constraints(
+        ck_ctr = lambda f: self._check_constraints(
             cr, table, field, dst_id, f, constraints, model, SUBQUERY[0])
         upd_del = lambda a, f, src_id: self._upd_del(a, cr, table, field,
                                                      dst_id, f, src_id,
