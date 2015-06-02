@@ -243,11 +243,18 @@ class object_merger(orm.TransientModel):
         :param src_ids:
         :return:
         '''
-        cr.execute("SELECT name, model, ttype "
-                   "FROM ir_model_fields "
-                   "WHERE relation=%s and ttype not in ('one2many');",
-                   (active_model, ))
-        for field_name, model_name, ttype in cr.fetchall():
+        query = """
+          SELECT name, model, ttype
+          FROM ir_model_fields
+          WHERE relation=%s AND ttype != 'one2many'"""
+        query_args = [active_model]
+        if not self.pool['object.merger.settings']._get_merge_cyclic(
+                cr, SUPERUSER_ID):
+            query += " AND model!=%s"
+            query_args.append(active_model)
+        cr.execute(query, tuple(query_args))
+        fks = cr.fetchall()
+        for field_name, model_name, ttype in fks:
             pool = self.pool.get(model_name)
             if not pool:
                 continue
