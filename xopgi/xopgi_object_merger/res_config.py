@@ -49,6 +49,22 @@ class object_merger_settings(osv.osv_memory):
                              value=field_value or '0',
                              context=context)
 
+    def _get_merge_cyclic(self, cr, uid, ids=None, name=None, arg=None,
+                          context=None):
+        obj = self.pool['ir.config_parameter']
+        try:
+            q = eval(obj.get_param(cr, uid, 'merge_cyclic', False,
+                                   context=context))
+        except (NameError, TypeError):
+            q = False
+        return {i: q for i in ids} if ids else q
+
+    def _set_merge_cyclic(self, cr, uid, _id, field_name, field_value, arg,
+                          context=None):
+        obj = self.pool['ir.config_parameter']
+        return obj.set_param(cr, uid, 'merge_cyclic',
+                             value=str(field_value), context=context)
+
     _columns = {
         'models_ids':
             fields.many2many(
@@ -62,6 +78,12 @@ class object_merger_settings(osv.osv_memory):
                 method=True, string='Object to merge limit', type='integer',
                 help='Limit quantity of objects to allow merge at one time.'
             ),
+
+        'merge_cyclic':
+            fields.function(
+                _get_merge_cyclic, fnct_inv=_set_merge_cyclic,
+                method=True, string='Merge cyclic relations',
+                type='boolean'),
     }
 
     def _get_default_object_merger_models(self, cr, uid, context=None):

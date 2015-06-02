@@ -17,9 +17,12 @@
           <separator string="Object MergerConfiguration"/>
           <group name="object_merger_config">
             <div name="object_merger">
-              <group colspan="8">
+              <group colspan="4" col="4">
                 <field name="limit"/>
-                <field name="models_ids" colspan="4" nolabel="1"/>
+                <field name="merge_cyclic"/>
+              </group>
+              <group>
+                <field name="models_ids" nolabel="1"/>
               </group>
             </div>
           </group>
