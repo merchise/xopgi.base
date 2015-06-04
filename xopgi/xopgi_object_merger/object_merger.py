@@ -48,14 +48,15 @@ class object_merger(orm.TransientModel):
         if context is None:
             context = {}
         object_ids = context.get('active_ids', [])
+        active_model = context.get('active_model')
         if object_ids:
-            self._check_quantity(cr, uid, object_ids, context=context)
+            self._check_quantity(cr, uid, object_ids, active_model,
+                                 context=context)
         res = super(object_merger, self).fields_view_get(cr, uid, view_id,
                                                          view_type,
                                                          context=context,
                                                          toolbar=toolbar,
                                                          submenu=submenu)
-        active_model = context.get('active_model')
         field_name = 'x_' + (
             active_model and active_model.replace('.', '_') or '') + '_id'
         if object_ids:
@@ -75,7 +76,16 @@ class object_merger(orm.TransientModel):
             res['fields'][field_name]['required'] = True
         return res
 
-    def _check_quantity(self, cr, uid, ids, context=None):
+    def _browse_active_model(self, cr, active_model):
+        model_obj = self.pool['ir.model']
+        model = model_obj.browse(
+            cr,
+            SUPERUSER_ID,
+            model_obj.search(cr, SUPERUSER_ID, [('model', '=', active_model)])
+        )
+        return model and model[0] or False
+
+    def _check_quantity(self, cr, uid, ids, active_model, context=None):
         '''Check for groups_id of uid and if it are not merger manager check
         limit quantity of objects to merge.
 
@@ -97,9 +107,8 @@ class object_merger(orm.TransientModel):
                                                     context=context)
             if user_data and group_id in user_data['groups_id']:
                 return True
-        obj = self.pool['ir.config_parameter']
-        q = obj.get_param(cr, uid, 'objects_to_merge', 3, context=context)
-        if ids and int(q) < len(ids):
+        model = self._browse_active_model(cr, active_model)
+        if model and 0 < model.merge_limit < len(ids):
             raise osv.except_osv(_('Warning!'),
                                  _('You can`t merge so much objects '
                                    'at one time.'))
@@ -248,13 +257,8 @@ class object_merger(orm.TransientModel):
           FROM ir_model_fields
           WHERE relation=%s AND ttype != 'one2many'"""
         query_args = [active_model]
-        model_obj = self.pool['ir.model']
-        model = model_obj.browse(
-            cr,
-            SUPERUSER_ID,
-            model_obj.search(cr, SUPERUSER_ID, [('model', '=', active_model)])
-        )
-        if model and not model[0].merge_cyclic:
+        model = self._browse_active_model(cr, active_model)
+        if model and not model.merge_cyclic:
             query += " AND model!=%s"
             query_args.append(active_model)
         cr.execute(query, tuple(query_args))
