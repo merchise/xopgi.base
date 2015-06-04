@@ -31,9 +31,19 @@ class ir_model(orm.Model):
                                                  ' module in the list'),
         'merge_cyclic':
             fields.boolean(string='Merge cyclic relations', type='boolean'),
-        }
+        'merge_limit':
+            fields.integer('Merge Limit', help='Limit quantity of objects to '
+                                               'allow merge at one time.'),
+    }
 
-    _defaults = {'object_merger_model': False, 'merge_cyclic': False}
+    _defaults = {'object_merger_model': False, 'merge_cyclic': False,
+                 'merge_limit': 0}
+
+    _sql_constraints = [
+        ('positive_merge_limit', 'check ( merge_limit >= 0 )',
+         'The limit quantity of objects to allow merge at one time must be '
+         'positive number!'),
+        ]
 
     def fields_view_get(self, cr, uid, view_id=None, view_type='form',
                         context=None, toolbar=False, submenu=False):
