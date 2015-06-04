@@ -248,8 +248,13 @@ class object_merger(orm.TransientModel):
           FROM ir_model_fields
           WHERE relation=%s AND ttype != 'one2many'"""
         query_args = [active_model]
-        if not self.pool['object.merger.settings']._get_merge_cyclic(
-                cr, SUPERUSER_ID):
+        model_obj = self.pool['ir.model']
+        model = model_obj.browse(
+            cr,
+            SUPERUSER_ID,
+            model_obj.search(cr, SUPERUSER_ID, [('model', '=', active_model)])
+        )
+        if model and not model[0].merge_cyclic:
             query += " AND model!=%s"
             query_args.append(active_model)
         cr.execute(query, tuple(query_args))
