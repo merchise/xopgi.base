@@ -35,6 +35,27 @@ class ir_model(orm.Model):
 
     _defaults = {'object_merger_model': False, 'merge_cyclic': False}
 
+    def fields_view_get(self, cr, uid, view_id=None, view_type='form',
+                        context=None, toolbar=False, submenu=False):
+        if (view_type == 'form' and
+                (context or {}).get('object_merger_settings', False)):
+            _, view_id = self.pool.get('ir.model.data').get_object_reference(
+                cr,
+                uid,
+                'xopgi_object_merger',
+                'view_ir_model_merge_form'
+            )
+        res = super(ir_model, self).fields_view_get(
+            cr,
+            uid,
+            view_id=view_id,
+            view_type=view_type,
+            context=context,
+            toolbar=toolbar,
+            submenu=submenu
+        )
+        return res
+
 
 class object_merger_settings(osv.osv_memory):
     _name = 'object.merger.settings'
@@ -77,7 +98,8 @@ class object_merger_settings(osv.osv_memory):
             fields.many2many(
                 'ir.model', 'object_merger_settings_model_rel',
                 'object_merger_id', 'model_id', 'Models',
-                domain=[('osv_memory', '=', False)]
+                domain=[('osv_memory', '=', False)],
+                context={'object_merger_settings': True}
             ),
         'limit':
             fields.function(
