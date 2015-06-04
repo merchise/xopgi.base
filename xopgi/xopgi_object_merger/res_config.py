@@ -23,10 +23,17 @@ import copy
 class ir_model(orm.Model):
     _inherit = 'ir.model'
 
-    _columns = {'object_merger_model': fields.boolean('Object Merger',
-                                                      help='If checked, by default the Object Merger configuration will get this module in the list'), }
+    _columns = {
+        'object_merger_model':
+            fields.boolean('Object Merger', help='If checked, by default '
+                                                 'the Object Merger '
+                                                 'configuration will get this'
+                                                 ' module in the list'),
+        'merge_cyclic':
+            fields.boolean(string='Merge cyclic relations', type='boolean'),
+        }
 
-    _defaults = {'object_merger_model': False, }
+    _defaults = {'object_merger_model': False, 'merge_cyclic': False}
 
 
 class object_merger_settings(osv.osv_memory):
