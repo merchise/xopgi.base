@@ -17,7 +17,7 @@
           <separator string="Object MergerConfiguration"/>
           <group name="object_merger_config">
             <div name="object_merger">
-              <group>
+              <group string="Models">
                 <field name="models_ids" nolabel="1">
                   <tree>
                     <field name="name"/>
@@ -26,6 +26,9 @@
                     <field name="merge_cyclic"/>
                   </tree>
                 </field>
+              </group>
+              <group string="Informal References">
+                <field name="informal_reference_ids" nolabel="1"/>
               </group>
             </div>
           </group>

@@ -95,6 +95,13 @@ class InformalReference(orm.Model):
         'model_field_value': '0'
     }
 
+    def get_all_ids(self, cr, uid):
+        return self.search(cr, uid, [])
+
+    def unlink_rest(self, cr, uid, no_unlink_ids):
+        unlink_ids = self.search(cr, uid, [('id', 'not in', no_unlink_ids)])
+        self.unlink(cr, uid, unlink_ids)
+
 
 class object_merger_settings(osv.osv_memory):
     _name = 'object.merger.settings'
@@ -108,6 +115,14 @@ class object_merger_settings(osv.osv_memory):
                 domain=[('osv_memory', '=', False)],
                 context={'object_merger_settings': True}
             ),
+        'informal_reference_ids':
+            fields.many2many('informal.reference',
+                             'object_merger_informal_reference_rel',
+                             'object_merger_id', 'informal_reference_id',
+                             'Informal References',
+                             help='Know cases of pair of field represented a '
+                                  'reference to an specific object from '
+                                  'especific model.'),
     }
 
     def _get_default_object_merger_models(self, cr, uid, context=None):
@@ -116,6 +131,9 @@ class object_merger_settings(osv.osv_memory):
 
     _defaults = {
         'models_ids': _get_default_object_merger_models,
+        'informal_reference_ids':
+            lambda s, c, u, cxt: s.pool['informal.reference'].get_all_ids(
+                c, u)
     }
 
     def update_field(self, cr, uid, vals, context=None):
@@ -209,7 +227,9 @@ class object_merger_settings(osv.osv_memory):
             context = {}
         """ install method """
         for vals in self.read(cr, uid, ids, context=context):
-            result = self.update_field(cr, uid, vals, context=context)
+            self.pool['informal.reference'].unlink_rest(
+                cr, uid, vals.get('informal_reference_ids', []))
+            self.update_field(cr, uid, vals, context=context)
         return {'type': 'ir.actions.client', 'tag': 'reload', }
 
     # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
