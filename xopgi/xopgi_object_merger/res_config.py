@@ -71,22 +71,6 @@ class object_merger_settings(osv.osv_memory):
     _name = 'object.merger.settings'
     _inherit = 'res.config.settings'
 
-    def _get_objects_to_merge(self, cr, uid, ids, name, arg, context=None):
-        obj = self.pool['ir.config_parameter']
-        q = int(obj.get_param(cr, uid, 'objects_to_merge', 0, context=context))
-        return {i: q for i in ids}
-
-    def _set_objects_to_merge(self, cr, uid, _id, field_name, field_value,
-                            arg, context=None):
-        if field_value and field_value < 0:
-            raise osv.except_osv(
-                'Error!',
-                _('The limit must be a positive number.'))
-        obj = self.pool['ir.config_parameter']
-        return obj.set_param(cr, uid, 'objects_to_merge',
-                             value=field_value or '0',
-                             context=context)
-
     _columns = {
         'models_ids':
             fields.many2many(
@@ -95,12 +79,6 @@ class object_merger_settings(osv.osv_memory):
                 domain=[('osv_memory', '=', False)],
                 context={'object_merger_settings': True}
             ),
-        'limit':
-            fields.function(
-                _get_objects_to_merge, fnct_inv=_set_objects_to_merge,
-                method=True, string='Object to merge limit', type='integer',
-                help='Limit quantity of objects to allow merge at one time.'
-            ),
     }
 
     def _get_default_object_merger_models(self, cr, uid, context=None):
@@ -108,9 +86,6 @@ class object_merger_settings(osv.osv_memory):
             ('object_merger_model', '=', True)], context=context)
 
     _defaults = {
-        'limit': lambda self, cr, uid, c: (
-            self._get_objects_to_merge(cr, uid, [0], None, None, context=c)[0]
-        ),
         'models_ids': _get_default_object_merger_models,
     }
 
