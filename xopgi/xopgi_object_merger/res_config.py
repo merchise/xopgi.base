@@ -20,6 +20,9 @@ from openerp import SUPERUSER_ID
 import copy
 
 
+MODEL_FIELD_VALUE_SELECTION = [('0', 'Model Name'), ('1', 'Model Id')]
+
+
 class ir_model(orm.Model):
     _inherit = 'ir.model'
 
@@ -65,6 +68,32 @@ class ir_model(orm.Model):
             submenu=submenu
         )
         return res
+
+
+class InformalReference(orm.Model):
+    _name = 'informal.reference'
+
+    _columns = {
+        'table_name':
+            fields.char('Table Name', size=128, required=True,
+                        help='Name of DB table where informal reference are.'),
+        'id_field_name':
+            fields.char('Id Field Name', size=128, required=True,
+                        help='Name of field where destination id are saved.'),
+        'model_field_name':
+            fields.char('Model Field Name', size=128, required=True,
+                        help='Name of field where destination model are saved.'),
+        'model_field_value':
+            fields.selection(MODEL_FIELD_VALUE_SELECTION, 'Model Field Value',
+                             required=True, help='How save destination '
+                                                 'model reference.'),
+    }
+
+    _defaults = {
+        'id_field_name': 'res_id',
+        'model_field_name': 'res_model',
+        'model_field_value': '0'
+    }
 
 
 class object_merger_settings(osv.osv_memory):
