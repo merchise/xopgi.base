@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data> <!-- noupdate="1"-->
+    <record id="ir_values" model="informal.reference">
+      <field name="table_name">ir_values</field>
+      <field name="model_field_name">model</field>
+    </record>
+    <record id="mail_followers" model="informal.reference">
+      <field name="table_name">mail_followers</field>
+    </record>
+    <record id="ir_attachment" model="informal.reference">
+      <field name="table_name">ir_attachment</field>
+    </record>
+    <record id="mail_message" model="informal.reference">
+      <field name="table_name">mail_message</field>
+      <field name="model_field_name">model</field>
+    </record>
+    <record id="ir_model_data" model="informal.reference">
+      <field name="table_name">ir_model_data</field>
+      <field name="model_field_name">model</field>
+    </record>
+    <record id="wkf_triggers" model="informal.reference">
+      <field name="table_name">wkf_triggers</field>
+      <field name="model_field_name">model</field>
+    </record>
+    <record id="mail_alias" model="informal.reference">
+      <field name="table_name">mail_alias</field>
+      <field name="id_field_name">alias_force_thread_id</field>
+      <field name="model_field_name">alias_model_id</field>
+      <field name="model_field_value">1</field>
+    </record>
+    <record id="mail_alias" model="informal.reference">
+      <field name="table_name">mail_alias</field>
+      <field name="id_field_name">alias_parent_thread_id</field>
+      <field name="model_field_name">alias_parent_model_id</field>
+      <field name="model_field_value">1</field>
+    </record>
+  </data>
+</openerp>

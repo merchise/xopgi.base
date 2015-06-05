@@ -24,6 +24,7 @@
     'data': [
         "view/res_config_view.xml",
         "view/object_merger_view.xml",
+        "data/know_informal_reference.xml",
     ],
     'demo': [],
     'installable': True,
