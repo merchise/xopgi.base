@@ -95,6 +95,9 @@ class InformalReference(orm.Model):
         'model_field_value': '0'
     }
 
+    def get_all(self, cr, uid):
+        return self.browse(cr, uid, self.get_all_ids(cr, uid))
+
     def get_all_ids(self, cr, uid):
         return self.search(cr, uid, [])
 
