@@ -14,38 +14,159 @@
 # package.
 
 
+from openerp.osv import fields, osv, orm
+from openerp.tools.translate import _
+from openerp import SUPERUSER_ID
+import copy
 
-from openerp.osv import fields, osv
-from openerp.addons.object_merger.res_config import \
-    object_merger_settings as _base
 
-from xoeuf.osv.orm import get_modelname
+class ir_model(orm.Model):
+    _inherit = 'ir.model'
 
-DEFAULT_LIMIT_VALUE = 3
+    _columns = {'object_merger_model': fields.boolean('Object Merger',
+                                                      help='If checked, by default the Object Merger configuration will get this module in the list'), }
+
+    _defaults = {'object_merger_model': False, }
+
 
 class object_merger_settings(osv.osv_memory):
-    _name = get_modelname(_base)
-    _inherit = _name
+    _name = 'object.merger.settings'
+    _inherit = 'res.config.settings'
 
     def _get_objects_to_merge(self, cr, uid, ids, name, arg, context=None):
         obj = self.pool['ir.config_parameter']
-        q = obj.get_param(cr, uid, 'objects_to_merge', DEFAULT_LIMIT_VALUE,
-                          context=context)
+        q = int(obj.get_param(cr, uid, 'objects_to_merge', 0, context=context))
         return {i: q for i in ids}
 
     def _set_objects_to_merge(self, cr, uid, _id, field_name, field_value,
                             arg, context=None):
+        if field_value and field_value < 0:
+            raise osv.except_osv(
+                'Error!',
+                _('The limit must be a positive number.'))
         obj = self.pool['ir.config_parameter']
         return obj.set_param(cr, uid, 'objects_to_merge',
-                             value=field_value or DEFAULT_LIMIT_VALUE,
+                             value=field_value or '0',
                              context=context)
 
     _columns = {
+        'models_ids':
+            fields.many2many(
+                'ir.model', 'object_merger_settings_model_rel',
+                'object_merger_id', 'model_id', 'Models',
+                domain=[('osv_memory', '=', False)]
+            ),
         'limit':
             fields.function(
                 _get_objects_to_merge, fnct_inv=_set_objects_to_merge,
                 method=True, string='Object to merge limit', type='integer',
-                help='Limit quantity of objects to allow merge at one time.'),
+                help='Limit quantity of objects to allow merge at one time.'
+            ),
     }
 
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+    def _get_default_object_merger_models(self, cr, uid, context=None):
+        return self.pool.get('ir.model').search(cr, uid, [
+            ('object_merger_model', '=', True)], context=context)
+
+    _defaults = {
+        'limit': lambda self, cr, uid, c: (
+            self._get_objects_to_merge(cr, uid, [0], None, None, context=c)[0]
+        ),
+        'models_ids': _get_default_object_merger_models,
+    }
+
+    def update_field(self, cr, uid, vals, context=None):
+        ## Init ##
+        if context is None:
+            context = {}
+        model_ids = []
+        model_obj = self.pool.get('ir.model')
+        action_obj = self.pool.get('ir.actions.act_window')
+        value_obj = self.pool.get('ir.values')
+        field_obj = self.pool.get('ir.model.fields')
+        ## Process ##
+        if not vals or not vals.get('models_ids', False):
+            return False
+        elif vals.get('models_ids') or model_ids[0][2]:
+            model_ids = vals.get('models_ids')
+            if isinstance(model_ids[0], (list)):
+                model_ids = model_ids[0][2]
+        # Unlink Previous Actions
+        unlink_ids = action_obj.search(cr, uid,
+                                       [('res_model', '=', 'object.merger')],
+                                       context=context)
+        for unlink_id in unlink_ids:
+            action_obj.unlink(cr, uid, unlink_id)
+            un_val_ids = value_obj.search(cr, uid, [
+                ('value', '=', "ir.actions.act_window," + str(unlink_id)), ],
+                                          context=context)
+            value_obj.unlink(cr, uid, un_val_ids, context=context)
+        # Put all models which were selected before back to not an object_merger
+        model_not_merge_ids = model_obj.search(
+            cr,
+            uid,
+            [('id', 'not in', model_ids), ('object_merger_model', '=',True)],
+            context=context
+        )
+        model_obj.write(cr, uid, model_not_merge_ids,
+                        {'object_merger_model': False}, context=context)
+        # Put all models which are selected to be an object_merger
+        model_obj.write(cr, uid, model_ids, {'object_merger_model': True},
+                        context=context)
+        ### Create New Fields ###
+        object_merger_ids = model_obj.search(cr, uid,
+                                             [('model', '=', 'object.merger')],
+                                             context=context)
+        read_datas = model_obj.read(cr, uid, model_ids,
+                                    ['model', 'name', 'object_merger_model'],
+                                    context=context)
+        for model in read_datas:
+            field_name = 'x_' + model['model'].replace('.', '_') + '_id'
+            act_id = action_obj.create(cr, uid, {
+                'name': "%s " % model['name'] + _("Merger"),
+                'type': 'ir.actions.act_window', 'res_model': 'object.merger',
+                'src_model': model['model'], 'view_type': 'form',
+                'context': "{'field_to_read':'%s'}" % field_name,
+                'view_mode': 'form', 'target': 'new', }, context=context)
+            value_obj.create(
+                cr,
+                uid,
+                {'name': "%s " % model['name'] + _("Merger"),
+                 'model': model['model'], 'key2': 'client_action_multi',
+                 'value': "ir.actions.act_window," + str(act_id),},
+                context=context
+            )
+            field_name = 'x_' + model['model'].replace('.', '_') + '_id'
+            if not field_obj.search(cr, uid, [('name', '=', field_name), (
+                    'model', '=', 'object.merger')], context=context):
+                field_data = {
+                    'model': 'object.merger',
+                    'model_id': object_merger_ids and object_merger_ids[0] or False,
+                    'name': field_name,
+                    'relation': model['model'],
+                    'field_description': "%s " % model['name'] + _('To keep'),
+                    'state': 'manual',
+                    'ttype': 'many2one',
+                }
+                field_obj.create(cr, SUPERUSER_ID, field_data, context=context)
+        return True
+
+    def create(self, cr, uid, vals, context=None):
+        """ create method """
+        vals2 = copy.deepcopy(vals)
+        result = super(object_merger_settings, self).create(cr, uid, vals2,
+                                                            context=context)
+        ## Fields Process ##
+        self.update_field(cr, uid, vals, context=context)
+        return result
+
+    def install(self, cr, uid, ids, context=None):
+        # Initialization of the configuration
+        if context is None:
+            context = {}
+        """ install method """
+        for vals in self.read(cr, uid, ids, context=context):
+            result = self.update_field(cr, uid, vals, context=context)
+        return {'type': 'ir.actions.client', 'tag': 'reload', }
+
+    # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

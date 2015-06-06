@@ -18,16 +18,15 @@
     'version': '1.0',
     'category': 'Tools',
     'description': """
-    Extension of object_merge module of julius report
+    Generic merge option for any model
     """,
-    'depends': [
-        'object_merger',
-    ],
+    'depends': ['base'],
     'data': [
         "view/res_config_view.xml",
+        "view/object_merger_view.xml",
     ],
     'demo': [],
     'installable': True,
-    "active": False,
+    'aplication': True,
 }
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
