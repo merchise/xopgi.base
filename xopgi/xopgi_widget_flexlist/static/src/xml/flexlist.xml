@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<template>
-  <t t-extend="ListView.buttons">
-    <t t-jquery="button">
-      $(this).addClass('oe_edit_only');
-    </t>
-  </t>
-</template>
