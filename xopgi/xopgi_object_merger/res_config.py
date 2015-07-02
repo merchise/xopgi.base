@@ -17,7 +17,6 @@
 from openerp.osv import fields, osv, orm
 from openerp.tools.translate import _
 from openerp import SUPERUSER_ID
-import copy
 from xoeuf.osv.orm import LINK_RELATED
 
 
@@ -219,15 +218,6 @@ class object_merger_settings(osv.osv_memory):
                 }
                 field_obj.create(cr, SUPERUSER_ID, field_data, context=context)
         return True
-
-    def create(self, cr, uid, vals, context=None):
-        """ create method """
-        vals2 = copy.deepcopy(vals)
-        result = super(object_merger_settings, self).create(cr, uid, vals2,
-                                                            context=context)
-        ## Fields Process ##
-        self.update_field(cr, uid, vals, context=context)
-        return result
 
     def install(self, cr, uid, ids, context=None):
         # Initialization of the configuration
