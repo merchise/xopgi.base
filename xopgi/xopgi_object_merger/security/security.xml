@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data>
+    <record id="group_merger_manager" model="res.groups">
+      <field name="name">Object Merger Manager</field>
+      <field name="category_id" ref="base.module_category_tools"/>
+    </record>
+  </data>
+</openerp>
