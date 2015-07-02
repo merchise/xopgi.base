@@ -306,8 +306,8 @@ class object_merger(orm.TransientModel):
             field=field,
             filter=','.join([str(i) for i in src_ids])
         ))
-        ck_ctr = lambda f: self.check_constraints(cr, table, field, dst_id, f,
-                                                  constraints)
+        ck_ctr = lambda f: self._check_constraints(cr, table, field,
+                                                   dst_id, f, constraints)
         upd_del = lambda a, f, src_id: self._upd_del(a, cr, table, field,
                                                      dst_id, f, src_id)
         for row in cr.dictfetchall():
