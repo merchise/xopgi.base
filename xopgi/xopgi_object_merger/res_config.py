@@ -18,6 +18,7 @@ from openerp.osv import fields, osv, orm
 from openerp.tools.translate import _
 from openerp import SUPERUSER_ID
 import copy
+from xoeuf.osv.orm import LINK_RELATED
 
 
 MODEL_FIELD_VALUE_SELECTION = [('0', 'Model Name'), ('1', 'Model Id')]
@@ -148,6 +149,9 @@ class object_merger_settings(osv.osv_memory):
         action_obj = self.pool.get('ir.actions.act_window')
         value_obj = self.pool.get('ir.values')
         field_obj = self.pool.get('ir.model.fields')
+        rol = self.pool['ir.model.data'].xmlid_to_res_id(
+            cr, SUPERUSER_ID, 'xopgi_object_merger.group_merger_manager',
+            raise_if_not_found=False)
         ## Process ##
         if not vals or not vals.get('models_ids', False):
             return False
@@ -190,6 +194,7 @@ class object_merger_settings(osv.osv_memory):
                 'name': "%s " % model['name'] + _("Merger"),
                 'type': 'ir.actions.act_window', 'res_model': 'object.merger',
                 'src_model': model['model'], 'view_type': 'form',
+                'groups_id': [LINK_RELATED(rol)],
                 'context': "{'field_to_read':'%s'}" % field_name,
                 'view_mode': 'form', 'target': 'new', }, context=context)
             value_obj.create(
