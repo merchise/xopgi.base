@@ -21,6 +21,8 @@ from openerp.tools.translate import _
 
 from six import integer_types
 
+from .res_config import IS_MODEL_ID
+
 
 class object_merger(orm.TransientModel):
     _name = 'object.merger'
@@ -359,7 +361,7 @@ class object_merger(orm.TransientModel):
         for ref in self.pool['informal.reference'].get_all(cr, SUPERUSER_ID):
             if _check_field_exist(ref.table_name, (ref.id_field_name,
                                                    ref.model_field_name)):
-                if ref.model_field_value == '0':
+                if ref.model_field_value == IS_MODEL_ID:
                     args = [('model', '=', active_model)]
                     model_id = self.pool['ir.model'].search(cr,
                                                             SUPERUSER_ID,

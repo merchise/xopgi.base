@@ -19,8 +19,8 @@ from openerp.tools.translate import _
 from openerp import SUPERUSER_ID
 from xoeuf.osv.orm import LINK_RELATED
 
-
-MODEL_FIELD_VALUE_SELECTION = [('0', 'Model Name'), ('1', 'Model Id')]
+IS_MODEL_ID = '1'
+MODEL_FIELD_VALUE_SELECTION = [('0', 'Model Name'), (IS_MODEL_ID, 'Model Id')]
 
 
 class ir_model(orm.Model):
