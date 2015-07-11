@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<openerp>
+  <data>
+
+    <record model="ir.ui.view" id="view_work_distributor_wizard_form">
+      <field name="name">work.distributor.wizard.form</field>
+      <field name="model">work.distributor.wizard</field>
+      <field name="arch" type="xml">
+        <form string="Work Distribution Strategy">
+          <group>
+            <field name="strategy_id" required="1"/>
+            <field name="info" readonly="1"/>
+          </group>
+          <footer>
+            <button string="Assign Distribution Strategy"
+                    name="action_config" type="object" class="oe_highlight"/>
+            or
+            <button string="Cancel" class="oe_link" special="cancel"/>
+          </footer>
+        </form>
+      </field>
+    </record>
+
+  </data>
+</openerp>

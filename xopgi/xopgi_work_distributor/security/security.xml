@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data>
+    <record id="group_distributor_manager" model="res.groups">
+      <field name="name">Automatic Work Distribution Manager</field>
+      <field name="category_id" ref="base.module_category_tools"/>
+    </record>
+
+    <record id="xopgi_dist_model_acl_public" model="ir.model.access">
+      <field name="name">xopgi.dist.model.acl.public</field>
+      <field name="model_id"
+             ref="xopgi_work_distributor.model_work_distribution_model"/>
+      <field name="group_id" ref="base.group_user"/>
+      <field name="perm_read" eval="1"/>
+      <field name="perm_create" eval="0"/>
+      <field name="perm_write" eval="0"/>
+      <field name="perm_unlink" eval="0"/>
+    </record>
+
+    <record id="xopgi_dist_model_acl_private" model="ir.model.access">
+      <field name="name">xopgi.dist.model.acl.private</field>
+      <field name="model_id"
+             ref="xopgi_work_distributor.model_work_distribution_model"/>
+      <field name="group_id" ref="base.group_system"/>
+      <field name="perm_read" eval="1"/>
+      <field name="perm_create" eval="1"/>
+      <field name="perm_write" eval="1"/>
+      <field name="perm_unlink" eval="1"/>
+    </record>
+
+    <record id="xopgi_dist_model_acl_private2" model="ir.model.access">
+      <field name="name">xopgi.dist.model.acl.private2</field>
+      <field name="model_id"
+             ref="xopgi_work_distributor.model_work_distribution_model"/>
+      <field name="group_id" ref="xopgi_work_distributor.group_distributor_manager"/>
+      <field name="perm_read" eval="1"/>
+      <field name="perm_create" eval="1"/>
+      <field name="perm_write" eval="1"/>
+      <field name="perm_unlink" eval="1"/>
+    </record>
+
+    <record id="xopgi_dist_strategy_acl_public" model="ir.model.access">
+      <field name="name">xopgi.dist.strategy.acl.public</field>
+      <field name="model_id"
+             ref="xopgi_work_distributor.model_work_distribution_strategy"/>
+      <field name="group_id" ref="base.group_user"/>
+      <field name="perm_read" eval="1"/>
+      <field name="perm_create" eval="0"/>
+      <field name="perm_write" eval="0"/>
+      <field name="perm_unlink" eval="0"/>
+    </record>
+  </data>
+</openerp>
