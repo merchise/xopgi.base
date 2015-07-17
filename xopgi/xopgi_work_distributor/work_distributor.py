@@ -33,6 +33,17 @@ FIELD_NAME_TO_SHOW_ON_WIZARD = \
 WIZARD_NAME = 'work.distributor.wizard'
 
 
+def _evaluate_domain(env, model, domain_str):
+    ''' Pop user lang information from context to allow put in domain names
+    and search always on original text and not on user lang translations.
+
+    '''
+    domain = safe_eval(domain_str or '[]')
+    context = dict(env.context)
+    context.pop('lang', False)
+    return env[model].with_context(context).search(domain)
+
+
 class WorkDistributionModel(models.Model):
     _name = 'work.distribution.model'
 
@@ -46,12 +57,14 @@ class WorkDistributionModel(models.Model):
         'ir.model', required=True,
         help='Model where Work Distribution Strategies will be applied.')
     group_field = fields.Many2one(
-        'ir.model.fields', 'Group Field', required=True,
+        'ir.model.fields', 'Group Field',
         help='many2one field where that it value determine domain of '
              'distribution destination.')
     group_model = fields.Char('Group Model')
+    domain = fields.Text(help='Odoo domain to search in destination_field`s '
+                              'model.')
     domain_field = fields.Many2one(
-        'ir.model.fields', 'Domain Field', required=True,
+        'ir.model.fields', 'Domain Field',
         help='Field that it value determine domain of '
              'distribution destination.')
     destination_field = fields.Many2one(
@@ -79,8 +92,8 @@ class WorkDistributionModel(models.Model):
             fields_name = model.strategy_ids.get_fields_name()
             if fields_name:
                 other_fields = safe_eval(model.other_fields or '{}')
-                if not other_fields or not all(other_fields.get(f, False)
-                                               for f in fields_name):
+                if not other_fields or not all(
+                        other_fields.get(f, False) for f in fields_name):
                     raise ValidationError(
                         _('Other fields must define all fields used on '
                           'selected strategies.'))
@@ -90,6 +103,28 @@ class WorkDistributionModel(models.Model):
                         raise ValidationError(
                             _('Some Other fields defined not exist on '
                               'destination model'))
+        return True
+
+    @api.constrains('domain')
+    def _check_domain(self):
+        for model in self:
+            try:
+                if not _evaluate_domain(self.env,
+                                        model.destination_field.relation,
+                                        model.domain):
+                    raise ValidationError(
+                        _('Domain evaluate not return any record.'))
+            except:
+                raise ValidationError(_('Domain value are wrong.'))
+        return True
+
+    @api.constrains('strategy_ids')
+    def _check_strategy_ids(self):
+        for model in self:
+            if not model.group_field and len(model.strategy_ids) > 1:
+                raise ValidationError(
+                    _('When no group field is defined only one strategy '
+                      'must be selected.'))
         return True
 
     @api.model
@@ -132,16 +167,20 @@ class WorkDistributionModel(models.Model):
 
         '''
         for item in self.search([('model.model', '=', model)]):
-            group_model = item.group_field.relation
-            group_id = values.get(item.group_field.name, False)
-            if group_id:
-                group = self.env[group_model].browse(group_id)
-                strategy = getattr(group, item.strategy_field.name, False)
+            strategy = False
+            if item.group_field:
+                group_id = values.get(item.group_field.name, False)
+                if group_id:
+                    group_model = item.group_field.relation
+                    group = self.env[group_model].browse(group_id)
+                    strategy = getattr(group, item.strategy_field.name, False)
+            else:
+                strategy = item.strategy_ids[0]
+            if strategy:
+                other_fields = (safe_eval(item.other_fields)
+                                if item.other_fields else {})
                 # TODO: check if active user have access to destination field
-                if strategy and strategy.id:
-                    other_fields = (safe_eval(item.other_fields)
-                                    if item.other_fields else {})
-                    strategy.apply(item, values, **dict(other_fields))
+                strategy.apply(item, values, **dict(other_fields))
         return values
 
     @api.model
@@ -151,7 +190,8 @@ class WorkDistributionModel(models.Model):
     @api.model
     @api.returns('self', lambda value: value.id)
     def create(self, values):
-        self.sudo().create_related(values)
+        if values.get('group_field', False):
+            self.sudo().create_related(values)
         res_id = super(WorkDistributionModel, self).create(values)
         return res_id
 
@@ -312,39 +352,55 @@ class WorkDistributionStrategy(models.Model):
     @api.one
     def apply(self, dist_model, values, **kwargs):
         method = getattr(self, self.name, None)
-        if method:
-            method(dist_model, values, **kwargs)
+        candidates = False
+        if bool(dist_model.group_field):
+            g_id = values.get(dist_model.group_field.name, False)
+            if g_id:
+                candidates = getattr(
+                    self.env[dist_model.group_field.relation].browse(g_id),
+                    dist_model.domain_field.name, False
+                )
+        elif dist_model.domain:
+            candidates = _evaluate_domain(
+                self.env, dist_model.destination_field.relation,
+                dist_model.domain)
+        if method and candidates:
+            method(dist_model, candidates, values, **kwargs)
 
-    def uniform(self, dist_model, values, **kwargs):
+    def uniform(self, dist_model, candidates, values, **kwargs):
         """Detect the next corresponding domain id and update values with it.
 
         """
-        group_id = values.get(dist_model.group_field.name, False)
-        group = self.env[dist_model.group_field.relation].browse(group_id)
         table = self.pool[dist_model.model.model]._table
-        self.env.cr.execute(
-            "SELECT %s FROM %s WHERE %s=%%s ORDER BY id DESC" % (
-                dist_model.destination_field.name, table,
-                dist_model.group_field.name), (group_id,))
+        if dist_model.group_field:
+            query = ("SELECT %s FROM %s WHERE %s = %%s ORDER BY id DESC" %
+                     (dist_model.destination_field.name, table,
+                      dist_model.group_field.name))
+            params = (values.get(dist_model.group_field.name, False),)
+        else:
+            query = ("SELECT %s FROM %s WHERE %s in %%s ORDER BY id DESC" %
+                     (dist_model.destination_field.name, table,
+                      dist_model.destination_field.name))
+            params = (tuple(candidates.ids),)
+        self.env.cr.execute(query, params=params)
         last_dist = self.env.cr.fetchone()
         last_dist = last_dist[0] or 0
-        domain = getattr(group, dist_model.domain_field.name, False)
-        if domain:
-            next_dist = (
-                min(_id for _id in domain.ids if _id > last_dist)
-                if last_dist and any(_id > last_dist for _id in domain.ids)
-                else domain.ids[0]
-            )
-            values.update({dist_model.destination_field.name: next_dist})
+        next_dist = (
+            min(_id for _id in candidates.ids if _id > last_dist)
+            if last_dist and any(_id > last_dist
+                                 for _id in candidates.ids)
+            else candidates.ids[0]
+        )
+        values.update({dist_model.destination_field.name: next_dist})
         return values
 
-    def effort(self, dist_model, values, **kwargs):
+    def effort(self, dist_model, candidates, values, **kwargs):
         values.update({
             dist_model.destination_field.name:
-                self._effort(dist_model, values)
+                self._effort(dist_model, candidates, values)
         })
 
-    def effort_month(self, dist_model, values, **kwargs):
+    def effort_month(self, dist_model, candidates, values, **kwargs):
         model = self.env[dist_model.model.model]
         DAYS = 30
         low_date = datetime.now()
@@ -356,30 +412,27 @@ class WorkDistributionStrategy(models.Model):
         strlow_date = low_date.strftime(format)
         strupp_date = upp_date.strftime(format)
         values.update({dist_model.destination_field.name: self._effort(
-            dist_model, values, date_field=date_field.name,
+            dist_model, candidates, values, date_field=date_field.name,
             date_start=strlow_date, date_end=strupp_date)})
 
-    def _effort(self, dist_model, values, date_field=False, date_start=False,
-                date_end=False):
+    def _effort(self, dist_model, candidates, values, date_field=False,
+                date_start=False, date_end=False):
         model = self.env[dist_model.model.model]
-        group_id = values.get(dist_model.group_field.name, False)
-        group = self.env[dist_model.group_field.relation].browse(group_id)
-        domain = getattr(group, dist_model.domain_field.name, False)
-        if domain:
-            min_value = None
-            next_dist = False
-            args = [(dist_model.group_field.name, '=', group_id)]
-            if date_field:
-                args.extend([(date_field, '>=', date_start),
-                             (date_field, '<=', date_end)])
-            for x in domain.ids:
-                current_effort = model.search_count(
-                    args + [(dist_model.destination_field.name, '=', x)])
-                if min_value is None or min_value > current_effort:
-                    min_value = current_effort
-                    next_dist = x
-        else:
-            next_dist = 1
+        min_value = None
+        next_dist = False
+        group_field_name = (dist_model.group_field.name
+                            if dist_model.group_field else False)
+        args = ([(group_field_name, '=', values[group_field_name])]
+                if group_field_name else [])
+        if date_field:
+            args.extend([(date_field, '>=', date_start),
+                         (date_field, '<=', date_end)])
+        for x in candidates.ids:
+            current_effort = model.search_count(
+                args + [(dist_model.destination_field.name, '=', x)])
+            if min_value is None or min_value > current_effort:
+                min_value = current_effort
+                next_dist = x
         return next_dist
 
     @api.model
