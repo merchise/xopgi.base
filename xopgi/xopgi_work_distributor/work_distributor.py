@@ -151,7 +151,7 @@ class WorkDistributionModel(models.Model):
     @api.model
     @api.returns('self', lambda value: value.id)
     def create(self, values):
-        self.create_related(values)
+        self.sudo().create_related(values)
         res_id = super(WorkDistributionModel, self).create(values)
         return res_id
 
@@ -191,7 +191,7 @@ class WorkDistributionModel(models.Model):
             'state': 'manual',
             'ttype': 'many2one'
         }
-        new_field = field_obj.sudo().create(field_data)
+        new_field = field_obj.create(field_data)
         self.create_ir_model_data_reference('ir.model.fields',
                                             new_field.id, field_name)
         return new_field.id
