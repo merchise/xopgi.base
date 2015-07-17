@@ -243,7 +243,8 @@ class WorkDistributionModel(models.Model):
             'model': model,
             'res_id': res_id,
             'module': 'xopgi_work_distributor',
-            'name': '%s-%s' % (model, name)
+            'name': '%s-%s' % (model, name),
+            'noupdate': True
         })
 
     def unlink(self):
