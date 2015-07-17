@@ -42,10 +42,9 @@ class WorkDistributionModel(models.Model):
             for m in self.env['ir.model'].search([('osv_memory', '=', False)])
         ]
 
-    model_id = fields.Selection(string='Model', selection='_get_models',
-                                required=True,
-                                help="Model where Work Distribution "
-                                     "strategies will be applied.")
+    model = fields.Many2one(
+        'ir.model', required=True,
+        help='Model where Work Distribution Strategies will be applied.')
     group_field = fields.Many2one(
         'ir.model.fields', 'Group Field', required=True,
         help='many2one field where that it value determine domain of '
@@ -85,7 +84,7 @@ class WorkDistributionModel(models.Model):
                     raise ValidationError(
                         _('Other fields must define all fields used on '
                           'selected strategies.'))
-                obj = self.pool.get(model.model_id)
+                obj = self.pool.get(model.model.model)
                 for field in other_fields.itervalues():
                     if not obj or not obj._fields.get(field, False):
                         raise ValidationError(
@@ -132,7 +131,7 @@ class WorkDistributionModel(models.Model):
         ''' Get all distribution configurations for model and apply each one.
 
         '''
-        for item in self.search([('model_id', '=', model)]):
+        for item in self.search([('model.model', '=', model)]):
             group_model = item.group_field.relation
             group_id = values.get(item.group_field.name, False)
             if group_id:
@@ -163,10 +162,11 @@ class WorkDistributionModel(models.Model):
         field_obj = self.env['ir.model.fields']
         destination_field = field_obj.browse(values['destination_field'])
         group_field = field_obj.browse(values['group_field'])
-        model = values.get('model_id', False)
-        strategy_field = self.create_field(group_field.relation, model,
-                                            destination_field.name)
-        action = self.create_actions(group_field.relation, model,
+        model_id = values.get('model', False)
+        model = self.env['ir.model'].browse(model_id)
+        strategy_field = self.create_field(group_field.relation, model.model,
+                                           destination_field.name)
+        action = self.create_actions(group_field.relation, model.name,
                                      destination_field.name, strategy_field)
         values.update(dict(strategy_field=strategy_field, action=action))
 
@@ -196,7 +196,7 @@ class WorkDistributionModel(models.Model):
                                             new_field.id, field_name)
         return new_field.id
 
-    def create_actions(self, group_model, model, destination_field,
+    def create_actions(self, group_model, model_name, destination_field,
                        strategy_field_id):
         ''' Create actions to config with strategy use on each group_field
         model objects.
@@ -205,7 +205,7 @@ class WorkDistributionModel(models.Model):
         action_obj = self.env['ir.actions.act_window']
         value_obj = self.env['ir.values']
         name = ("Define work Distribution Strategy for %s field of %s "
-                "model" % (destination_field, model or ''))
+                "model" % (destination_field, model_name or ''))
         rol = self.env.ref('xopgi_work_distributor.group_distributor_manager',
                            raise_if_not_found=False)
         new_act = action_obj.create({
@@ -320,7 +320,7 @@ class WorkDistributionStrategy(models.Model):
         """
         group_id = values.get(dist_model.group_field.name, False)
         group = self.env[dist_model.group_field.relation].browse(group_id)
-        table = self.pool[dist_model.model_id]._table
+        table = self.pool[dist_model.model.model]._table
         self.env.cr.execute(
             "SELECT %s FROM %s WHERE %s=%%s ORDER BY id DESC" % (
                 dist_model.destination_field.name, table,
@@ -344,7 +344,7 @@ class WorkDistributionStrategy(models.Model):
         })
 
     def effort_month(self, dist_model, values, **kwargs):
-        model = self.env[dist_model.model_id]
+        model = self.env[dist_model.model.model]
         DAYS = 30
         low_date = datetime.now()
         upp_date = low_date + timedelta(DAYS)
@@ -360,7 +360,7 @@ class WorkDistributionStrategy(models.Model):
 
     def _effort(self, dist_model, values, date_field=False, date_start=False,
                 date_end=False):
-        model = self.env[dist_model.model_id]
+        model = self.env[dist_model.model.model]
         group_id = values.get(dist_model.group_field.name, False)
         group = self.env[dist_model.group_field.relation].browse(group_id)
         domain = getattr(group, dist_model.domain_field.name, False)
