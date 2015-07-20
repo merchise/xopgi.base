@@ -82,9 +82,8 @@ class WorkDistributionModel(models.Model):
         'model_id', 'strategy_id', 'Strategies', required=True,
         help='Work Distribution Strategies possible to apply on this model '
              'objects.')
-    action = fields.Many2one('ir.actions.act_window', required=True)
-    strategy_field = fields.Many2one('ir.model.fields', 'Setting Field',
-                                     required=True)
+    action = fields.Many2one('ir.actions.act_window')
+    strategy_field = fields.Many2one('ir.model.fields', 'Setting Field')
 
     @api.constrains('other_fields')
     def _check_other_fields(self):
