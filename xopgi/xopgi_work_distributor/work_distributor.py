@@ -333,10 +333,22 @@ class WorkDistributionModel(models.Model):
         ]).unlink()
 
     def write(self, values):
-        raise Warning(_('Error!'),
-                      _('This items are not ables to update, you must '
-                        'delete and create a new one.'))
-
+        if 'group_field' in values or 'destination_field' in values:
+            actions_to_unlink = [i.action.id for i in self if i.action]
+            fields_to_unlink = [i.strategy_field.id for i in self
+                                if i.strategy_field]
+            self.sudo().unlink_actions(actions_to_unlink)
+            self.sudo().unlink_fields(fields_to_unlink)
+        result = super(WorkDistributionModel, self).write(values)
+        if values.get('group_field', False):
+            for item in self:
+                vals = {'destination_field': item.destination_field.id,
+                        'group_field': item.group_field.id}
+                self.create_related(vals)
+                vals.pop('destination_field', False)
+                vals.pop('group_field', False)
+                item.write(vals)
+        return result
 
 class WorkDistributionStrategy(models.Model):
     _name = 'work.distribution.strategy'
