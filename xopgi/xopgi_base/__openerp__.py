@@ -33,10 +33,8 @@ for all XOPGI's dependant components.
 
 """,
     "depends": ['base'],
-    "init_xml": [
+    "data": [
         'data/xopgi_security.xml',
-        ],
-    "update_xml": [
         'data/xopgi_model_view.xml',
         ],
     "demo_xml": [],

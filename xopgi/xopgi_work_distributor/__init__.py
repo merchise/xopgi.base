@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 # --------------------------------------------------------------------------
-# xopgi_object_merge.__openerp__
+# xopgi_object_merge
 # --------------------------------------------------------------------------
-# Copyright (c) 2014, 2015 Merchise Autrement and Contributors
+# Copyright (c) 2014 Merchise Autrement and Contributors
 # All rights reserved.
 #
 # Author: Merchise Autrement
@@ -13,22 +13,7 @@
 # terms of the LICENCE attached (see LICENCE file) in the distribution
 # package.
 
-{
-    'name': 'Xopgi Object Merger',
-    'version': '1.0',
-    'category': 'Tools',
-    'description': """
-    Generic merge option for any model
-    """,
-    'depends': ['base'],
-    'data': [
-        "view/res_config_view.xml",
-        "view/object_merger_view.xml",
-        "data/know_informal_reference.xml",
-        "security/security.xml",
-    ],
-    'demo': [],
-    'installable': True,
-    'aplication': True,
-}
+import work_distributor
+import res_config
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 # --------------------------------------------------------------------------
-# xopgi_object_merge.__openerp__
+# xopgi_work_distributor.__openerp__
 # --------------------------------------------------------------------------
 # Copyright (c) 2014, 2015 Merchise Autrement and Contributors
 # All rights reserved.
@@ -14,18 +14,18 @@
 # package.
 
 {
-    'name': 'Xopgi Object Merger',
+    'name': 'Xopgi Work Distributor',
     'version': '1.0',
     'category': 'Tools',
     'description': """
-    Generic merge option for any model
+    Generic automatic work distribution for any model
     """,
     'depends': ['base'],
     'data': [
-        "view/res_config_view.xml",
-        "view/object_merger_view.xml",
-        "data/know_informal_reference.xml",
         "security/security.xml",
+        "view/res_config_view.xml",
+        "view/work_distributor_view.xml",
+        "data/work_distribution_strategies.xml",
     ],
     'demo': [],
     'installable': True,

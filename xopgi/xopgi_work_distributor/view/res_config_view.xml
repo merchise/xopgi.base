@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+    <record id="view_work_distribution_settings" model="ir.ui.view">
+      <field name="name">Work Distribution settings</field>
+      <field name="model">work.distribution.settings</field>
+      <field name="arch" type="xml">
+        <form string="Configure Work Distribution" version="7.0"
+              class="oe_form_configuration">
+          <header>
+            <button string="Apply" type="object" name="install"
+                    class="oe_highlight"/>
+            or
+            <button string="Cancel" type="object" name="cancel"
+                    class="oe_link"/>
+          </header>
+          <group name="work_distribution_config">
+            <div name="work_distribution">
+              <group string="Models">
+                <field name="models_ids" nolabel="1"/>
+              </group>
+            </div>
+          </group>
+        </form>
+      </field>
+    </record>
+
+    <record id="action_work_distribution_settings" model="ir.actions.act_window">
+      <field name="name">Configure Work Distribution</field>
+      <field name="res_model">work.distribution.settings</field>
+      <field name="view_id" ref="view_work_distribution_settings"/>
+      <field name="view_mode">form</field>
+      <field name="target">inline</field>
+    </record>
+
+    <menuitem id="menu_work_distribution_settings" name="Work Distribution"
+              parent="base.menu_config"
+              sequence="36" action="action_work_distribution_settings"/>
+
+    <record id="view_work_distribution_model_form" model="ir.ui.view">
+      <field name="name">work.distribution.model.form</field>
+      <field name="model">work.distribution.model</field>
+      <field name="arch" type="xml">
+        <form string="Work Distribution Model" version="7.0">
+          <sheet>
+            <group colspan="4" col="4">
+              <field name="model"/>
+              <field name="destination_field"
+                     domain="[('ttype', '=', 'many2one'),
+                              ('model_id','=', model)]"/>
+              <field name="group_field"
+                     domain="[('ttype', '=', 'many2one'),
+                              ('model_id','=', model)]"/>
+              <field name="domain_field"
+                     domain="[('ttype', 'in', ['many2many','one2many']),
+                              ('model','=', group_model),
+                              ('relation','=', destination_model)]"
+                     attrs="{'invisible': [('group_field','=', False)],
+                             'required': [('group_field','!=', False)]}"/>
+              <field name="group_model" invisible="1"/>
+              <field name="destination_model" invisible="1"/>
+            </group>
+            <group>
+              <field name="domain"
+                     attrs="{'invisible': [('group_field','!=', False)],
+                             'required': [('group_field','=', False)]}"
+                     placeholder="e.g [('groups_id', '=', 6)] or
+                                  [('groups_id', '=', 'Empleados')]"/>
+              <field name="strategy_ids">
+                <tree>
+                  <field name="name"/>
+                </tree>
+                <form>
+                  <field name="name"/>
+                </form>
+              </field>
+              <field name="other_fields"/>
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <record id="view_work_distribution_model_tree" model="ir.ui.view">
+      <field name="name">work.distribution.model.tree</field>
+      <field name="model">work.distribution.model</field>
+      <field name="arch" type="xml">
+        <tree string="Work Distribution Models">
+          <field name="model"/>
+          <field name="destination_field"/>
+          <field name="domain"/>
+          <field name="group_field"/>
+          <field name="domain_field"/>
+          <field name="other_fields"/>
+        </tree>
+      </field>
+    </record>
+  </data>
+</openerp>
