@@ -205,8 +205,9 @@ class WorkDistributionModel(models.Model):
         model = self.env['ir.model'].browse(model_id)
         strategy_field = self.create_field(group_field.relation, model.model,
                                            destination_field.name)
-        action = self.create_actions(group_field.relation, model.name,
-                                     destination_field.name, strategy_field)
+        action = self.create_actions(
+            group_field.relation, model.name,
+            destination_field.field_description, strategy_field)
         values.update(dict(strategy_field=strategy_field, action=action))
 
     def create_field(self, group_model, model, destination_field_name):
