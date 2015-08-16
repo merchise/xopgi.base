@@ -20,11 +20,27 @@ from openerp.osv import orm, osv, fields
 
 from openerp.tools.translate import _
 
-from six import integer_types
+from six import string_types
 
 from .res_config import IS_MODEL_ID
 
 from xoeuf.ui import CLOSE_WINDOW
+
+
+def get_filters(data, except_field):
+    def tuple_parser(name, value):
+        if value is None:
+            res_val = 'Null'
+            res_op = 'is'
+        else:
+            res_val = ("'%s'" % value
+                       if isinstance(value, string_types)
+                       else str(value))
+            res_op = 'is' if isinstance(value, bool) else '='
+        return name, res_op, res_val
+    return [tuple_parser(field_name, field_value) for
+            field_name, field_value in data.items()
+            if field_name != except_field]
 
 
 class object_merger(orm.TransientModel):
@@ -218,7 +234,7 @@ class object_merger(orm.TransientModel):
         return constraints.values()
 
     def _check_constraints(self, cr, table, field, dst_id, filters,
-                          constraints, model='', subquery='{field}={id}'):
+                          constraints, model='', subquery='{field} = {id}'):
         '''
         Revisar si hay alguna fila que contenga los mismos valores que
         la que se está intentando actualizar de forma que se viole
@@ -227,13 +243,12 @@ class object_merger(orm.TransientModel):
         :return: False if any violation detected else True
 
         '''
-        filters.append(subquery.format(field=field, model=model, id=str(dst_id)))
         for columns in constraints:
-            const_filters = [arg for arg in filters if
-                             arg.split('=')[0] in columns]
+            query_filters = ' AND '.join(
+                ['%s %s %s' % f for f in filters if f[0] in columns] +
+                [subquery.format(field=field, model=model, id=str(dst_id))])
             cr.execute("SELECT {field} FROM {table} WHERE {filters}".format(
-                field=field, table=table,
-                filters=' AND '.join(const_filters)))
+                field=field, table=table, filters=query_filters))
             if cr.rowcount:
                 return False
         return True
@@ -246,8 +261,9 @@ class object_merger(orm.TransientModel):
         Delete query are executed
         :return:
         '''
-        filters.append(subquery.format(field=field, model=model, id=str(src_id)))
-        query_filters = ' AND '.join(filters)
+        query_filters = ' AND '.join(
+            ['%s %s %s' % f for f in filters] +
+            [subquery.format(field=field, model=model, id=str(src_id))])
         if action_update:
             query = "UPDATE {table} SET " + subquery + " WHERE {filters};"
             cr.execute(query.format(table=table, field=field, model=model,
@@ -323,8 +339,6 @@ class object_merger(orm.TransientModel):
         for columns in constraints:
             all_columns.extend(columns)
         all_columns = set(all_columns)
-        value_parser = lambda val: (str(val) if isinstance(val, integer_types)
-                                    else "'%s'" % str(val))
         query = '''SELECT {fields} FROM {model}
                    WHERE {field} IN ({filter})'''
         cr.execute(query.format(
@@ -338,9 +352,7 @@ class object_merger(orm.TransientModel):
         upd_del = lambda a, f, src_id: self._upd_del(a, cr, table, field,
                                                      dst_id, f, src_id)
         for row in cr.dictfetchall():
-            filters = ['%s=%s' % (field_name, value_parser(field_value))
-                       for field_name, field_value in row.items()
-                       if field_name != field]
+            filters = get_filters(row, field)
             upd_del(ck_ctr(filters), filters, row.get(field))
 
     def _check_references(self, cr, active_model, dst_id, src_ids):
@@ -433,8 +445,6 @@ class object_merger(orm.TransientModel):
         for columns in constraints:
             all_columns.extend(columns)
         all_columns = set(all_columns)
-        value_parser = lambda val: (str(val) if isinstance(val, integer_types)
-                                    else "'%s'" % str(val))
         query = ("SELECT {fields} FROM {table} WHERE " + ' AND '.join(SUBQUERY))
         ck_ctr = lambda f: self._check_constraints(
             cr, table, field, dst_id, f, constraints, model, SUBQUERY[0])
@@ -447,9 +457,7 @@ class object_merger(orm.TransientModel):
                              field=field, model=model, id=src_id,
                              model_field=model_field))
             for row in cr.dictfetchall():
-                filters = ['%s=%s' % (field_name, value_parser(field_value))
-                           for field_name, field_value in row.items()
-                           if field_name != field]
+                filters = get_filters(row, field)
                 upd_del(ck_ctr(filters), filters, src_id)
 
     def _check_on_alias_defaults(self, cr, dst_id,
