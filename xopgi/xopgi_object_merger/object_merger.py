@@ -127,12 +127,30 @@ class object_merger(orm.TransientModel):
         else:
             raise orm.except_orm(_('Configuration Error!'),
                                  _('Please select one value to keep'))
+        model = self.pool.get(active_model)
+        src_names = model.name_get(cr, uid, src_ids, context=context)
         self._merge(cr, active_model, dst_id, src_ids, context=context)
         # init a new transaction to check for references on alias_defaults.
         cr.commit()
         self._check_on_alias_defaults(cr, dst_id, src_ids,
                                       active_model, context=context)
+        thread = self.pool.get('mail.thread')
+        if thread and active_model in thread.message_capable_models(
+                cr, SUPERUSER_ID, context=context):
+            self._notify_merge(cr, uid, active_model, dst_id, src_names,
+                               context=context)
         return {'type': 'ir.actions.act_window_close'}
+
+    def _notify_merge(self, cr, uid, active_model, dst_id, src_names,
+                      context=None):
+        context['thread_model'] = active_model
+        model = self.pool[active_model]
+        subject = _('%s(s) Merged') % model._description or active_model
+
+        body = '<br/>'.join([_('<b>ID:</b> %s; <b>Name:</b> %s') % id_name
+                             for id_name in src_names])
+        return model.message_post(
+            cr, uid, dst_id, body=body, subject=subject, context=context)
 
     def _merge(self, cr, active_model, dst_id, src_ids, context=None):
         '''Do merge src_ids: first verify if at less 2 src_ids exist
