@@ -14,6 +14,7 @@
 # package.
 
 from openerp import SUPERUSER_ID
+from openerp.exceptions import AccessError
 
 from openerp.osv import orm, osv, fields
 
@@ -22,6 +23,8 @@ from openerp.tools.translate import _
 from six import integer_types
 
 from .res_config import IS_MODEL_ID
+
+from xoeuf.ui import CLOSE_WINDOW
 
 
 class object_merger(orm.TransientModel):
@@ -139,7 +142,11 @@ class object_merger(orm.TransientModel):
                 cr, SUPERUSER_ID, context=context):
             self._notify_merge(cr, uid, active_model, dst_id, src_names,
                                context=context)
-        return {'type': 'ir.actions.act_window_close'}
+        try:
+            model.read(cr, uid, dst_id, [], context=context)
+            return model.get_formview_action(cr, uid, dst_id, context=context)
+        except AccessError:
+            return CLOSE_WINDOW
 
     def _notify_merge(self, cr, uid, active_model, dst_id, src_names,
                       context=None):
