@@ -332,6 +332,7 @@ class WorkDistributionModel(models.Model):
             ('module', '=', 'xopgi_work_distributor')
         ]).unlink()
 
+    @api.multi
     def write(self, values):
         if 'group_field' in values or 'destination_field' in values:
             actions_to_unlink = [i.action.id for i in self if i.action]
