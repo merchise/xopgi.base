@@ -101,18 +101,6 @@ class object_merger(orm.TransientModel):
                 _('Information!'),
                 _('At less two items are necessary for merge.')
             )
-        if uid == SUPERUSER_ID:
-            return True
-        pool = self.pool.get('ir.model.data')
-        dummy, group_id = pool.get_object_reference(cr, uid,
-                                                    'xopgi_object_merger',
-                                                    'group_merger_manager')
-        if group_id:
-            user_data = self.pool['res.users'].read(cr, uid, uid,
-                                                    ['groups_id'],
-                                                    context=context)
-            if user_data and group_id in user_data['groups_id']:
-                return True
         model = self._browse_active_model(cr, active_model)
         if model and 0 < model.merge_limit < len(ids):
             raise osv.except_osv(_('Warning!'),
