@@ -13,6 +13,7 @@
 # terms of the LICENCE attached (see LICENCE file) in the distribution
 # package.
 from openerp import api, models, fields
+from xoeuf.ui import RELOAD_UI
 
 
 class WorkDistributionSettings(models.TransientModel):
@@ -31,7 +32,7 @@ class WorkDistributionSettings(models.TransientModel):
     def install(self, *args, **kargs):
         for wiz in self.browse(*args, **kargs):
             wiz.models_ids.unlink_rest()
-        return {'type': 'ir.actions.client', 'tag': 'reload', }
+        return RELOAD_UI
 
 @api.model
 @api.returns('self', lambda value: value.id)
