@@ -244,8 +244,8 @@ class WorkDistributionModel(models.Model):
         '''
         action_obj = self.env['ir.actions.act_window']
         value_obj = self.env['ir.values']
-        name = ("Define work Distribution Strategy for %s field of %s "
-                "model" % (destination_field, model_name or ''))
+        name = ("Define work Distribution Strategy for '%s' on '%s'"
+                % (destination_field, model_name))
         rol = self.env.ref('xopgi_work_distributor.group_distributor_manager',
                            raise_if_not_found=False)
         new_act = action_obj.create({
