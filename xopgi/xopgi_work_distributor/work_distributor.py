@@ -33,15 +33,21 @@ FIELD_NAME_TO_SHOW_ON_WIZARD = \
 WIZARD_NAME = 'work.distributor.wizard'
 
 
-def _evaluate_domain(env, model, domain_str):
+def _evaluate_domain(env, model, domain_str, values):
     ''' Pop user lang information from context to allow put in domain names
     and search always on original text and not on user lang translations.
 
     '''
-    domain = safe_eval(domain_str or '[]')
     context = dict(env.context)
+    self = env[model]
+    if not domain_str or domain_str.strip().startswith('['):
+        domain = safe_eval(domain_str or '[]')
+    else:
+        local_dict = locals()
+        safe_eval(domain_str, local_dict, mode='exec', nocopy=True)
+        domain = local_dict['result']
     context.pop('lang', False)
-    return env[model].with_context(context).search(domain)
+    return self.with_context(context).search(domain)
 
 
 class WorkDistributionModel(models.Model):
@@ -61,8 +67,19 @@ class WorkDistributionModel(models.Model):
         help='many2one field where that it value determine domain of '
              'distribution destination.')
     group_model = fields.Char('Group Model')
-    domain = fields.Text(help='Odoo domain to search in destination_field`s '
-                              'model.')
+    domain = fields.Text(
+        help='Odoo domain to search in destination_field`s model.',
+        default='''
+        #  Odoo domain like [('field_name', 'operator', value)]
+        #  or python code to return on result var a odoo domain like
+        #  result = [('field_name', 'operator', value)]
+        #  self, env, model, values and contet are able to use:
+        #  self => active model pool (on new api).
+        #  env => active enviroment (.cr, .uid, .user, context).
+        #  model => active model name.
+        #  values => python dict to passed to create method.
+        #  context => active context without user lang.
+        ''')
     domain_field = fields.Many2one(
         'ir.model.fields', 'Domain Field',
         help='Field that it value determine domain of '
@@ -102,19 +119,6 @@ class WorkDistributionModel(models.Model):
                         raise ValidationError(
                             _('Some Other fields defined not exist on '
                               'destination model'))
-        return True
-
-    @api.constrains('domain')
-    def _check_domain(self):
-        for model in self:
-            try:
-                if not _evaluate_domain(self.env,
-                                        model.destination_field.relation,
-                                        model.domain):
-                    raise ValidationError(
-                        _('Domain evaluate not return any record.'))
-            except:
-                raise ValidationError(_('Domain value are wrong.'))
         return True
 
     @api.constrains('strategy_ids')
@@ -205,8 +209,9 @@ class WorkDistributionModel(models.Model):
         model = self.env['ir.model'].browse(model_id)
         strategy_field = self.create_field(group_field.relation, model.model,
                                            destination_field.name)
-        action = self.create_actions(group_field.relation, model.name,
-                                     destination_field.name, strategy_field)
+        action = self.create_actions(
+            group_field.relation, model.name,
+            destination_field.field_description, strategy_field)
         values.update(dict(strategy_field=strategy_field, action=action))
 
     def create_field(self, group_model, model, destination_field_name):
@@ -243,8 +248,8 @@ class WorkDistributionModel(models.Model):
         '''
         action_obj = self.env['ir.actions.act_window']
         value_obj = self.env['ir.values']
-        name = ("Define work Distribution Strategy for %s field of %s "
-                "model" % (destination_field, model_name or ''))
+        name = ("Define work Distribution Strategy for '%s' on '%s'"
+                % (destination_field, model_name))
         rol = self.env.ref('xopgi_work_distributor.group_distributor_manager',
                            raise_if_not_found=False)
         new_act = action_obj.create({
@@ -331,6 +336,7 @@ class WorkDistributionModel(models.Model):
             ('module', '=', 'xopgi_work_distributor')
         ]).unlink()
 
+    @api.multi
     def write(self, values):
         if 'group_field' in values or 'destination_field' in values:
             actions_to_unlink = [i.action.id for i in self if i.action]
@@ -374,7 +380,7 @@ class WorkDistributionStrategy(models.Model):
         elif dist_model.domain:
             candidates = _evaluate_domain(
                 self.env, dist_model.destination_field.relation,
-                dist_model.domain)
+                dist_model.domain, values)
         if method and candidates:
             method(dist_model, candidates, values, **kwargs)
 
@@ -395,7 +401,7 @@ class WorkDistributionStrategy(models.Model):
             params = (tuple(candidates.ids),)
         self.env.cr.execute(query, params=params)
         last_dist = self.env.cr.fetchone()
-        last_dist = last_dist[0] or 0
+        last_dist = last_dist[0] if last_dist and last_dist[0] else 0
         next_dist = (
             min(_id for _id in candidates.ids if _id > last_dist)
             if last_dist and any(_id > last_dist

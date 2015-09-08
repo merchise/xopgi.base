@@ -111,15 +111,4 @@
       </field>
     </record>
   </data>
-  <data noupdate="1">
-    <record id="merger_category" model="ir.module.category">
-      <field name="name">Object Merger</field>
-      <field name="sequence">80</field>
-    </record>
-
-    <record id="group_merger_manager" model="res.groups">
-      <field name="name">Object Merger Manager</field>
-      <field name="category_id" ref="merger_category"/>
-    </record>
-  </data>
 </openerp>
