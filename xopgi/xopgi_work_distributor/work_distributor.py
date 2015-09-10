@@ -70,15 +70,18 @@ class WorkDistributionModel(models.Model):
     domain = fields.Text(
         help='Odoo domain to search in destination_field`s model.',
         default='''
-        #  Odoo domain like [('field_name', 'operator', value)]
+        #  Odoo domain like: [('field_name', 'operator', value)]
         #  or python code to return on result var a odoo domain like
-        #  result = [('field_name', 'operator', value)]
-        #  self, env, model, values and contet are able to use:
+        #  if uid != 1:
+        #      result = [('id', '=', uid)]
+        #  else:
+        #      result = [('id', '!=', 1)]
+        #  self, env, model, values and context are able to use:
         #  self => active model pool (on new api).
-        #  env => active enviroment (.cr, .uid, .user, context).
+        #  env => active environment (.cr, .uid, .user, .context).
         #  model => active model name.
         #  values => python dict to passed to create method.
-        #  context => active context without user lang.
+        #  context => active context.
         ''')
     domain_field = fields.Many2one(
         'ir.model.fields', 'Domain Field',
