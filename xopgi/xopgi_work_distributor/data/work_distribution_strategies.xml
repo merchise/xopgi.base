@@ -2,13 +2,20 @@
 <openerp>
   <data> <!-- noupdate="1"-->
     <record id="uniform" model="work.distribution.strategy">
-      <field name="name">uniform</field>
+      <field name="name">Uniform Distribution</field>
+      <field name="code">uniform</field>
+      <field name="predefine">True</field>
     </record>
     <record id="effort" model="work.distribution.strategy">
-      <field name="name">effort</field>
+      <field name="name">Effort Based Distribution</field>
+      <field name="code">effort</field>
+      <field name="predefine">True</field>
     </record>
     <record id="effort_month" model="work.distribution.strategy">
-      <field name="name">effort_month</field>
+      <field name="name">Next Month Effort Based Distribution</field>
+      <field name="code">effort_month</field>
+      <field name="predefine">True</field>
+      <field name="other_fields">['date_start']</field>
     </record>
   </data>
 </openerp>

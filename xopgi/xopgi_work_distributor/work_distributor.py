@@ -19,13 +19,6 @@ from openerp.exceptions import ValidationError, Warning
 from openerp.tools.safe_eval import safe_eval
 from xoeuf.osv.orm import LINK_RELATED
 
-STRATEGIES_SELECTION = {
-    'uniform': {'name': 'Uniform Distribution', 'other_fields': []},
-    'effort': {'name': 'Effort Based Distribution',
-               'other_fields': []},
-    'effort_month': {'name': 'Next Month Effort Based Distribution',
-                     'other_fields': ['date_start']},
-}
 
 FIELD_NAME_TO_SHOW_ON_WIZARD = \
     lambda model: 'x_%s_ids' % model.replace('.', '_')
@@ -45,7 +38,7 @@ def _evaluate_domain(env, model, domain_str, values):
     else:
         local_dict = locals()
         safe_eval(domain_str, local_dict, mode='exec', nocopy=True)
-        domain = local_dict['result']
+        domain = local_dict.get('result', [])
     context.pop('lang', False)
     return self.with_context(context).search(domain)
 
@@ -357,13 +350,27 @@ class WorkDistributionModel(models.Model):
                 vals.pop('group_field', False)
                 item.write(vals)
         return result
+    
 
 class WorkDistributionStrategy(models.Model):
     _name = 'work.distribution.strategy'
 
-    name = fields.Selection([(k, v.get('name', ''))
-                             for k, v in STRATEGIES_SELECTION.items()],
-                            required=True)
+    name = fields.Char(required=True, translate=True)
+    predefine = fields.Boolean()
+    code = fields.Text(required=True, default='''
+        #  python dict like: {'field_name': value, ...}
+        #  or python code to return on result var a python dict like
+        #  result = {dist_model.destination_field.name: False}
+        #  self, dist_model, values, candidates and **kwargs are able to use:
+        #  self => active strategy (on new api).
+        #  dist_model => active model name.
+        #  values => python dict to passed to create method.
+        #  **kwargs => python dict set on field ``other fields``.
+        ''')
+    other_fields = fields.Char(
+        help='Python List with others variables'
+             'needed on this distribution strategy.\n '
+             'Eg: ["date", "qtty"]', default='[]')
 
     _sql_constraints = [
         ('name_unique', 'unique (name)', 'Strategy must be unique!')
@@ -371,7 +378,8 @@ class WorkDistributionStrategy(models.Model):
 
     @api.one
     def apply(self, dist_model, values, **kwargs):
-        method = getattr(self, self.name, None)
+        method = (getattr(self, self.code, None)
+                  if self.predefine else self.custom)
         candidates = False
         if bool(dist_model.group_field):
             g_id = values.get(dist_model.group_field.name, False)
@@ -455,13 +463,22 @@ class WorkDistributionStrategy(models.Model):
                 next_dist = x
         return next_dist
 
+    def custom(self, dist_model, candidates, values, **kwargs):
+        if self.code.strip().startswith('{'):
+            values.update(safe_eval(self.code or '{'))
+        else:
+            local_dict = locals()
+            safe_eval(self.code, local_dict, mode='exec', nocopy=True)
+            values.update(local_dict['values'])
+        return values
+
     @api.model
     def get_fields_name(self, mixed=True):
         result = []
         method = getattr(result, 'extend' if mixed else 'append')
         for strategy in self:
-            method(STRATEGIES_SELECTION.get(
-                strategy.name, {}).get('other_fields'))
+            method(safe_eval(strategy.other_fields)
+                   if strategy.other_fields else [])
         return set(result) if mixed else result
 
 
