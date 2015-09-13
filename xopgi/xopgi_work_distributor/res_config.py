@@ -34,6 +34,7 @@ class WorkDistributionSettings(models.TransientModel):
             wiz.models_ids.unlink_rest()
         return RELOAD_UI
 
+
 @api.model
 @api.returns('self', lambda value: value.id)
 def create(self, vals):

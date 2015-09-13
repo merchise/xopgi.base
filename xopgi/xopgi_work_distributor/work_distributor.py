@@ -60,7 +60,7 @@ class WorkDistributionModel(models.Model):
         'ir.model.fields', 'Group Field',
         help='many2one field where that it value determine domain of '
              'distribution destination.')
-    group_model = fields.Char('Group Model')
+    strategy_by_group = fields.Boolean()
     domain = fields.Text(
         help='Odoo domain to search in destination_field`s model.',
         default='''
@@ -77,15 +77,10 @@ class WorkDistributionModel(models.Model):
         #  values => python dict to passed to create method.
         #  context => active context.
         ''')
-    domain_field = fields.Many2one(
-        'ir.model.fields', 'Domain Field',
-        help='Field that it value determine domain of '
-             'distribution destination.')
     destination_field = fields.Many2one(
         'ir.model.fields', 'Destination Field', required=True,
         help='Field that it value it will determinate by distribution '
              'strategy apply.')
-    destination_model = fields.Char('Destination Model')
     other_fields = fields.Text(
         'Other fields', help='Python Dictionary with others variables (Keys) '
                              'used on some distribution strategy and '
@@ -126,22 +121,6 @@ class WorkDistributionModel(models.Model):
                     _('When no group field is defined only one strategy '
                       'must be selected.'))
         return True
-
-    @api.model
-    @api.onchange('group_field')
-    def onchange_group_field(self):
-        if self.group_field:
-            self.group_model = self.group_field.relation
-        else:
-            self.group_model = False
-
-    @api.model
-    @api.onchange('destination_field')
-    def onchange_destination_field(self):
-        if self.destination_field:
-            self.destination_model = self.destination_field.relation
-        else:
-            self.destination_model = False
 
     @api.model
     @api.onchange('strategy_ids')
@@ -351,7 +330,7 @@ class WorkDistributionModel(models.Model):
                 vals.pop('group_field', False)
                 item.write(vals)
         return result
-    
+
 
 class WorkDistributionStrategy(models.Model):
     _name = 'work.distribution.strategy'
@@ -381,18 +360,9 @@ class WorkDistributionStrategy(models.Model):
     def apply(self, dist_model, values, **kwargs):
         method = (getattr(self, self.code, None)
                   if self.predefine else self.custom)
-        candidates = False
-        if bool(dist_model.group_field):
-            g_id = values.get(dist_model.group_field.name, False)
-            if g_id:
-                candidates = getattr(
-                    self.env[dist_model.group_field.relation].browse(g_id),
-                    dist_model.domain_field.name, False
-                )
-        elif dist_model.domain:
-            candidates = _evaluate_domain(
-                self.env, dist_model.destination_field.relation,
-                dist_model.domain, values)
+        candidates = _evaluate_domain(
+            self.env, dist_model.destination_field.relation,
+            dist_model.domain, values)
         if method and candidates:
             method(dist_model, candidates, values, **kwargs)
 

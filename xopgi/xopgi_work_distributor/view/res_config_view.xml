@@ -48,17 +48,12 @@
               <field name="destination_field"
                      domain="[('ttype', '=', 'many2one'),
                               ('model_id','=', model)]"/>
+              <field name="strategy_by_group"/>
               <field name="group_field"
+                     attrs="{'invisible': [('strategy_by_group','!=', True)],
+                             'required': [('strategy_by_group','=', True)]}"
                      domain="[('ttype', '=', 'many2one'),
                               ('model_id','=', model)]"/>
-              <field name="domain_field"
-                     domain="[('ttype', 'in', ['many2many','one2many']),
-                              ('model','=', group_model),
-                              ('relation','=', destination_model)]"
-                     attrs="{'invisible': [('group_field','=', False)],
-                             'required': [('group_field','!=', False)]}"/>
-              <field name="group_model" invisible="1"/>
-              <field name="destination_model" invisible="1"/>
             </group>
             <group>
               <field name="domain"
@@ -83,7 +78,6 @@
           <field name="destination_field"/>
           <field name="domain"/>
           <field name="group_field"/>
-          <field name="domain_field"/>
           <field name="other_fields"/>
         </tree>
       </field>
