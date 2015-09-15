@@ -18,9 +18,9 @@ from openerp.osv import fields, osv, orm
 from openerp.tools.safe_eval import safe_eval
 from openerp.tools.translate import _
 from operator import gt, lt
-from openerp import (
-    api, exceptions, fields as new_api_fields, models, SUPERUSER_ID)
+from openerp import api, fields as new_api_fields, models, SUPERUSER_ID
 from xoeuf.osv.orm import LINK_RELATED
+from xoutil import logger
 
 
 IS_MODEL_ID = '1'
@@ -79,16 +79,10 @@ class ir_model(orm.Model):
     @api.one
     @api.multi
     def merge(self, dst_id, src_ids):
-        '''
-
-        :param active_model:
-        :param dst_obj:
-        :param srce_objs:
-        :return:
-        '''
         dst_obj = self.env[self.model].browse(dst_id)
         src_objs = self.env[self.model].browse(src_ids)
-        values = self.field_merge_way_ids.merge(dst_obj, src_objs)
+        values = (self.field_merge_way_ids.merge(dst_obj, src_objs)
+                  if bool(self.field_merge_way_ids) else {})
         local_dict = locals()
         local_dict.update(globals().get('__builtins__', {}))
         try:
@@ -96,14 +90,18 @@ class ir_model(orm.Model):
                       nocopy=True)
             values.update(local_dict['result'])
         except:
-            raise exceptions.Warning(_('An error happen trying to execute '
-                                       'the General Merge Way python code.'))
+            logger.exception('An error happen trying to execute the General '
+                             'Merge Way python code. for Model: %s, '
+                             'Destination id: %s and Source ids: %s' %
+                             (self.model, str(dst_id), str(src_ids)))
         try:
-            dst_obj.write(values)
+            if values:
+                dst_obj.write(values)
         except:
-            raise exceptions.Warning(
-                _('An error happen updating result object from the general '
-                  'and specific merge ways.'))
+            logger.exception(
+                'An error happen updating result object with: \n%s \n'
+                'For Model: %s, Destination id: %s and Source ids: %s' %
+                (str(values), self.model, str(dst_id), str(src_ids)))
 
 
 class InformalReference(orm.Model):
@@ -287,16 +285,18 @@ class FieldMergeWay(models.Model):
     _sql_constraints = [
         ('name_unique', 'unique (name)', 'Strategy must be unique!')]
 
-    @api.one
     def apply(self, dst_obj, src_objs, field):
         method = (
-        getattr(self, self.code, None) if self.predefine else self.custom)
+            getattr(self, self.code, None) if self.predefine else self.custom)
         try:
             return method(dst_obj, src_objs, field) if method else None
         except:
-            raise exceptions.Warning(
-                _('An error happen trying to execute the Specific Merge '
-                  'Way python code for %s field.') % field.field_description)
+            logger.exception(
+                'An error happen trying to execute the Specific Merge '
+                'Way python code for Model: %s, Field: %s,'
+                'Destination id: %s and Source ids: %s' %
+                (field.model, field.field_description, str(dst_obj.id),
+                 str(src_objs.ids)))
 
     def add(self, dst_obj, src_objs, field):
         '''
@@ -355,10 +355,12 @@ class FieldMergeWayRel(models.Model):
 
     @api.multi
     def merge(self, dst_obj, src_objs):
-        return {
-            item.name.name: self.merge_way.apply(dst_obj, src_objs, item.name)
-            for item in self
-        }
+        res = {}
+        for item in self:
+            val = item.merge_way.apply(dst_obj, src_objs, item.name)
+            if val is not None:
+                res[item.name.name] = val
+        return res
 
 
 
