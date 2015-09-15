@@ -18,6 +18,7 @@ from openerp import models, _, api, fields
 from openerp.exceptions import ValidationError, Warning
 from openerp.tools.safe_eval import safe_eval
 from xoeuf.osv.orm import LINK_RELATED
+from xoutil import logger
 
 
 FIELD_NAME_TO_SHOW_ON_WIZARD = \
@@ -159,7 +160,9 @@ class WorkDistributionModel(models.Model):
                 other_fields = (safe_eval(item.other_fields)
                                 if item.other_fields else {})
                 # TODO: check if active user have access to destination field
-                strategy.apply(item, values, **dict(other_fields))
+                val = strategy.apply(item, values, **dict(other_fields))
+                if val is not None:
+                    values[item.destination_field.name] = val
         return values
 
     @api.model
@@ -338,9 +341,9 @@ class WorkDistributionStrategy(models.Model):
     name = fields.Char(required=True, translate=True)
     predefine = fields.Boolean()
     code = fields.Text(required=True, default='''
-        #  python dict like: {'field_name': value, ...}
-        #  or python code to return on result var a python dict like
-        #  result = {dist_model.destination_field.name: False}
+        #  Python code to return on result var value to set on
+        #  destination field or None to no update it.
+        #  E.g: result = False
         #  self, dist_model, values, candidates and **kwargs are able to use:
         #  self => active strategy (on new api).
         #  dist_model => active model name.
@@ -356,7 +359,6 @@ class WorkDistributionStrategy(models.Model):
         ('name_unique', 'unique (name)', 'Strategy must be unique!')
     ]
 
-    @api.one
     def apply(self, dist_model, values, **kwargs):
         method = (getattr(self, self.code, None)
                   if self.predefine else self.custom)
@@ -364,7 +366,8 @@ class WorkDistributionStrategy(models.Model):
             self.env, dist_model.destination_field.relation,
             dist_model.domain, values)
         if method and candidates:
-            method(dist_model, candidates, values, **kwargs)
+            return method(dist_model, candidates, values, **kwargs)
+        return None
 
     def uniform(self, dist_model, candidates, values, **kwargs):
         """Detect the next corresponding domain id and update values with it.
@@ -390,14 +393,10 @@ class WorkDistributionStrategy(models.Model):
                                  for _id in candidates.ids)
             else candidates.ids[0]
         )
-        values.update({dist_model.destination_field.name: next_dist})
-        return values
+        return next_dist
 
     def effort(self, dist_model, candidates, values, **kwargs):
-        values.update({
-            dist_model.destination_field.name:
-                self._effort(dist_model, candidates, values)
-        })
+        return self._effort(dist_model, candidates, values)
 
     def effort_month(self, dist_model, candidates, values, **kwargs):
         model = self.env[dist_model.model.model]
@@ -410,9 +409,9 @@ class WorkDistributionStrategy(models.Model):
                   else fields.DATE_FORMAT)
         strlow_date = low_date.strftime(format)
         strupp_date = upp_date.strftime(format)
-        values.update({dist_model.destination_field.name: self._effort(
+        return self._effort(
             dist_model, candidates, values, date_field=date_field.name,
-            date_start=strlow_date, date_end=strupp_date)})
+            date_start=strlow_date, date_end=strupp_date)
 
     def _effort(self, dist_model, candidates, values, date_field=False,
                 date_start=False, date_end=False):
@@ -436,13 +435,12 @@ class WorkDistributionStrategy(models.Model):
 
     def custom(self, dist_model, candidates, values, **kwargs):
         if self.code.strip().startswith('{'):
-            values.update(safe_eval(self.code or '{'))
+            return safe_eval(self.code or '{')
         else:
             local_dict = locals()
             local_dict.update(globals().get('__builtins__', {}))
             safe_eval(self.code, local_dict, mode='exec', nocopy=True)
-            values.update(local_dict['values'])
-        return values
+            return local_dict.get('result', None)
 
     @api.model
     def get_fields_name(self, mixed=True):
