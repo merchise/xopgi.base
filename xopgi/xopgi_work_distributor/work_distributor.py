@@ -366,7 +366,14 @@ class WorkDistributionStrategy(models.Model):
             self.env, dist_model.destination_field.relation,
             dist_model.domain, values)
         if method and candidates:
-            return method(dist_model, candidates, values, **kwargs)
+            try:
+                return method(dist_model, candidates, values, **kwargs)
+            except:
+                logger.exception(
+                    'An error happen trying to execute work distribution for '
+                    'Model: %s, Field: %$,' %
+                    (dist_model.destination_field.model,
+                     dist_model.destination_field.name))
         return None
 
     def uniform(self, dist_model, candidates, values, **kwargs):
