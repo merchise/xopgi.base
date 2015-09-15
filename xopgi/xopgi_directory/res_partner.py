@@ -17,6 +17,8 @@ from __future__ import (division as _py3_division,
 
 
 from openerp import api, fields, models
+from xoeuf.osv.orm import FORGET_RELATED, LINK_RELATED
+
 
 @api.multi
 def get_contact_information(self):
@@ -56,6 +58,9 @@ class ResPartner(models.Model):
     owner_identity = fields.Char(compute='_get_owner_identity')
     contact_information = fields.One2many('res.partner',
                                           compute='_get_fake_partners')
+    classifications = fields.Many2many('res.partner.classification',
+                                       'res_partner_classification_rel',
+                                       'partner_id', 'classification_id')
 
     @api.model
     def _where_calc(self, domain, active_test=True):
@@ -68,3 +73,26 @@ class ResPartner(models.Model):
                 domain.insert(0, ('fake', '=', False))
         return super(ResPartner, self)._where_calc(
             domain, active_test=active_test)
+
+    @api.model
+    def migrate_classifications(self):
+        """This is needed because a migration not occur on module installation.
+
+        """
+        ref = lambda xml_id: self.env.ref(xml_id, raise_if_not_found=False)
+        partners = self.with_context(active_test=False)
+        for att in ('employee', 'customer', 'supplier'):
+            partners = partners.search([(att, '=', True)])
+            classification = ref('xopgi_directory.%s' % att)
+            if partners and classification:
+                partners.write(
+                    {'classifications': [LINK_RELATED(classification.id)]})
+
+
+class PartnerClassification(models.Model):
+    _name = 'res.partner.classification'
+
+    name = fields.Char(required=True, translate=True)
+    partners = fields.Many2many('res.partner',
+                                'res_partner_classification_rel',
+                                'classification_id', 'partner_id')
