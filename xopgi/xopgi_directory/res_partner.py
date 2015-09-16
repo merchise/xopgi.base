@@ -61,6 +61,33 @@ class ResPartner(models.Model):
     classifications = fields.Many2many('res.partner.classification',
                                        'res_partner_classification_rel',
                                        'partner_id', 'classification_id')
+    employee = fields.Boolean(
+        compute='_get_classification',
+        inverse=lambda self: self._set_classification('employee'), store=True)
+    customer = fields.Boolean(
+        compute='_get_classification',
+        inverse=lambda self: self._set_classification('customer'), store=True)
+    supplier = fields.Boolean(
+        compute='_get_classification',
+        inverse=lambda self: self._set_classification('supplier'), store=True)
+
+    @api.one
+    @api.depends('classifications')
+    def _get_classification(self):
+        c_ids = self.classifications.ids
+        ref = lambda xml_id: self.env.ref(xml_id, raise_if_not_found=False)
+        for att in ('employee', 'customer', 'supplier'):
+            classific = ref('xopgi_directory.%s' % att)
+            setattr(self, att,
+                    True if classific and classific.id in c_ids else False)
+
+    def _set_classification(self, classification):
+        ref = lambda xml_id: self.env.ref(xml_id, raise_if_not_found=False)
+        classific = ref('xopgi_directory.%s' % classification)
+        if classific:
+            action = (LINK_RELATED if getattr(self, classification, False)
+                      else FORGET_RELATED)
+            self.write({'classifications': [action(classific.id)]})
 
     @api.model
     def _where_calc(self, domain, active_test=True):
