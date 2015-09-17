@@ -8,7 +8,7 @@
       <field name="arch" type="xml">
         <form string="Work Distribution Strategy">
           <group>
-            <field name="strategy_id" required="1"/>
+            <field name="strategy_id"/>
             <field name="info" readonly="1"/>
           </group>
           <footer>
