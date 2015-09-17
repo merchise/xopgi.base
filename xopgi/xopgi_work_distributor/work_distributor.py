@@ -371,7 +371,7 @@ class WorkDistributionStrategy(models.Model):
             except:
                 logger.exception(
                     'An error happen trying to execute work distribution for '
-                    'Model: %s, Field: %$,' %
+                    'Model: %s, Field: %s,' %
                     (dist_model.destination_field.model,
                      dist_model.destination_field.name))
         return None
@@ -469,6 +469,22 @@ class WorkDistributorWizard(models.TransientModel):
     info = fields.Text()
 
     @api.model
+    def fields_view_get(self, view_id=None, view_type='form',
+                        toolbar=False, submenu=False):
+        result = super(WorkDistributorWizard, self).fields_view_get(
+            view_id=view_id, view_type=view_type, toolbar=toolbar,
+            submenu=submenu)
+        if view_type != 'form' or not result.get('fields', {}).get(
+                'strategy_id', False):
+            return result
+        active_model = self.env.context.get('active_model', False)
+        model = self.env['work.distribution.model'].search(
+            [('group_field.relation', '=', active_model)])
+        result['fields']['strategy_id']['domain'] = [
+            ('id', 'in', model.strategy_ids.ids)]
+        return result
+
+    @api.model
     def default_get(self, fields_list):
         values = super(WorkDistributorWizard, self).default_get(fields_list)
         if 'info' in fields_list:
@@ -476,8 +492,12 @@ class WorkDistributorWizard(models.TransientModel):
             active_model = self.env.context.get('active_model', False)
             ir_model = self.env['ir.model']
             model = ir_model.search([('model', '=', active_model)])[0]
-            names = [n for i, n in self.env[active_model].browse(
-                active_ids).name_get()]
+            field = self.env['ir.model.fields'].browse(
+                self.env.context.get('strategy_field_id'))
+            names = [_('%s\n       Strategy: %s') %
+                     (item.name_get()[0][1],
+                      getattr(item, field.name).name or '')
+                     for item in self.env[active_model].browse(active_ids)]
             info = _("%s(s) to set work distribution strategy:\n"
                      "     * %s") % (model.name, '\n     * '.join(names))
             values.update({'info': info})
