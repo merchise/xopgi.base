@@ -37,6 +37,7 @@ def _evaluate_domain(env, model, domain_str, values):
         domain = safe_eval(domain_str or '[]')
     else:
         local_dict = locals()
+        local_dict.update(globals().get('__builtins__', {}))
         safe_eval(domain_str, local_dict, mode='exec', nocopy=True)
         domain = local_dict.get('result', [])
     context.pop('lang', False)
@@ -468,6 +469,7 @@ class WorkDistributionStrategy(models.Model):
             values.update(safe_eval(self.code or '{'))
         else:
             local_dict = locals()
+            local_dict.update(globals().get('__builtins__', {}))
             safe_eval(self.code, local_dict, mode='exec', nocopy=True)
             values.update(local_dict['values'])
         return values
