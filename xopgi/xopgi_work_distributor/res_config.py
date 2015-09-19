@@ -48,14 +48,14 @@ def create(self, vals):
 models.Model.create = create
 
 
-@api.model
-def fields_view_get(self, view_id=None, view_type='form', toolbar=False,
-                    submenu=False):
+def fields_view_get(self, cr, uid, view_id=None, view_type='form',
+                    context=None, toolbar=False, submenu=False):
     result = super(models.Model, self).fields_view_get(
-        view_id=view_id, view_type=view_type, toolbar=toolbar,
-        submenu=submenu)
+        cr, uid, view_id=view_id, view_type=view_type, context=context,
+        toolbar=toolbar, submenu=submenu)
     if 'work.distribution.model' not in self.pool or view_type != 'form':
         return result
+    self = self.browse(cr, uid, context=context)
     if not self.user_has_groups(
             'xopgi_work_distributor.group_distributor_manager,'
             'base.group_system'):
