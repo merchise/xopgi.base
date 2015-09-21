@@ -48,6 +48,7 @@ def create(self, vals):
 models.Model.create = create
 
 
+@api.guess
 def fields_view_get(self, cr, uid, view_id=None, view_type='form',
                     context=None, toolbar=False, submenu=False):
     result = super(models.Model, self).fields_view_get(
