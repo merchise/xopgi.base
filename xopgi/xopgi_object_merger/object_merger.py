@@ -136,6 +136,12 @@ class object_merger(orm.TransientModel):
                                  _('Please select one value to keep'))
         model = self.pool.get(active_model)
         src_names = model.name_get(cr, uid, src_ids, context=context)
+
+        ir_model = self.pool['ir.model'].browse(
+            cr, uid, context=context).search([('model', '=', active_model)])
+        src_ids.remove(dst_id)
+        ir_model.merge(dst_id, src_ids)
+        cr.commit()
         self._merge(cr, active_model, dst_id, src_ids, context=context)
         # init a new transaction to check for references on alias_defaults.
         cr.commit()
@@ -173,8 +179,7 @@ class object_merger(orm.TransientModel):
         model_pool = self.pool.get(active_model)
         src_ids = model_pool.exists(cr, SUPERUSER_ID, src_ids,
                                        context=context)
-        if src_ids and dst_id in src_ids and len(src_ids) > 1:
-            src_ids.remove(dst_id)
+        if src_ids and dst_id in src_ids and len(src_ids) >= 1:
             self._check_fks(cr, active_model, dst_id, src_ids)
             self._check_references(cr, active_model, dst_id, src_ids)
             active_col = (model_pool._columns.get('active')

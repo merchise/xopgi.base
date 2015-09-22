@@ -15,9 +15,13 @@
 
 
 from openerp.osv import fields, osv, orm
+from openerp.tools.safe_eval import safe_eval
 from openerp.tools.translate import _
-from openerp import SUPERUSER_ID
+from operator import gt, lt
+from openerp import api, fields as new_api_fields, models, SUPERUSER_ID
 from xoeuf.osv.orm import LINK_RELATED
+from xoutil import logger
+
 
 IS_MODEL_ID = '1'
 MODEL_FIELD_VALUE_SELECTION = [('0', 'Model Name'), (IS_MODEL_ID, 'Model Id')]
@@ -37,10 +41,13 @@ class ir_model(orm.Model):
         'merge_limit':
             fields.integer('Merge Limit', help='Limit quantity of objects to '
                                                'allow merge at one time.'),
+        'field_merge_way_ids':
+            fields.one2many('field.merge.way.rel', 'model',
+                            string='Specific Merge Ways'),
+        'general_merge_way': fields.text('General Merge Way')
     }
 
-    _defaults = {'object_merger_model': False, 'merge_cyclic': False,
-                 'merge_limit': 0}
+    _defaults = {'merge_limit': 0}
 
     _sql_constraints = [
         ('positive_merge_limit', 'check ( merge_limit >= 0 )',
@@ -68,6 +75,33 @@ class ir_model(orm.Model):
             submenu=submenu
         )
         return res
+
+    @api.one
+    @api.multi
+    def merge(self, dst_id, src_ids):
+        dst_obj = self.env[self.model].browse(dst_id)
+        src_objs = self.env[self.model].browse(src_ids)
+        values = (self.field_merge_way_ids.merge(dst_obj, src_objs)
+                  if bool(self.field_merge_way_ids) else {})
+        local_dict = locals()
+        local_dict.update(globals().get('__builtins__', {}))
+        try:
+            safe_eval(self.general_merge_way, local_dict, mode='exec',
+                      nocopy=True)
+            values.update(local_dict['result'])
+        except:
+            logger.exception('An error happen trying to execute the General '
+                             'Merge Way python code. for Model: %s, '
+                             'Destination id: %s and Source ids: %s' %
+                             (self.model, str(dst_id), str(src_ids)))
+        try:
+            if values:
+                dst_obj.write(values)
+        except:
+            logger.exception(
+                'An error happen updating result object with: \n%s \n'
+                'For Model: %s, Destination id: %s and Source ids: %s' %
+                (str(values), self.model, str(dst_id), str(src_ids)))
 
 
 class InformalReference(orm.Model):
@@ -231,3 +265,102 @@ class object_merger_settings(osv.osv_memory):
         return {'type': 'ir.actions.client', 'tag': 'reload', }
 
     # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+
+
+class FieldMergeWay(models.Model):
+    _name = 'field.merge.way'
+
+    name = new_api_fields.Char(required=True, translate=True)
+    predefine = new_api_fields.Boolean()
+    code = new_api_fields.Text(required=True, default='''
+        #  Python code to return on result var the value of active field
+        #  result = False
+        #  self, dst_obj, src_objs, field are able to use:
+        #  self => active strategy (on new api).
+        #  dst_obj => merge destination object.
+        #  src_objs => merge source objects without dst_obj.
+        #  field => field to apply merge way.
+        ''')
+
+    _sql_constraints = [
+        ('name_unique', 'unique (name)', 'Strategy must be unique!')]
+
+    def apply(self, dst_obj, src_objs, field):
+        method = (
+            getattr(self, self.code, None) if self.predefine else self.custom)
+        try:
+            return method(dst_obj, src_objs, field) if method else None
+        except:
+            logger.exception(
+                'An error happen trying to execute the Specific Merge '
+                'Way python code for Model: %s, Field: %s,'
+                'Destination id: %s and Source ids: %s' %
+                (field.model, field.field_description, str(dst_obj.id),
+                 str(src_objs.ids)))
+
+    def add(self, dst_obj, src_objs, field):
+        '''
+        not applicable to: selection, many2one, date, datetime
+        '''
+        result = getattr(dst_obj, field.name, None)
+        if field.ttype == 'char':
+            union = ' '
+        elif field.ttype == 'text':
+            union = '\n ********************************************* \n'
+        else:
+            union = False
+        for obj in src_objs:
+            temp = getattr(obj, field.name, None)
+            if result and temp:
+                result += union + temp if union else temp
+            elif not result:
+                result = temp
+        return result
+
+    def max(self, dst_obj, src_objs, field):
+        '''
+        not applicable to:
+        '''
+        return self._max_min(dst_obj, src_objs, field, gt)
+
+    def min(self, dst_obj, src_objs, field):
+        '''
+        not applicable to:
+        '''
+        return self._max_min(dst_obj, src_objs, field, lt)
+
+    def _max_min(self, dst_obj, src_objs, field, operator):
+        result = getattr(dst_obj, field.name, None)
+        for obj in src_objs:
+            temp = getattr(obj, field.name, None)
+            if not any(var in [None, False] for var in [result, temp]):
+                result = temp if operator(temp, result) else result
+            elif not result and temp:
+                result = temp
+        return result
+
+    def custom(self, dst_obj, src_objs, field):
+        local_dict = locals()
+        local_dict.update(globals().get('__builtins__', {}))
+        safe_eval(self.code, local_dict, mode='exec', nocopy=True)
+        return local_dict['result']
+
+
+class FieldMergeWayRel(models.Model):
+    _name = 'field.merge.way.rel'
+
+    name = new_api_fields.Many2one('ir.model.fields', required=True)
+    merge_way = new_api_fields.Many2one('field.merge.way', required=True)
+    model = new_api_fields.Many2one('ir.model', required=True)
+
+    @api.multi
+    def merge(self, dst_obj, src_objs):
+        res = {}
+        for item in self:
+            val = item.merge_way.apply(dst_obj, src_objs, item.name)
+            if val is not None:
+                res[item.name.name] = val
+        return res
+
+
+

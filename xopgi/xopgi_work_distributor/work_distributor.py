@@ -18,14 +18,8 @@ from openerp import models, _, api, fields
 from openerp.exceptions import ValidationError, Warning
 from openerp.tools.safe_eval import safe_eval
 from xoeuf.osv.orm import LINK_RELATED
+from xoutil import logger
 
-STRATEGIES_SELECTION = {
-    'uniform': {'name': 'Uniform Distribution', 'other_fields': []},
-    'effort': {'name': 'Effort Based Distribution',
-               'other_fields': []},
-    'effort_month': {'name': 'Next Month Effort Based Distribution',
-                     'other_fields': ['date_start']},
-}
 
 FIELD_NAME_TO_SHOW_ON_WIZARD = \
     lambda model: 'x_%s_ids' % model.replace('.', '_')
@@ -44,8 +38,9 @@ def _evaluate_domain(env, model, domain_str, values):
         domain = safe_eval(domain_str or '[]')
     else:
         local_dict = locals()
+        local_dict.update(globals().get('__builtins__', {}))
         safe_eval(domain_str, local_dict, mode='exec', nocopy=True)
-        domain = local_dict['result']
+        domain = local_dict.get('result', [])
     context.pop('lang', False)
     return self.with_context(context).search(domain)
 
@@ -66,29 +61,27 @@ class WorkDistributionModel(models.Model):
         'ir.model.fields', 'Group Field',
         help='many2one field where that it value determine domain of '
              'distribution destination.')
-    group_model = fields.Char('Group Model')
+    strategy_by_group = fields.Boolean()
     domain = fields.Text(
         help='Odoo domain to search in destination_field`s model.',
         default='''
-        #  Odoo domain like [('field_name', 'operator', value)]
+        #  Odoo domain like: [('field_name', 'operator', value)]
         #  or python code to return on result var a odoo domain like
-        #  result = [('field_name', 'operator', value)]
-        #  self, env, model, values and contet are able to use:
+        #  if uid != 1:
+        #      result = [('id', '=', uid)]
+        #  else:
+        #      result = [('id', '!=', 1)]
+        #  self, env, model, values and context are able to use:
         #  self => active model pool (on new api).
-        #  env => active enviroment (.cr, .uid, .user, context).
+        #  env => active environment (.cr, .uid, .user, .context).
         #  model => active model name.
         #  values => python dict to passed to create method.
-        #  context => active context without user lang.
+        #  context => active context.
         ''')
-    domain_field = fields.Many2one(
-        'ir.model.fields', 'Domain Field',
-        help='Field that it value determine domain of '
-             'distribution destination.')
     destination_field = fields.Many2one(
         'ir.model.fields', 'Destination Field', required=True,
         help='Field that it value it will determinate by distribution '
              'strategy apply.')
-    destination_model = fields.Char('Destination Model')
     other_fields = fields.Text(
         'Other fields', help='Python Dictionary with others variables (Keys) '
                              'used on some distribution strategy and '
@@ -131,22 +124,6 @@ class WorkDistributionModel(models.Model):
         return True
 
     @api.model
-    @api.onchange('group_field')
-    def onchange_group_field(self):
-        if self.group_field:
-            self.group_model = self.group_field.relation
-        else:
-            self.group_model = False
-
-    @api.model
-    @api.onchange('destination_field')
-    def onchange_destination_field(self):
-        if self.destination_field:
-            self.destination_model = self.destination_field.relation
-        else:
-            self.destination_model = False
-
-    @api.model
     @api.onchange('strategy_ids')
     def onchange_strategy_ids(self):
         warning = False
@@ -183,7 +160,9 @@ class WorkDistributionModel(models.Model):
                 other_fields = (safe_eval(item.other_fields)
                                 if item.other_fields else {})
                 # TODO: check if active user have access to destination field
-                strategy.apply(item, values, **dict(other_fields))
+                val = strategy.apply(item, values, **dict(other_fields))
+                if val is not None:
+                    values[item.destination_field.name] = val
         return values
 
     @api.model
@@ -355,34 +334,47 @@ class WorkDistributionModel(models.Model):
                 item.write(vals)
         return result
 
+
 class WorkDistributionStrategy(models.Model):
     _name = 'work.distribution.strategy'
 
-    name = fields.Selection([(k, v.get('name', ''))
-                             for k, v in STRATEGIES_SELECTION.items()],
-                            required=True)
+    name = fields.Char(required=True, translate=True)
+    predefine = fields.Boolean()
+    code = fields.Text(required=True, default='''
+        #  Python code to return on result var value to set on
+        #  destination field or None to no update it.
+        #  E.g: result = False
+        #  self, dist_model, values, candidates and **kwargs are able to use:
+        #  self => active strategy (on new api).
+        #  dist_model => active model name.
+        #  values => python dict to passed to create method.
+        #  **kwargs => python dict set on field ``other fields``.
+        ''')
+    other_fields = fields.Char(
+        help='Python List with others variables'
+             'needed on this distribution strategy.\n '
+             'Eg: ["date", "qtty"]', default='[]')
 
     _sql_constraints = [
         ('name_unique', 'unique (name)', 'Strategy must be unique!')
     ]
 
-    @api.one
     def apply(self, dist_model, values, **kwargs):
-        method = getattr(self, self.name, None)
-        candidates = False
-        if bool(dist_model.group_field):
-            g_id = values.get(dist_model.group_field.name, False)
-            if g_id:
-                candidates = getattr(
-                    self.env[dist_model.group_field.relation].browse(g_id),
-                    dist_model.domain_field.name, False
-                )
-        elif dist_model.domain:
-            candidates = _evaluate_domain(
-                self.env, dist_model.destination_field.relation,
-                dist_model.domain, values)
+        method = (getattr(self, self.code, None)
+                  if self.predefine else self.custom)
+        candidates = _evaluate_domain(
+            self.env, dist_model.destination_field.relation,
+            dist_model.domain, values)
         if method and candidates:
-            method(dist_model, candidates, values, **kwargs)
+            try:
+                return method(dist_model, candidates, values, **kwargs)
+            except:
+                logger.exception(
+                    'An error happen trying to execute work distribution for '
+                    'Model: %s, Field: %s,' %
+                    (dist_model.destination_field.model,
+                     dist_model.destination_field.name))
+        return None
 
     def uniform(self, dist_model, candidates, values, **kwargs):
         """Detect the next corresponding domain id and update values with it.
@@ -408,14 +400,10 @@ class WorkDistributionStrategy(models.Model):
                                  for _id in candidates.ids)
             else candidates.ids[0]
         )
-        values.update({dist_model.destination_field.name: next_dist})
-        return values
+        return next_dist
 
     def effort(self, dist_model, candidates, values, **kwargs):
-        values.update({
-            dist_model.destination_field.name:
-                self._effort(dist_model, candidates, values)
-        })
+        return self._effort(dist_model, candidates, values)
 
     def effort_month(self, dist_model, candidates, values, **kwargs):
         model = self.env[dist_model.model.model]
@@ -428,9 +416,9 @@ class WorkDistributionStrategy(models.Model):
                   else fields.DATE_FORMAT)
         strlow_date = low_date.strftime(format)
         strupp_date = upp_date.strftime(format)
-        values.update({dist_model.destination_field.name: self._effort(
+        return self._effort(
             dist_model, candidates, values, date_field=date_field.name,
-            date_start=strlow_date, date_end=strupp_date)})
+            date_start=strlow_date, date_end=strupp_date)
 
     def _effort(self, dist_model, candidates, values, date_field=False,
                 date_start=False, date_end=False):
@@ -452,13 +440,22 @@ class WorkDistributionStrategy(models.Model):
                 next_dist = x
         return next_dist
 
+    def custom(self, dist_model, candidates, values, **kwargs):
+        if self.code.strip().startswith('{'):
+            return safe_eval(self.code or '{')
+        else:
+            local_dict = locals()
+            local_dict.update(globals().get('__builtins__', {}))
+            safe_eval(self.code, local_dict, mode='exec', nocopy=True)
+            return local_dict.get('result', None)
+
     @api.model
     def get_fields_name(self, mixed=True):
         result = []
         method = getattr(result, 'extend' if mixed else 'append')
         for strategy in self:
-            method(STRATEGIES_SELECTION.get(
-                strategy.name, {}).get('other_fields'))
+            method(safe_eval(strategy.other_fields)
+                   if strategy.other_fields else [])
         return set(result) if mixed else result
 
 
@@ -472,6 +469,22 @@ class WorkDistributorWizard(models.TransientModel):
     info = fields.Text()
 
     @api.model
+    def fields_view_get(self, view_id=None, view_type='form',
+                        toolbar=False, submenu=False):
+        result = super(WorkDistributorWizard, self).fields_view_get(
+            view_id=view_id, view_type=view_type, toolbar=toolbar,
+            submenu=submenu)
+        if view_type != 'form' or not result.get('fields', {}).get(
+                'strategy_id', False):
+            return result
+        active_model = self.env.context.get('active_model', False)
+        model = self.env['work.distribution.model'].search(
+            [('group_field.relation', '=', active_model)])
+        result['fields']['strategy_id']['domain'] = [
+            ('id', 'in', model.strategy_ids.ids)]
+        return result
+
+    @api.model
     def default_get(self, fields_list):
         values = super(WorkDistributorWizard, self).default_get(fields_list)
         if 'info' in fields_list:
@@ -479,8 +492,12 @@ class WorkDistributorWizard(models.TransientModel):
             active_model = self.env.context.get('active_model', False)
             ir_model = self.env['ir.model']
             model = ir_model.search([('model', '=', active_model)])[0]
-            names = [n for i, n in self.env[active_model].browse(
-                active_ids).name_get()]
+            field = self.env['ir.model.fields'].browse(
+                self.env.context.get('strategy_field_id'))
+            names = [_('%s\n       Strategy: %s') %
+                     (item.name_get()[0][1],
+                      getattr(item, field.name).name or '')
+                     for item in self.env[active_model].browse(active_ids)]
             info = _("%s(s) to set work distribution strategy:\n"
                      "     * %s") % (model.name, '\n     * '.join(names))
             values.update({'info': info})

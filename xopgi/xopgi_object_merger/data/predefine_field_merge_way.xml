@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data> <!-- noupdate="1"-->
+    <record id="uniform" model="field.merge.way">
+      <field name="name">Add/Concat</field>
+      <field name="code">add</field>
+      <field name="predefine">True</field>
+    </record>
+    <record id="effort" model="field.merge.way">
+      <field name="name">Max</field>
+      <field name="code">max</field>
+      <field name="predefine">True</field>
+    </record>
+    <record id="effort_month" model="field.merge.way">
+      <field name="name">Min</field>
+      <field name="code">min</field>
+      <field name="predefine">True</field>
+    </record>
+  </data>
+</openerp>
