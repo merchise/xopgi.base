@@ -56,7 +56,7 @@ def fields_view_get(self, cr, uid, view_id=None, view_type='form',
         toolbar=toolbar, submenu=submenu)
     if 'work.distribution.model' not in self.pool or view_type != 'form':
         return result
-    self = self.browse(cr, uid, context=context)
+    self = self.browse(cr, uid, None, context=context)
     if not self.user_has_groups(
             'xopgi_work_distributor.group_distributor_manager,'
             'base.group_system'):
