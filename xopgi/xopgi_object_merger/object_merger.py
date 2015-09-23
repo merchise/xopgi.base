@@ -179,7 +179,7 @@ class object_merger(orm.TransientModel):
         model_pool = self.pool.get(active_model)
         src_ids = model_pool.exists(cr, SUPERUSER_ID, src_ids,
                                        context=context)
-        if src_ids and dst_id in src_ids and len(src_ids) >= 1:
+        if src_ids and len(src_ids) >= 1:
             self._check_fks(cr, active_model, dst_id, src_ids)
             self._check_references(cr, active_model, dst_id, src_ids)
             active_col = (model_pool._columns.get('active')

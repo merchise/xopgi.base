@@ -85,15 +85,16 @@ class ir_model(orm.Model):
                   if bool(self.field_merge_way_ids) else {})
         local_dict = locals()
         local_dict.update(globals().get('__builtins__', {}))
-        try:
-            safe_eval(self.general_merge_way, local_dict, mode='exec',
-                      nocopy=True)
-            values.update(local_dict['result'])
-        except:
-            logger.exception('An error happen trying to execute the General '
-                             'Merge Way python code. for Model: %s, '
-                             'Destination id: %s and Source ids: %s' %
-                             (self.model, str(dst_id), str(src_ids)))
+        if self.general_merge_way:
+            try:
+                safe_eval(self.general_merge_way, local_dict, mode='exec',
+                          nocopy=True)
+                values.update(local_dict.get('result', {}))
+            except:
+                logger.exception('An error happen trying to execute the General '
+                                 'Merge Way python code. for Model: %s, '
+                                 'Destination id: %s and Source ids: %s' %
+                                 (self.model, str(dst_id), str(src_ids)))
         try:
             if values:
                 dst_obj.write(values)
