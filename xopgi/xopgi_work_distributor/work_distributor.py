@@ -27,19 +27,19 @@ FIELD_NAME_TO_SHOW_ON_WIZARD = \
 WIZARD_NAME = 'work.distributor.wizard'
 
 
-def _evaluate_domain(env, model, domain_str, values):
+def _evaluate_domain(dist_model, values):
     ''' Pop user lang information from context to allow put in domain names
     and search always on original text and not on user lang translations.
 
     '''
-    context = dict(env.context)
-    self = env[model]
-    if not domain_str or domain_str.strip().startswith('['):
-        domain = safe_eval(domain_str or '[]')
+    context = dict(dist_model.env.context)
+    self = dist_model.env[dist_model.destination_field.relation]
+    if not dist_model.domain or dist_model.domain.strip().startswith('['):
+        domain = safe_eval(dist_model.domain or '[]')
     else:
         local_dict = locals()
         local_dict.update(globals().get('__builtins__', {}))
-        safe_eval(domain_str, local_dict, mode='exec', nocopy=True)
+        safe_eval(dist_model.domain, local_dict, mode='exec', nocopy=True)
         domain = local_dict.get('result', [])
     context.pop('lang', False)
     return self.with_context(context).search(domain)
@@ -72,9 +72,12 @@ class WorkDistributionModel(models.Model):
         #  else:
         #      result = [('id', '!=', 1)]
         #  self, env, model, values and context are able to use:
-        #  self => active model pool (on new api).
-        #  env => active environment (.cr, .uid, .user, .context).
-        #  model => active model name.
+        #  self => active model (on new api).
+        #  dist_model => work distribution model config entry. (
+        #      .destination_field (objective field)
+        #      .group_field (field to get group)
+        #      .strategy_by_group (if grouping or not)
+        #  )
         #  values => python dict to passed to create method.
         #  context => active context.
         ''')
@@ -362,9 +365,7 @@ class WorkDistributionStrategy(models.Model):
     def apply(self, dist_model, values, **kwargs):
         method = (getattr(self, self.code, None)
                   if self.predefine else self.custom)
-        candidates = _evaluate_domain(
-            self.env, dist_model.destination_field.relation,
-            dist_model.domain, values)
+        candidates = _evaluate_domain(dist_model, values)
         if method and candidates:
             try:
                 return method(dist_model, candidates, values, **kwargs)
