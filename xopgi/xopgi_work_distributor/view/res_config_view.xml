@@ -56,11 +56,7 @@
                               ('model_id','=', model)]"/>
             </group>
             <group>
-              <field name="domain"
-                     attrs="{'invisible': [('group_field','!=', False)],
-                             'required': [('group_field','=', False)]}"
-                     placeholder="e.g [('groups_id', '=', 6)] or
-                                  [('groups_id', '=', 'Empleados')]"/>
+              <field name="domain" required="1"/>
               <field name="strategy_ids"/>
               <field name="other_fields"/>
             </group>
