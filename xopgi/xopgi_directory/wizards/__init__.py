@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # ---------------------------------------------------------------------
-# xopgi_directory
+# xopgi_directory.wizards
 # ---------------------------------------------------------------------
 # Copyright (c) 2013-2015 Merchise Autrement
 # All rights reserved.
@@ -9,8 +9,7 @@
 # terms of the LICENCE attached (see LICENCE file) in the distribution
 # package.
 #
-# @created: 2015-09-15
+# @created: 2015-09-30
 
 
-import res_partner  # noqa
-import wizards  # noqa
+import make_fake  # noqa
