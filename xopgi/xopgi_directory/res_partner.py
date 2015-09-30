@@ -115,6 +115,21 @@ class ResPartner(models.Model):
                 partners.write(
                     {'classifications': [LINK_RELATED(classification.id)]})
 
+    @api.model
+    def name_search(self, name='', args=None, operator='ilike', limit=100):
+        """Get name_search result plus fakes related with its.
+
+        """
+        res = super(ResPartner, self).name_search(
+            name=name, args=args, operator=operator, limit=limit)
+        if self.env.context.get('include_fake'):
+            res = {_id for _id, name in res}
+            for item in self.browse(list(res)):
+                if item.contact_information:
+                    res |= set(item.contact_information.ids)
+            res = self.browse(list(res)).name_get()
+        return res
+
 
 class PartnerClassification(models.Model):
     _name = 'res.partner.classification'
