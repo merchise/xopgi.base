@@ -36,7 +36,7 @@ class ResPartner(models.Model):
     @api.depends('owner')
     def _get_owner_identity(self):
         if self.owner:
-            _, name = self.owner.get_name()[0]
+            _, name = self.owner.name_get()[0]
             self.owner_identity = '%s: %s' % (self.owner._name, name)
         else:
             self.owner_identity = ''
