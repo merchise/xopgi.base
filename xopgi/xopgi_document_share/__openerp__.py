@@ -15,7 +15,7 @@
 
 {
     'name': 'Document Share',
-    'version': '2.1',
+    'version': '1.0',
     'category': 'Knowledge Management',
     'description': """
     Module that allows to share documents
@@ -32,4 +32,4 @@
     'auto_install': False,
 }
 
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+
