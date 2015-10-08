@@ -17,6 +17,7 @@ from __future__ import (division as _py3_division,
 
 
 from openerp import api, fields, models
+from six import integer_types
 from xoeuf.osv.orm import FORGET_RELATED, LINK_RELATED
 
 
@@ -26,7 +27,8 @@ def get_contact_information(self):
 
     """
     return self.env['res.partner'].with_context(only_fake=True).search(
-        [('owner', 'in', list({'%s,%d' % (self._name, i.id) for i in self}))])
+        [('owner', 'in', list({'%s,%d' % (self._name, i.id) for i in self
+                               if isinstance(i.id, integer_types)}))])
 
 
 class ResPartner(models.Model):
