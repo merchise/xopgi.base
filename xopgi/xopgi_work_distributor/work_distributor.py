@@ -32,6 +32,12 @@ def _evaluate_domain(dist_model, values):
     and search always on original text and not on user lang translations.
 
     '''
+    group = False
+    if dist_model.group_field:
+        group = values.get(dist_model.group_field.name, False)
+        if group:
+            group = dist_model.env[dist_model.group_field.relation].browse(
+                group)
     context = dict(dist_model.env.context)
     self = dist_model.env[dist_model.destination_field.relation]
     if not dist_model.domain or dist_model.domain.strip().startswith('['):
@@ -71,7 +77,7 @@ class WorkDistributionModel(models.Model):
         #      result = [('id', '=', uid)]
         #  else:
         #      result = [('id', '!=', 1)]
-        #  self, env, model, values and context are able to use:
+        #  self, env, model, values, context and group are able to use:
         #  self => active model (on new api).
         #  dist_model => work distribution model config entry. (
         #      .destination_field (objective field)
@@ -80,6 +86,9 @@ class WorkDistributionModel(models.Model):
         #  )
         #  values => python dict to passed to create method.
         #  context => active context.
+        #  group => group object from value passed on create method.
+        #  E.g: result = ([('id', 'in', group.members_field_name.ids)]
+        #                 if group else [])
         ''')
     destination_field = fields.Many2one(
         'ir.model.fields', 'Destination Field', required=True,
