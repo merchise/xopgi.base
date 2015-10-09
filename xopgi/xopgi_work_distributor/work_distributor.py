@@ -13,7 +13,7 @@
 # terms of the LICENCE attached (see LICENCE file) in the distribution
 # package.
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 from openerp import models, _, api, fields
 from openerp.exceptions import ValidationError, Warning
 from openerp.tools.safe_eval import safe_eval
@@ -420,7 +420,7 @@ class WorkDistributionStrategy(models.Model):
     def effort_month(self, dist_model, candidates, values, **kwargs):
         model = self.env[dist_model.model.model]
         DAYS = 30
-        low_date = datetime.now()
+        low_date = normalize_datetime(fields.Datetime.context_timestamp(self))
         upp_date = low_date + timedelta(DAYS)
         date_field = model._fields[kwargs.get('date_start')]
         format = (fields.DATETIME_FORMAT
@@ -434,13 +434,13 @@ class WorkDistributionStrategy(models.Model):
 
     def around_effort(self, dist_model, candidates, values, **kwargs):
         model = self.env[dist_model.model.model]
-        now = datetime.now()
+        today = normalize_datetime(fields.Datetime.context_timestamp(self))
         DAYS = 7
         TOTAL_DAYS = DAYS * 2 + 1
         item_date = values.get(kwargs.get('date_start'), False)
-        item_date = normalize_datetime(item_date) if item_date else now
-        low_date = (now
-                    if item_date < now + timedelta(DAYS)
+        item_date = normalize_datetime(item_date) if item_date else today
+        low_date = (today
+                    if item_date < today + timedelta(DAYS)
                     else item_date - timedelta(DAYS))
         upp_date = low_date + timedelta(TOTAL_DAYS)
         date_field = model._fields[kwargs.get('date_start')]
@@ -453,7 +453,7 @@ class WorkDistributionStrategy(models.Model):
 
     def future_effort(self, dist_model, candidates, values, **kwargs):
         model = self.env[dist_model.model.model]
-        low_date = datetime.now()
+        low_date = normalize_datetime(fields.Datetime.context_timestamp(self))
         date_field = model._fields[kwargs.get('date_start')]
         to_str = date2str if isinstance(date_field, fields.Date) else dt2str
         strlow_date = to_str(low_date)
