@@ -198,14 +198,14 @@ class WorkDistributionModel(models.Model):
         group_field = field_obj.browse(values['group_field'])
         model_id = values.get('model', False)
         model = self.env['ir.model'].browse(model_id)
-        strategy_field = self.create_field(group_field.relation, model.model,
-                                           destination_field.name)
+        strategy_field = self.create_field(group_field.relation, model,
+                                           destination_field)
         action = self.create_actions(
             group_field.relation, model.name,
             destination_field.field_description, strategy_field)
         values.update(dict(strategy_field=strategy_field, action=action))
 
-    def create_field(self, group_model, model, destination_field_name):
+    def create_field(self, group_model, model, destination_field):
         ''' Create field to save which distribution strategy use on each
         group_field model objects.
 
@@ -213,16 +213,17 @@ class WorkDistributionModel(models.Model):
         field_obj = self.env['ir.model.fields']
         model_obj = self.env['ir.model']
         group_model = model_obj.search([('model', '=', group_model)])
-        field_base_name = '%s_%s' % (model.replace('.', '_'),
-                                     destination_field_name)
-        field_name = 'x_%s_ids' % field_base_name
+        field_base_name = '%s_%s' % (model.model.replace('.', '_'),
+                                     destination_field.name)
+        field_name = 'x_%s_id' % field_base_name
         field_data = {
             'model': group_model[0].model,
             'model_id': group_model.ids[0],
             'name': field_name,
             'relation': 'work.distribution.strategy',
             'field_description':
-                "Set %s Work Distribution Strategy" % field_base_name,
+                _("Work Distribution Strategy for %s on %s") %
+                (destination_field.field_description, model.name),
             'state': 'manual',
             'ttype': 'many2one'
         }
@@ -239,7 +240,7 @@ class WorkDistributionModel(models.Model):
         '''
         action_obj = self.env['ir.actions.act_window']
         value_obj = self.env['ir.values']
-        name = ("Define work Distribution Strategy for '%s' on '%s'"
+        name = (_("Define Work Distribution Strategy for '%s' on '%s'")
                 % (destination_field, model_name))
         rol = self.env.ref('xopgi_work_distributor.group_distributor_manager',
                            raise_if_not_found=False)
