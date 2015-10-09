@@ -71,26 +71,24 @@ class WorkDistributionModel(models.Model):
     strategy_by_group = fields.Boolean()
     domain = fields.Text(
         help='Odoo domain to search in destination_field`s model.',
-        default='''
-        #  Odoo domain like: [('field_name', 'operator', value)]
-        #  or python code to return on result var a odoo domain like
-        #  if uid != 1:
-        #      result = [('id', '=', uid)]
-        #  else:
-        #      result = [('id', '!=', 1)]
-        #  self, env, model, values, context and group are able to use:
-        #  self => active model (on new api).
-        #  dist_model => work distribution model config entry. (
-        #      .destination_field (objective field)
-        #      .group_field (field to get group)
-        #      .strategy_by_group (if grouping or not)
-        #  )
-        #  values => python dict to passed to create method.
-        #  context => active context.
-        #  group => group object from value passed on create method.
-        #  E.g: result = ([('id', 'in', group.members_field_name.ids)]
-        #                 if group else [])
-        ''')
+        default='''#  Odoo domain like: [('field_name', 'operator', value)]
+#  or python code to return on result var a odoo domain like
+#  if uid != 1:
+#      result = [('id', '=', uid)]
+#  else:
+#      result = [('id', '!=', 1)]
+#  self, env, model, values, context and group are able to use:
+#  self => active model (on new api).
+#  dist_model => work distribution model config entry. (
+#      .destination_field (objective field)
+#      .group_field (field to get group)
+#      .strategy_by_group (if grouping or not)
+#  )
+#  values => python dict to passed to create method.
+#  context => active context.
+#  group => group object from value passed on create method.
+#  E.g: result = ([('id', 'in', group.members_field_name.ids)]
+#                 if group else [])''')
     destination_field = fields.Many2one(
         'ir.model.fields', 'Destination Field', required=True,
         help='Field that it value it will determinate by distribution '
@@ -107,6 +105,8 @@ class WorkDistributionModel(models.Model):
              'objects.')
     action = fields.Many2one('ir.actions.act_window')
     strategy_field = fields.Many2one('ir.model.fields', 'Setting Field')
+    when_apply = fields.Selection(
+        [('all', 'Always'), ('no_set', 'When no value set')], default='all')
 
     @api.constrains('other_fields')
     def _check_other_fields(self):
@@ -160,23 +160,32 @@ class WorkDistributionModel(models.Model):
 
         '''
         for item in self.search([('model.model', '=', model)]):
-            strategy = False
-            if item.group_field:
-                group_id = values.get(item.group_field.name, False)
-                if group_id:
-                    group_model = item.group_field.relation
-                    group = self.env[group_model].browse(group_id)
-                    strategy = getattr(group, item.strategy_field.name, False)
-            else:
-                strategy = item.strategy_ids[0]
-            if strategy:
-                other_fields = (safe_eval(item.other_fields)
-                                if item.other_fields else {})
-                # TODO: check if active user have access to destination field
-                val = strategy.apply(item, values, **dict(other_fields))
-                if val is not None:
-                    values[item.destination_field.name] = val
+            if item.applicable(values):
+                strategy = False
+                if item.group_field:
+                    group_id = values.get(item.group_field.name, False)
+                    if group_id:
+                        group_model = item.group_field.relation
+                        group = self.env[group_model].browse(group_id)
+                        strategy = getattr(group, item.strategy_field.name,
+                                           False)
+                else:
+                    strategy = item.strategy_ids[0]
+                if strategy:
+                    other_fields = (safe_eval(item.other_fields)
+                                    if item.other_fields else {})
+                    # TODO: check if active user have access to destination
+                    # field
+                    val = strategy.apply(item, values, **dict(other_fields))
+                    if val is not None:
+                        values[item.destination_field.name] = val
         return values
+
+    def applicable(self, values):
+        if not self.when_apply or self.when_apply == 'all':
+            return True
+        else:
+            return not values.get(self.destination_field.name, False)
 
     @api.model
     def unlink_rest(self):

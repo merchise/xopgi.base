@@ -48,6 +48,7 @@
               <field name="destination_field"
                      domain="[('ttype', '=', 'many2one'),
                               ('model_id','=', model)]"/>
+              <field name="when_apply"/>
               <field name="strategy_by_group"/>
               <field name="group_field"
                      attrs="{'invisible': [('strategy_by_group','!=', True)],
