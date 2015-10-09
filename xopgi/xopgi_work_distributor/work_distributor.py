@@ -18,6 +18,7 @@ from openerp import models, _, api, fields
 from openerp.exceptions import ValidationError, Warning
 from openerp.tools.safe_eval import safe_eval
 from xoeuf.osv.orm import LINK_RELATED
+from xoeuf.tools import date2str, dt2str, normalize_datetime
 from xoutil import logger
 
 
@@ -431,6 +432,34 @@ class WorkDistributionStrategy(models.Model):
             dist_model, candidates, values, date_field=date_field.name,
             date_start=strlow_date, date_end=strupp_date)
 
+    def around_effort(self, dist_model, candidates, values, **kwargs):
+        model = self.env[dist_model.model.model]
+        now = datetime.now()
+        DAYS = 7
+        TOTAL_DAYS = DAYS * 2 + 1
+        item_date = values.get(kwargs.get('date_start'), False)
+        item_date = normalize_datetime(item_date) if item_date else now
+        low_date = (now
+                    if item_date < now + timedelta(DAYS)
+                    else item_date - timedelta(DAYS))
+        upp_date = low_date + timedelta(TOTAL_DAYS)
+        date_field = model._fields[kwargs.get('date_start')]
+        to_str = date2str if isinstance(date_field, fields.Date) else dt2str
+        strlow_date = to_str(low_date)
+        strupp_date = to_str(upp_date)
+        return self._effort(dist_model, candidates, values,
+            date_field=date_field.name, date_start=strlow_date,
+            date_end=strupp_date)
+
+    def future_effort(self, dist_model, candidates, values, **kwargs):
+        model = self.env[dist_model.model.model]
+        low_date = datetime.now()
+        date_field = model._fields[kwargs.get('date_start')]
+        to_str = date2str if isinstance(date_field, fields.Date) else dt2str
+        strlow_date = to_str(low_date)
+        return self._effort(dist_model, candidates, values,
+            date_field=date_field.name, date_start=strlow_date)
+
     def _effort(self, dist_model, candidates, values, date_field=False,
                 date_start=False, date_end=False):
         model = self.env[dist_model.model.model]
@@ -441,8 +470,10 @@ class WorkDistributionStrategy(models.Model):
         args = ([(group_field_name, '=', values[group_field_name])]
                 if group_field_name else [])
         if date_field:
-            args.extend([(date_field, '>=', date_start),
-                         (date_field, '<=', date_end)])
+            if date_start:
+                args.append((date_field, '>=', date_start))
+            if date_end:
+                args.append((date_field, '<=', date_end))
         for x in candidates.ids:
             current_effort = model.search_count(
                 args + [(dist_model.destination_field.name, '=', x)])

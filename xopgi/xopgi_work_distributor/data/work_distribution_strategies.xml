@@ -17,5 +17,17 @@
       <field name="predefine">True</field>
       <field name="other_fields">['date_start']</field>
     </record>
+    <record id="future_effort" model="work.distribution.strategy">
+      <field name="name">Future Effort Based Distribution</field>
+      <field name="code">future_effort</field>
+      <field name="predefine">True</field>
+      <field name="other_fields">['date_start']</field>
+    </record>
+    <record id="around_effort" model="work.distribution.strategy">
+      <field name="name">Around Date Effort Based Distribution</field>
+      <field name="code">around_effort</field>
+      <field name="predefine">True</field>
+      <field name="other_fields">['date_start']</field>
+    </record>
   </data>
 </openerp>
