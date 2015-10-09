@@ -417,24 +417,27 @@ class WorkDistributionStrategy(models.Model):
     def effort(self, dist_model, candidates, values, **kwargs):
         return self._effort(dist_model, candidates, values)
 
-    def effort_month(self, dist_model, candidates, values, **kwargs):
+    def _effort_commons(self, dist_model, **kwargs):
         model = self.env[dist_model.model.model]
-        DAYS = 30
-        low_date = normalize_datetime(fields.Datetime.context_timestamp(self))
-        upp_date = low_date + timedelta(DAYS)
+        today = normalize_datetime(fields.Date.context_today(self))
         date_field = model._fields[kwargs.get('date_start')]
-        format = (fields.DATETIME_FORMAT
-                  if isinstance(date_field, fields.Datetime)
-                  else fields.DATE_FORMAT)
-        strlow_date = low_date.strftime(format)
-        strupp_date = upp_date.strftime(format)
+        to_str = date2str if isinstance(date_field, fields.Date) else dt2str
+        return model, today, date_field, to_str
+
+    def effort_month(self, dist_model, candidates, values, **kwargs):
+        model, low_date, date_field, to_str = self._effort_commons(dist_model,
+                                                                   **kwargs)
+        DAYS = 30
+        upp_date = low_date + timedelta(DAYS)
+        strlow_date = to_str(low_date)
+        strupp_date = to_str(upp_date)
         return self._effort(
             dist_model, candidates, values, date_field=date_field.name,
             date_start=strlow_date, date_end=strupp_date)
 
     def around_effort(self, dist_model, candidates, values, **kwargs):
-        model = self.env[dist_model.model.model]
-        today = normalize_datetime(fields.Datetime.context_timestamp(self))
+        model, today, date_field, to_str = self._effort_commons(dist_model,
+                                                                **kwargs)
         DAYS = 7
         TOTAL_DAYS = DAYS * 2 + 1
         item_date = values.get(kwargs.get('date_start'), False)
@@ -443,8 +446,6 @@ class WorkDistributionStrategy(models.Model):
                     if item_date < today + timedelta(DAYS)
                     else item_date - timedelta(DAYS))
         upp_date = low_date + timedelta(TOTAL_DAYS)
-        date_field = model._fields[kwargs.get('date_start')]
-        to_str = date2str if isinstance(date_field, fields.Date) else dt2str
         strlow_date = to_str(low_date)
         strupp_date = to_str(upp_date)
         return self._effort(dist_model, candidates, values,
@@ -452,13 +453,10 @@ class WorkDistributionStrategy(models.Model):
             date_end=strupp_date)
 
     def future_effort(self, dist_model, candidates, values, **kwargs):
-        model = self.env[dist_model.model.model]
-        low_date = normalize_datetime(fields.Datetime.context_timestamp(self))
-        date_field = model._fields[kwargs.get('date_start')]
-        to_str = date2str if isinstance(date_field, fields.Date) else dt2str
-        strlow_date = to_str(low_date)
+        model, today, date_field, to_str = self._effort_commons(dist_model,
+                                                                **kwargs)
         return self._effort(dist_model, candidates, values,
-            date_field=date_field.name, date_start=strlow_date)
+            date_field=date_field.name, date_start=to_str(today))
 
     def _effort(self, dist_model, candidates, values, date_field=False,
                 date_start=False, date_end=False):
