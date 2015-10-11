@@ -17,6 +17,7 @@ from __future__ import (division as _py3_division,
 
 
 from openerp import api, exceptions, fields, models, _
+from xoeuf.osv.orm import LINK_RELATED
 
 
 class MakeFake(models.TransientModel):
@@ -40,6 +41,7 @@ class MakeFake(models.TransientModel):
     def confirm(self):
         self.contact_information.write({
             'fake': True,
-            'owner': 'res.partner,%d' % self.owner.id
+            'owner': 'res.partner,%d' % self.owner.id,
+            'user_ids': [LINK_RELATED(i.id) for i in self.owner.user_ids]
         })
         return self.owner.get_access_action()
