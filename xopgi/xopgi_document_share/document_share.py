@@ -23,7 +23,8 @@ class Document(models.Model):
     _inherit = 'ir.attachment'
 
     owner = fields.Many2one(
-        comodel_name='ir.attachment', string='Owner', required=False, ondelete='cascade')
+        comodel_name='ir.attachment', string='Owner', required=False,
+        ondelete='cascade')
 
     @api.multi
     def button_share(self):
@@ -50,7 +51,9 @@ class DocumentShare(models.Model):
         models = self.env['ir.model'].search([('osv_memory', '=', False)])
         return [(model.model, model.name)
                 for model in models
-                if not model.model.startswith('base.') and not model.model.startswith('base_')and not model.model.startswith('ir.')]
+                if not model.model.startswith('base.') and not
+                model.model.startswith('base_')and
+                not model.model.startswith('ir.')]
 
     @api.multi
     def action_share(self):
@@ -61,7 +64,8 @@ class DocumentShare(models.Model):
               attachment_obj = self.env['ir.attachment']
               if model and res_id:
                  for active_id in self.env.context.get('active_ids', []):
-                    parent_document = self.env['ir.attachment'].browse([ active_id])
+                    parent_document = self.env['ir.attachment'].browse(
+                        [ active_id])
                     attachment_obj = parent_document.copy({
                                'name': parent_document.name,
                                'user_id': parent_document.env.uid,

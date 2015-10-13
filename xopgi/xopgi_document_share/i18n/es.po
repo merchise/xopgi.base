@@ -1,5 +1,6 @@
 # Translation of OpenERP Server.
-# This file contains the translation of the following modules:
+# This file contains the translation
+# of the following modules:
 # 	* xopgi_document_share
 #
 
@@ -17,5 +18,3 @@ msgstr "Cancelar"
 #: field:view.attachment.form.inh:0
 msgid "Share"
 msgstr "Compartir"
-
-
