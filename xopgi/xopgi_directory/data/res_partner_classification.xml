@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<openerp>
+  <data noupdate="1">
+    <record id="employee" model="res.partner.classification">
+      <field name="name">Employee</field>
+    </record>
+    <record id="customer" model="res.partner.classification">
+      <field name="name">Customer</field>
+    </record>
+    <record id="supplier" model="res.partner.classification">
+      <field name="name">Supplier</field>
+    </record>
+    <function name="migrate_classifications" model="res.partner"/>
+  </data>
+</openerp>

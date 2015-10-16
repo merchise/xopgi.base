@@ -72,11 +72,58 @@
                   <field name="merge_cyclic"/>
                 </group>
               </page>
-              <page string="Fields">
-                <field name="field_id" readonly="1"/>
+              <page string="General Merge Way">
+                <p>Python code to return on result var a python dict like:</p>
+                <p>result = {'field_name': field_value, ...}</p>
+                <p>self, dst_obj and src_objs are able to use:</p>
+                <p>self => active ir.model (on new api).</p>
+                <p>dst_obj => merge destination object.</p>
+                <p>src_objs => merge source objects without dst_obj.</p>
+                <field name="general_merge_way" nolabel="1"/>
+              </page>
+              <page string="Specific Merge Ways for model fields">
+                <field name="field_merge_way_ids" nolabel="1"
+                       context="{'default_model':active_id}">
+                  <tree editable="bottom">
+                    <field name="model" invisible="1"/>
+                    <field name="name"
+                           domain="[('model_id','=', model),
+                                      ('ttype', 'not in', ('many2many', 'one2many'))]"/>
+                    <field name="merge_way"/>
+                  </tree>
+                </field>
               </page>
             </notebook>
           </sheet>
+        </form>
+      </field>
+    </record>
+
+    <record id="view_field_merge_way_tree" model="ir.ui.view">
+      <field name="name">field.merge.way.tree</field>
+      <field name="model">field.merge.way</field>
+      <field name="arch" type="xml">
+        <tree string="Field Merge Way">
+          <field name="name"/>
+          <field name="predefine"/>
+        </tree>
+      </field>
+    </record>
+
+    <record id="view_field_merge_way_form" model="ir.ui.view">
+      <field name="name">field.merge.way.form</field>
+      <field name="model">field.merge.way</field>
+      <field name="type">form</field>
+      <field name="priority" eval="8"/>
+      <field name="arch" type="xml">
+        <form>
+          <field name="predefine" invisible="1"/>
+          <group>
+            <field name="name" required="1"
+                   attrs="{'readonly': [('predefine','=', True)]}"/>
+            <field name="code" required="1"
+                   attrs="{'invisible': [('predefine','=', True)]}"/>
+          </group>
         </form>
       </field>
     </record>

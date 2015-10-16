@@ -27,5 +27,50 @@
       <field name="perm_write" eval="1"/>
       <field name="perm_unlink" eval="1"/>
     </record>
+
+    <record id="xopgi_field_merge_way_acl_public" model="ir.model.access">
+      <field name="name">xopgi.field.merge.way.acl.public</field>
+      <field name="model_id"
+             ref="xopgi_object_merger.model_field_merge_way"/>
+      <field name="group_id" ref="base.group_user"/>
+      <field name="perm_read" eval="1"/>
+      <field name="perm_create" eval="0"/>
+      <field name="perm_write" eval="0"/>
+      <field name="perm_unlink" eval="0"/>
+    </record>
+
+    <record id="xopgi_field_merge_way_acl_private" model="ir.model.access">
+      <field name="name">xopgi.field.merge.way.acl.private</field>
+      <field name="model_id"
+             ref="xopgi_object_merger.model_field_merge_way"/>
+      <field name="group_id" ref="base.group_system"/>
+      <field name="perm_read" eval="1"/>
+      <field name="perm_create" eval="1"/>
+      <field name="perm_write" eval="1"/>
+      <field name="perm_unlink" eval="1"/>
+    </record>
+
+    <record id="xopgi_field_merge_way_rel_acl_public" model="ir.model.access">
+      <field name="name">xopgi.field.merge.way.rel.acl.public</field>
+      <field name="model_id"
+             ref="xopgi_object_merger.model_field_merge_way_rel"/>
+      <field name="group_id" ref="base.group_user"/>
+      <field name="perm_read" eval="1"/>
+      <field name="perm_create" eval="0"/>
+      <field name="perm_write" eval="0"/>
+      <field name="perm_unlink" eval="0"/>
+    </record>
+
+    <record id="xopgi_field_merge_way_rel_acl_private"
+            model="ir.model.access">
+      <field name="name">xopgi.field.merge.way.rel.acl.private</field>
+      <field name="model_id"
+             ref="xopgi_object_merger.model_field_merge_way_rel"/>
+      <field name="group_id" ref="base.group_system"/>
+      <field name="perm_read" eval="1"/>
+      <field name="perm_create" eval="1"/>
+      <field name="perm_write" eval="1"/>
+      <field name="perm_unlink" eval="1"/>
+    </record>
   </data>
 </openerp>
