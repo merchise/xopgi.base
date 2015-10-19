@@ -14,3 +14,5 @@
 
 import res_partner  # noqa
 import wizards  # noqa
+import contact_reference  # noqa
+import res_config  # noqa
