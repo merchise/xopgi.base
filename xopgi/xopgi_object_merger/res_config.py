@@ -318,6 +318,19 @@ class FieldMergeWay(models.Model):
                 result = temp
         return result
 
+    def average(self, dst_obj, src_objs, field):
+        '''Applicable to: integer and float
+
+        '''
+        result = getattr(dst_obj, field.name, 0)
+        count = 1 if result not in [False, None] else 0
+        for obj in src_objs:
+            temp = getattr(obj, field.name, None)
+            if not any(var in [False, None] for var in (result, temp)):
+                result += temp
+                count += 1
+        return result / count if result and count else 0
+
     def max(self, dst_obj, src_objs, field):
         '''
         not applicable to:

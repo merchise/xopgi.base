@@ -13,11 +13,12 @@
 # terms of the LICENCE attached (see LICENCE file) in the distribution
 # package.
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 from openerp import models, _, api, fields
 from openerp.exceptions import ValidationError, Warning
 from openerp.tools.safe_eval import safe_eval
 from xoeuf.osv.orm import LINK_RELATED
+from xoeuf.tools import date2str, dt2str, normalize_datetime
 from xoutil import logger
 
 
@@ -32,6 +33,12 @@ def _evaluate_domain(dist_model, values):
     and search always on original text and not on user lang translations.
 
     '''
+    group = False
+    if dist_model.group_field:
+        group = values.get(dist_model.group_field.name, False)
+        if group:
+            group = dist_model.env[dist_model.group_field.relation].browse(
+                group)
     context = dict(dist_model.env.context)
     self = dist_model.env[dist_model.destination_field.relation]
     if not dist_model.domain or dist_model.domain.strip().startswith('['):
@@ -64,23 +71,24 @@ class WorkDistributionModel(models.Model):
     strategy_by_group = fields.Boolean()
     domain = fields.Text(
         help='Odoo domain to search in destination_field`s model.',
-        default='''
-        #  Odoo domain like: [('field_name', 'operator', value)]
-        #  or python code to return on result var a odoo domain like
-        #  if uid != 1:
-        #      result = [('id', '=', uid)]
-        #  else:
-        #      result = [('id', '!=', 1)]
-        #  self, env, model, values and context are able to use:
-        #  self => active model (on new api).
-        #  dist_model => work distribution model config entry. (
-        #      .destination_field (objective field)
-        #      .group_field (field to get group)
-        #      .strategy_by_group (if grouping or not)
-        #  )
-        #  values => python dict to passed to create method.
-        #  context => active context.
-        ''')
+        default='''#  Odoo domain like: [('field_name', 'operator', value)]
+#  or python code to return on result var a odoo domain like
+#  if uid != 1:
+#      result = [('id', '=', uid)]
+#  else:
+#      result = [('id', '!=', 1)]
+#  self, env, model, values, context and group are able to use:
+#  self => active model (on new api).
+#  dist_model => work distribution model config entry. (
+#      .destination_field (objective field)
+#      .group_field (field to get group)
+#      .strategy_by_group (if grouping or not)
+#  )
+#  values => python dict to passed to create method.
+#  context => active context.
+#  group => group object from value passed on create method.
+#  E.g: result = ([('id', 'in', group.members_field_name.ids)]
+#                 if group else [])''')
     destination_field = fields.Many2one(
         'ir.model.fields', 'Destination Field', required=True,
         help='Field that it value it will determinate by distribution '
@@ -97,6 +105,8 @@ class WorkDistributionModel(models.Model):
              'objects.')
     action = fields.Many2one('ir.actions.act_window')
     strategy_field = fields.Many2one('ir.model.fields', 'Setting Field')
+    when_apply = fields.Selection(
+        [('all', 'Always'), ('no_set', 'When no value set')], default='all')
 
     @api.constrains('other_fields')
     def _check_other_fields(self):
@@ -150,23 +160,32 @@ class WorkDistributionModel(models.Model):
 
         '''
         for item in self.search([('model.model', '=', model)]):
-            strategy = False
-            if item.group_field:
-                group_id = values.get(item.group_field.name, False)
-                if group_id:
-                    group_model = item.group_field.relation
-                    group = self.env[group_model].browse(group_id)
-                    strategy = getattr(group, item.strategy_field.name, False)
-            else:
-                strategy = item.strategy_ids[0]
-            if strategy:
-                other_fields = (safe_eval(item.other_fields)
-                                if item.other_fields else {})
-                # TODO: check if active user have access to destination field
-                val = strategy.apply(item, values, **dict(other_fields))
-                if val is not None:
-                    values[item.destination_field.name] = val
+            if item.applicable(values):
+                strategy = False
+                if item.group_field:
+                    group_id = values.get(item.group_field.name, False)
+                    if group_id:
+                        group_model = item.group_field.relation
+                        group = self.env[group_model].browse(group_id)
+                        strategy = getattr(group, item.strategy_field.name,
+                                           False)
+                else:
+                    strategy = item.strategy_ids[0]
+                if strategy:
+                    other_fields = (safe_eval(item.other_fields)
+                                    if item.other_fields else {})
+                    # TODO: check if active user have access to destination
+                    # field
+                    val = strategy.apply(item, values, **dict(other_fields))
+                    if val is not None:
+                        values[item.destination_field.name] = val
         return values
+
+    def applicable(self, values):
+        if not self.when_apply or self.when_apply == 'all':
+            return True
+        else:
+            return not values.get(self.destination_field.name, False)
 
     @api.model
     def unlink_rest(self):
@@ -189,14 +208,14 @@ class WorkDistributionModel(models.Model):
         group_field = field_obj.browse(values['group_field'])
         model_id = values.get('model', False)
         model = self.env['ir.model'].browse(model_id)
-        strategy_field = self.create_field(group_field.relation, model.model,
-                                           destination_field.name)
+        strategy_field = self.create_field(group_field.relation, model,
+                                           destination_field)
         action = self.create_actions(
             group_field.relation, model.name,
             destination_field.field_description, strategy_field)
         values.update(dict(strategy_field=strategy_field, action=action))
 
-    def create_field(self, group_model, model, destination_field_name):
+    def create_field(self, group_model, model, destination_field):
         ''' Create field to save which distribution strategy use on each
         group_field model objects.
 
@@ -204,16 +223,17 @@ class WorkDistributionModel(models.Model):
         field_obj = self.env['ir.model.fields']
         model_obj = self.env['ir.model']
         group_model = model_obj.search([('model', '=', group_model)])
-        field_base_name = '%s_%s' % (model.replace('.', '_'),
-                                     destination_field_name)
-        field_name = 'x_%s_ids' % field_base_name
+        field_base_name = '%s_%s' % (model.model.replace('.', '_'),
+                                     destination_field.name)
+        field_name = 'x_%s_id' % field_base_name
         field_data = {
             'model': group_model[0].model,
             'model_id': group_model.ids[0],
             'name': field_name,
             'relation': 'work.distribution.strategy',
             'field_description':
-                "Set %s Work Distribution Strategy" % field_base_name,
+                _("Work Distribution Strategy for %s on %s") %
+                (destination_field.field_description, model.name),
             'state': 'manual',
             'ttype': 'many2one'
         }
@@ -230,7 +250,7 @@ class WorkDistributionModel(models.Model):
         '''
         action_obj = self.env['ir.actions.act_window']
         value_obj = self.env['ir.values']
-        name = ("Define work Distribution Strategy for '%s' on '%s'"
+        name = (_("Define Work Distribution Strategy for '%s' on '%s'")
                 % (destination_field, model_name))
         rol = self.env.ref('xopgi_work_distributor.group_distributor_manager',
                            raise_if_not_found=False)
@@ -406,20 +426,46 @@ class WorkDistributionStrategy(models.Model):
     def effort(self, dist_model, candidates, values, **kwargs):
         return self._effort(dist_model, candidates, values)
 
-    def effort_month(self, dist_model, candidates, values, **kwargs):
+    def _effort_commons(self, dist_model, **kwargs):
         model = self.env[dist_model.model.model]
-        DAYS = 30
-        low_date = datetime.now()
-        upp_date = low_date + timedelta(DAYS)
+        today = normalize_datetime(fields.Date.context_today(self))
         date_field = model._fields[kwargs.get('date_start')]
-        format = (fields.DATETIME_FORMAT
-                  if isinstance(date_field, fields.Datetime)
-                  else fields.DATE_FORMAT)
-        strlow_date = low_date.strftime(format)
-        strupp_date = upp_date.strftime(format)
+        to_str = date2str if isinstance(date_field, fields.Date) else dt2str
+        return model, today, date_field, to_str
+
+    def effort_month(self, dist_model, candidates, values, **kwargs):
+        model, low_date, date_field, to_str = self._effort_commons(dist_model,
+                                                                   **kwargs)
+        DAYS = 30
+        upp_date = low_date + timedelta(DAYS)
+        strlow_date = to_str(low_date)
+        strupp_date = to_str(upp_date)
         return self._effort(
             dist_model, candidates, values, date_field=date_field.name,
             date_start=strlow_date, date_end=strupp_date)
+
+    def around_effort(self, dist_model, candidates, values, **kwargs):
+        model, today, date_field, to_str = self._effort_commons(dist_model,
+                                                                **kwargs)
+        DAYS = 7
+        TOTAL_DAYS = DAYS * 2 + 1
+        item_date = values.get(kwargs.get('date_start'), False)
+        item_date = normalize_datetime(item_date) if item_date else today
+        low_date = (today
+                    if item_date < today + timedelta(DAYS)
+                    else item_date - timedelta(DAYS))
+        upp_date = low_date + timedelta(TOTAL_DAYS)
+        strlow_date = to_str(low_date)
+        strupp_date = to_str(upp_date)
+        return self._effort(dist_model, candidates, values,
+            date_field=date_field.name, date_start=strlow_date,
+            date_end=strupp_date)
+
+    def future_effort(self, dist_model, candidates, values, **kwargs):
+        model, today, date_field, to_str = self._effort_commons(dist_model,
+                                                                **kwargs)
+        return self._effort(dist_model, candidates, values,
+            date_field=date_field.name, date_start=to_str(today))
 
     def _effort(self, dist_model, candidates, values, date_field=False,
                 date_start=False, date_end=False):
@@ -431,8 +477,10 @@ class WorkDistributionStrategy(models.Model):
         args = ([(group_field_name, '=', values[group_field_name])]
                 if group_field_name else [])
         if date_field:
-            args.extend([(date_field, '>=', date_start),
-                         (date_field, '<=', date_end)])
+            if date_start:
+                args.append((date_field, '>=', date_start))
+            if date_end:
+                args.append((date_field, '<=', date_end))
         for x in candidates.ids:
             current_effort = model.search_count(
                 args + [(dist_model.destination_field.name, '=', x)])

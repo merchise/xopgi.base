@@ -16,5 +16,10 @@
       <field name="code">min</field>
       <field name="predefine">True</field>
     </record>
+    <record id="average" model="field.merge.way">
+      <field name="name">Average</field>
+      <field name="code">average</field>
+      <field name="predefine">True</field>
+    </record>
   </data>
 </openerp>
