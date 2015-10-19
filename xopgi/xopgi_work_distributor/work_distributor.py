@@ -17,10 +17,10 @@ from datetime import timedelta
 from openerp import models, _, api, fields
 from openerp.exceptions import ValidationError, Warning
 from openerp.tools.safe_eval import safe_eval
+from xoeuf import signals
 from xoeuf.osv.orm import LINK_RELATED
 from xoeuf.tools import date2str, dt2str, normalize_datetime
 from xoutil import logger
-
 
 FIELD_NAME_TO_SHOW_ON_WIZARD = \
     lambda model: 'x_%s_ids' % model.replace('.', '_')
@@ -154,12 +154,13 @@ class WorkDistributionModel(models.Model):
         self.other_fields = str(other_fields)
         return {'warning': warning} if warning else None
 
-    @api.model
-    def distribute(self, model, values):
+    @signals.receiver(signals.pre_create)
+    def distribute(self, signal, values):
         ''' Get all distribution configurations for model and apply each one.
 
         '''
-        for item in self.search([('model.model', '=', model)]):
+        dist_model = self.env['work.distribution.model']
+        for item in dist_model.search([('model.model', '=', self._name)]):
             if item.applicable(values):
                 strategy = False
                 if item.group_field:

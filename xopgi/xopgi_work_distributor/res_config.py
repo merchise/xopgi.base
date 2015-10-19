@@ -13,6 +13,7 @@
 # terms of the LICENCE attached (see LICENCE file) in the distribution
 # package.
 from openerp import api, models, fields
+from xoeuf import signals
 from xoeuf.ui import RELOAD_UI
 from xoutil import logger
 
@@ -36,27 +37,14 @@ class WorkDistributionSettings(models.TransientModel):
         return RELOAD_UI
 
 
-@api.model
-@api.returns('self', lambda value: value.id)
-def create(self, vals):
-    if 'work.distribution.model' in self.pool:
-        self.env['work.distribution.model'].distribute(self._name, vals)
-    res = super(models.Model, self).create(vals)
-    return res
-
-
-models.Model.create = create
-
-
-@api.guess
-def fields_view_get(self, cr, uid, view_id=None, view_type='form',
-                    context=None, toolbar=False, submenu=False):
-    result = super(models.Model, self).fields_view_get(
-        cr, uid, view_id=view_id, view_type=view_type, context=context,
-        toolbar=toolbar, submenu=submenu)
-    if 'work.distribution.model' not in self.pool or view_type != 'form':
-        return result
-    self = self.browse(cr, uid, None, context=context)
+@signals.receiver(signals.post_fields_view_get)
+def post_fields_view_get(self, **kwargs):
+    result = kwargs['result']
+    if ('work.distribution.model' not in self.pool or
+                kwargs['view_type'] != 'form'):
+        return kwargs['result']
+    self = self.browse(kwargs['cr'], kwargs['uid'], None,
+                      context=kwargs['context'])
     if not self.user_has_groups(
             'xopgi_work_distributor.group_distributor_manager,'
             'base.group_system'):
@@ -90,16 +78,13 @@ def fields_view_get(self, cr, uid, view_id=None, view_type='form',
         temp['arch'] = arch.replace(
                 xpath, view_part % '\t'.join(fields_to_add.values()))
         temp['fields'].update(self.fields_get(fields_to_add.keys()))
-        result = temp
+        result.update(temp)
     except:
         logger.exception(
             'An error happen trying to add work distribution strategy '
             'fields on form view for '
             'Model: %s.' % (self._name))
     return result
-
-
-models.Model.fields_view_get = fields_view_get
 
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
