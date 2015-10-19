@@ -43,8 +43,6 @@ def post_fields_view_get(self, **kwargs):
     if ('work.distribution.model' not in self.pool or
                 kwargs['view_type'] != 'form'):
         return kwargs['result']
-    self = self.browse(kwargs['cr'], kwargs['uid'], None,
-                      context=kwargs['context'])
     if not self.user_has_groups(
             'xopgi_work_distributor.group_distributor_manager,'
             'base.group_system'):
