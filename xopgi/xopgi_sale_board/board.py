@@ -167,7 +167,10 @@ class CrmLead(models.Model):
             target = res[indicator]['target']
             value = res[indicator]['this_month']
             if target:
-                sector = int(value / target) * 10
+                if target < value:
+                    sector = 10
+                else:
+                    sector = int(float(value) / target * 10)
             res[indicator]['sector'] = str(sector)
         return res
 
