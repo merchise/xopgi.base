@@ -95,7 +95,14 @@ class ResPartner(models.Model):
     @api.model
     def _where_calc(self, domain, active_test=True):
         domain = domain if domain else []
-        if self._context.get('only_fake', False):
+        #  Next condition exclude fake args when domain is completely based
+        #  on id field.
+        if domain and all(arg[0] == 'id' and (
+                len(arg) < 2 or arg[1] in ['in', '=', 'child_of'])
+                for arg in domain):
+            return super(ResPartner, self)._where_calc(
+                domain, active_test=active_test)
+        elif self._context.get('only_fake', False):
             if not any(item[0] == 'fake' for item in domain):
                 domain.insert(0, ('fake', '=', True))
         elif not self._context.get('include_fake', False):
