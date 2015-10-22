@@ -140,6 +140,19 @@ class ResPartner(models.Model):
             res = self.browse(list(res)).name_get()
         return res
 
+    @api.model
+    def create(self, vals):
+        """ Put name as owner_identity when fake res.partner with no
+        name create.
+
+        """
+        if not vals.get('name', False):
+            vals['name'] = 'No name'
+        res = super(ResPartner, self).create(vals)
+        if res.fake and res.owner and vals.get('name', '') == 'No name':
+            res.name = res.owner_identity
+        return res
+
 
 class PartnerClassification(models.Model):
     _name = 'res.partner.classification'
