@@ -57,7 +57,7 @@ class ResPartner(models.Model):
 
     fake = fields.Boolean()
     owner = fields.Reference(selection=[])
-    owner_identity = fields.Char(compute='_get_owner_identity')
+    owner_identity = fields.Char(compute='_get_owner_identity', store=True)
     contact_information = fields.One2many('res.partner',
                                           compute='_get_fake_partners')
     classifications = fields.Many2many('res.partner.classification',
