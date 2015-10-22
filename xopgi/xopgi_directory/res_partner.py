@@ -127,17 +127,15 @@ class ResPartner(models.Model):
 
     @api.model
     def name_search(self, name='', args=None, operator='ilike', limit=100):
-        """Get name_search result plus fakes related with its.
+        """Search too by owner_identity for fake partners.
 
         """
         res = super(ResPartner, self).name_search(
             name=name, args=args, operator=operator, limit=limit)
-        if self.env.context.get('include_fake'):
-            res = {_id for _id, name in res}
-            for item in self.browse(list(res)):
-                if item.contact_information:
-                    res |= set(item.contact_information.ids)
-            res = self.browse(list(res)).name_get()
+        if self.env.context.get('include_fake') or self.env.context.get(
+                'only_fake') and name:
+            res = list(set(res) | set(self.search(
+                args + [('owner_identity', operator, name)]).name_get()))
         return res
 
     @api.model
