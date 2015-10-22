@@ -16,7 +16,7 @@ from __future__ import (division as _py3_division,
                         absolute_import as _absolute_import)
 
 from openerp import api, fields, models, _
-from xoeuf import api as xoeuf_api, signals
+from xoeuf import signals
 
 
 class ContactReferenceModel(models.Model):
@@ -61,10 +61,6 @@ class ContactReferenceModel(models.Model):
                     fake=True,
                     owner=self.get_contact_identity(reference)[0],
                 )
-                if 'name' not in contac_vals:
-                    contac_vals.update(
-                        name=getattr(reference, reference._rec_name,
-                                     _('Contact_information')))
             return getattr(contact, action)(contac_vals)
 
 
@@ -89,8 +85,6 @@ class ContactReferenceField(models.Model):
     @api.multi
     def get_fields_map(self):
         result = {i.reference_field.name: i.contact_field.name for i in self}
-        if self.model._rec_name and 'name' not in result.itervalues():
-            result.update({self.model._rec_name: 'name'})
         return result
 
 
