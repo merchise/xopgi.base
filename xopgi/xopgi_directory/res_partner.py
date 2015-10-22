@@ -39,7 +39,8 @@ class ResPartner(models.Model):
     def _get_owner_identity(self):
         if self.owner:
             _, name = self.owner.name_get()[0]
-            self.owner_identity = '%s: %s' % (self.owner._name, name)
+            self.owner_identity = '%s: %s' % (
+                self.owner._description or self.owner._name, name)
         else:
             self.owner_identity = ''
 
