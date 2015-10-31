@@ -142,10 +142,9 @@ class CrmLead(models.Model):
             if inv.date_invoice:
                 inv_date = to_date(inv.date_invoice)
                 if today >= inv_date >= first_month_day:
-                    res['invoiced']['this_month'] += inv.amount_untaxed_signed
+                    res['invoiced']['this_month'] += inv.amount_untaxed
                 elif first_month_day > inv_date >= first_last_month_day:
-                    res['invoiced']['last_month'] += inv[
-                        'amount_untaxed_signed']
+                    res['invoiced']['last_month'] += inv.amount_untaxed
         res['nb_opportunities'] = len(opportunities)
         res['done']['target'] = self.env.user.target_sales_done
         res['won']['target'] = self.env.user.target_sales_won
