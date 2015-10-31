@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+<openerp>
+  <data>
+    <!-- Opportunities Search View -->
+
+    <!-- Opportunities Search View -->
+    <record model="ir.ui.view" id="crm_opportunity_partner_filter">
+      <field name="name">crm.opportunity.partner.filter.assigned</field>
+      <field name="model">crm.lead</field>
+      <field name="inherit_id" ref="crm.view_crm_case_opportunities_filter"/>
+      <field name="arch" type="xml">
+        <filter name="unassigned" position="after">
+          <separator/>
+          <filter string="Today Activities" name="today"
+                  domain="[('date_action', '=', context_today().strftime('%Y-%m-%d'))]"/>
+          <filter string="This Week Activities" name="this_week"
+                  domain="['&amp;', ('date_action', '&gt;=', context_today().strftime('%Y-%m-%d')),
+                                   ('date_action', '&lt;=', (context_today()+datetime.timedelta(days=7)).strftime('%Y-%m-%d'))
+                          ]"/>
+          <filter string="Overdue Activities" name="overdue"
+                  domain="[('date_action', '&lt;', context_today().strftime('%Y-%m-%d'))]"/>
+        </filter>
+      </field>
+    </record>
+
+    <record id="crm_lead_action_activities" model="ir.actions.act_window">
+      <field name="name">Next Activities</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">crm.lead</field>
+      <field name="view_mode">tree,form,kanban,calendar,pivot,graph</field>
+      <field name="search_view_id"
+             ref="crm.view_crm_case_opportunities_filter"/>
+      <field name="domain">[('type','=','opportunity')]</field>
+      <field name="context">{
+        'default_type': 'opportunity',
+        'default_user_id': uid,
+        'search_default_assigned_to_me': 1
+        }
+      </field>
+      <field name="help" type="html">
+        <p>
+          Here is the list of your next activities. Those are linked to your
+          opportunities.
+          To set a next activity, go on an opportunity and add one. It will
+          then appear in this list.
+        </p>
+      </field>
+    </record>
+
+
+    <record id="crm_opportunity_report_action_graph"
+            model="ir.actions.act_window">
+      <field name="name">Pipeline Analysis</field>
+      <field name="res_model">crm.opportunity.report</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">graph,pivot</field>
+      <field name="context">{'search_default_opportunity': True,
+        'search_default_current': True, 'active_test': True,
+        'search_default_my': True}
+      </field>
+      <field name="view_ids"
+             eval="[(5, 0, 0),
+                          (0, 0, {'view_mode': 'graph', 'view_id': ref('crm_opportunity_report_view_graph')}),
+                          (0, 0, {'view_mode': 'pivot', 'view_id': ref('crm_opportunity_report_view_pivot')})]"/>
+      <field name="help">Pipeline Analysis gives you an instant access to
+        your opportunities with information such as the expected revenue,
+        planned cost,
+        missed deadlines or the number of interactions per opportunity. This
+        report is
+        mainly used by the sales manager in order to periodically review the
+        pipeline
+        with the the sales teams.
+      </field>
+    </record>
+
+  </data>
+</openerp>

@@ -1,0 +1,114 @@
+.o_sales_dashboard {
+    padding: 10px 6px;
+    position: relative;
+    background-color: white;
+    flex: 1 0 100%;
+    margin: -4px -12px 4px;
+}
+
+.o_sales_dashboard .o_welcome_message {
+    width: 100%;
+    bottom: auto;
+    right: auto;
+    display: flex;
+    justify-content: center;
+    left: 0px;
+    top: 0px;
+    position: absolute;
+}
+
+.o_sales_dashboard .o_welcome_message .o_welcome_image {
+    padding: 20px;
+}
+
+.o_sales_dashboard .o_welcome_message .o_welcome_content > a {
+    color: white;
+    display: inline-block;
+}
+
+.o_sales_dashboard > .o_demo {
+    opacity: 0.07;
+}
+
+.o_sales_dashboard > div {
+    display: inline-block;
+    vertical-align: top;
+    width: 50%;
+}
+
+.o_sales_dashboard > div > table {
+    border-spacing: 10px 0;
+    table-layout: fixed;
+    border-collapse: separate;
+    margin-bottom: 0;
+}
+
+.o_sales_dashboard > div > table > tbody > tr > td {
+    vertical-align: middle;
+    text-align: center;
+    border-top: 1px solid #FFF;
+    width: 25%;
+    height: 33px;
+}
+
+.o_sales_dashboard > div > table > tbody > tr > td > input {
+    vertical-align: middle;
+    text-align: center;
+    width: 100%;
+}
+
+.o_sales_dashboard > div > table > tbody > tr > td > span {
+    display: inline;
+}
+
+.o_sales_dashboard > div > table > tbody > tr > td > a:hover {
+    text-decoration: none;
+}
+
+.o_sales_dashboard .o_main {
+    background-color: #337AB7;
+}
+
+.o_sales_dashboard .o_main:hover {
+    background-color: #285F8F;
+}
+
+.o_sales_dashboard .o_main a {
+    color: white;
+}
+
+.o_sales_dashboard .o_warning {
+    background-color: #FFA500;
+}
+
+.o_sales_dashboard .o_warning:hover {
+    background-color: #CC8400;
+}
+
+.o_sales_dashboard .o_warning a {
+    color: white;
+}
+
+.o_sales_dashboard .o_secondary a {
+    color: black;
+}
+
+.o_sales_dashboard .o_secondary {
+    background-color: #E2E2E0;
+}
+
+.o_sales_dashboard .o_secondary:hover{
+    background-color: #C9C9C6;
+}
+
+.o_sales_dashboard .o_highlight {
+    font-size: 20px;
+}
+
+.o_highlight {
+    font-size: 20px;
+}
+
+.o_sales_dashboard .o_text {
+    text-align: left;
+}
