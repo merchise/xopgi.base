@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <record id="view_knowledge_configuration" model="ir.ui.view">
+            <field name="name">Configure Knowledge</field>
+            <field name="model">knowledge.config.settings</field>
+            <field name="inherit_id"
+            ref="knowledge.view_knowledge_configuration"/>
+            <field name="arch" type="xml">
+            <xpath expr="//label[@for='module_document']" position="after">
+                    <div>
+                        <div>
+                            <field name="module_xopgi_document_share" class="oe_inline"/>
+                            <label for="module_xopgi_document_share"/>
+                        </div>
+                     </div>
+            </xpath>
+            </field>
+        </record>
+    </data>
+</openerp>
