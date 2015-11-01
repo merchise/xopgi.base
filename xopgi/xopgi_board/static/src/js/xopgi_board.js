@@ -43,6 +43,9 @@ instance.web.form.XopgiBoard = instance.web.form.FormWidget.extend({
                 }else{
                     template_name = 'no_content'
                 }
+                if (!!values.xml_template) {
+                    QWeb.add_template(values.xml_template);
+                }
                 var args = values;
                 args.widget = self;
                 var template = QWeb.render(template_name, args);

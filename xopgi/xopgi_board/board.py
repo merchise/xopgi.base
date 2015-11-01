@@ -31,8 +31,15 @@ class XopgiBoard(models.Model):
     def get_data(self):
         """Override this method to add new board widget.
         :return: list of dict like {
-            'template': 'template_x',  # Qweb template to show
-            'string': 'widget x',  # Title of widget
+            'template': 'template_x',  # Qweb template name to render.
+            'string': 'widget x',  # Title of widget.
+            'xml_templa': ''' # String of qweb template to add and render.
+                <templates>
+                  <t t-name="pruebaaa">
+                    <div t-esc="text"/>
+                  </t>
+                </templates>
+            '''
             #  Any additional data E.g: values to show on board.
         }
         """
