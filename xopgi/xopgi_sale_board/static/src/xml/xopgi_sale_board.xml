@@ -11,7 +11,8 @@
             </td>
             <td class="o_main" title="To Calendar">
               <a href="#" class="o_dashboard_action"
-                 name="calendar.action_calendar_event">
+                 name="calendar.action_calendar_event"
+                 data-context="{'search_default_mymeetings': 1}">
                 <span class="o_highlight">
                   <t t-if="!show_demo">
                     <t t-esc="values['meeting']['today']"/>
@@ -26,7 +27,7 @@
             <td class="o_main" title="To Activities">
               <a href="#" class="o_dashboard_action"
                  name="xopgi_sale_board.crm_lead_action_activities"
-                 data-extra="today">
+                 data-context="{'search_default_today': 1}">
                 <span class="o_highlight">
                   <t t-if="!show_demo">
                     <t t-esc="values['activity']['today']"/>
@@ -40,7 +41,8 @@
             </td>
             <td class="o_main" title="Your Pipeline" rowspan="2">
               <a href="#" class="o_dashboard_action"
-                 name="crm.crm_case_category_act_oppor11">
+                 name="crm.crm_case_category_act_oppor11"
+                 data-context="{'search_default_won': 1}">
                 <span class="fa fa-th-large fa-3x"/><br/>
                 Your Pipeline
               </a>
@@ -50,7 +52,8 @@
             <td class="o_text">Next 7 days</td>
             <td class="o_main" title="To Calendar">
               <a href="#" class="o_dashboard_action"
-                 name="calendar.action_calendar_event">
+                 name="calendar.action_calendar_event"
+                 data-context="{'search_default_mymeetings': 1}">
                 <t t-if="!show_demo">
                   <t t-esc="values['meeting']['next_7_days']"/>
                 </t>
@@ -61,7 +64,8 @@
             </td>
             <td class="o_main" title="To Activities">
               <a href="#" class="o_dashboard_action"
-                 name="xopgi_sale_board.crm_lead_action_activities" data-extra="this_week">
+                 name="xopgi_sale_board.crm_lead_action_activities"
+                 data-context="{'search_default_this_week': 1}">
                 <t t-if="!show_demo">
                   <t t-esc="values['activity']['next_7_days']"/>
                 </t>
@@ -78,7 +82,8 @@
             <td t-if="show_demo or (values and values['activity']['overdue'] != 0)"
                 class="o_warning" title="To Activities">
               <a href="#" class="o_dashboard_action"
-                 name="xopgi_sale_board.crm_lead_action_activities" data-extra="overdue">
+                 name="xopgi_sale_board.crm_lead_action_activities"
+                 data-context="{'search_default_overdue': 1}">
                 <t t-if="!show_demo">
                   <t t-esc="values['activity']['overdue']"/> overdue
                 </t>
@@ -90,7 +95,8 @@
             <td t-if="show_demo or (values and values['closing']['overdue'] != 0)"
                 class="o_warning" title="To Opportunities">
               <a href="#" class="o_dashboard_action"
-                 name="crm.crm_case_category_act_oppor11">
+                 name="crm.crm_case_category_act_oppor11"
+                 data-context="{'search_default_won': 1}">
                 <t t-if="!show_demo">
                   <t t-esc="values['closing']['overdue']"/> exp. closing
                 </t>
@@ -206,14 +212,16 @@
             <td class="o_text">Last Month</td>
             <td class="o_secondary" title="To Activity Report">
               <a href="#" class="o_dashboard_action"
-                 name="crm.action_report_crm_opportunity">
+                 name="crm.action_report_crm_opportunity"
+                 data-context="{'search_default_won': 1}">
                 <t t-if="!show_demo" t-esc="values['done']['last_month']"/>
                 <t t-if="show_demo" t-esc="10"/>
               </a>
             </td>
             <td class="o_secondary" title="To Opportunity Report">
               <a href="#" class="o_dashboard_action"
-                 name="crm.action_report_crm_opportunity">
+                 name="crm.action_report_crm_opportunity"
+                 data-context="{'search_default_won': 1}">
                 <t t-if="!show_demo"
                    t-esc="widget.render_monetary_field(values['won']['last_month'], values['currency_id'])"/>
                 <t t-if="show_demo" t-esc="$10"/>
