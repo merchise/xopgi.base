@@ -17,7 +17,7 @@
             </td>
             <td class="o_text" title="To your leads">
               <a href="#" class="o_dashboard_action"
-                 name="xopgi_sale_board.crm_case_category_act_leads_all"
+                 name="xopgi_sale_board.crm_leads_all"
                  data-context="{'search_default_my_leads': 1}">
                 Leads
               </a>
@@ -62,7 +62,7 @@
             </td>
             <td class="o_main" title="To your leads" rowspan="2">
               <a href="#" class="o_dashboard_action"
-                 name="xopgi_sale_board.crm_case_category_act_leads_all"
+                 name="xopgi_sale_board.crm_leads_all"
                  data-context="{'search_default_my_leads': 1,
                                 'search_default_today': 1}">
                 <br/>
@@ -170,7 +170,7 @@
             <td t-if="show_demo or (values and values['lead'] and values['lead']['overdue'] != 0)"
                 class="o_warning">
               <a href="#" class="o_dashboard_action"
-                 name="xopgi_sale_board.crm_case_category_act_leads_all"
+                 name="xopgi_sale_board.crm_leads_all"
                  data-context="{'search_default_my_leads': 1,
                                 'search_default_overdue': 1}">
                   <t t-if="!show_demo">
