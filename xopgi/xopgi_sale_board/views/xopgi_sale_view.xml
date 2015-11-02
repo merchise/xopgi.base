@@ -2,10 +2,8 @@
 <openerp>
   <data>
     <!-- Opportunities Search View -->
-
-    <!-- Opportunities Search View -->
-    <record model="ir.ui.view" id="crm_opportunity_partner_filter">
-      <field name="name">crm.opportunity.partner.filter.assigned</field>
+    <record model="ir.ui.view" id="view_crm_case_opportunities_filter_inh">
+      <field name="name">view.crm.case.opportunities.filter</field>
       <field name="model">crm.lead</field>
       <field name="inherit_id" ref="crm.view_crm_case_opportunities_filter"/>
       <field name="arch" type="xml">
@@ -23,27 +21,116 @@
       </field>
     </record>
 
-    <record id="crm_lead_action_activities" model="ir.actions.act_window">
-      <field name="name">Next Activities</field>
-      <field name="type">ir.actions.act_window</field>
+    <!-- Leads Search View -->
+    <record model="ir.ui.view" id="view_crm_case_leads_filter_inh">
+      <field name="name">crm.lead.search</field>
+      <field name="model">crm.lead</field>
+      <field name="inherit_id" ref="crm.view_crm_case_leads_filter"/>
+      <field name="arch" type="xml">
+        <xpath expr="//filter[@string='My Leads']" position="attributes">
+          <attribute name="name">my_leads</attribute>
+        </xpath>
+        <filter name="unassigned" position="after">
+          <separator/>
+          <filter string="Today Leads" name="today"
+                  domain="[('create_date', '&gt;=', (context_today()+datetime.timedelta(days=-7)).strftime('%Y-%m-%d') + ' 00:00:00')]"/>
+          <filter string="Overdue Leads" name="overdue"
+                  domain="[('create_date', '&lt;', (context_today()+datetime.timedelta(days=-7)).strftime('%Y-%m-%d') + ' 00:00:00')]"/>
+        </filter>
+      </field>
+    </record>
+
+    <!-- Leads Action -->
+    <record model="ir.actions.act_window" id="crm_leads_all">
+      <field name="name">Leads</field>
       <field name="res_model">crm.lead</field>
-      <field name="view_mode">tree,form,kanban,calendar,pivot,graph</field>
-      <field name="search_view_id"
-             ref="crm.view_crm_case_opportunities_filter"/>
-      <field name="domain">[('type','=','opportunity')]</field>
-      <field name="context">{
-        'default_type': 'opportunity',
-        'default_user_id': uid,
-        'search_default_assigned_to_me': 1
+      <field name="view_mode">tree,form</field>
+      <field name="domain">
+        ['|', ('type','=','lead'), ('type','=',False)]
+      </field>
+      <field name="view_id" ref="crm.crm_case_tree_view_leads"/>
+      <field name="search_view_id" ref="crm.view_crm_case_leads_filter"/>
+      <field name="context">
+        {
+        'default_type':'lead',
+        'stage_type':'lead',
         }
       </field>
-      <field name="help" type="html">
-        <p>
-          Here is the list of your next activities. Those are linked to your
-          opportunities.
-          To set a next activity, go on an opportunity and add one. It will
-          then appear in this list.
-        </p>
+    </record>
+
+    <!-- Sale Orders Search View-->
+    <record model="ir.ui.view" id="view_sale_order_filter_inh">
+      <field name="name">sale.order.search</field>
+      <field name="model">sale.order</field>
+      <field name="inherit_id" ref="sale.view_sales_order_filter"/>
+      <field name="arch" type="xml">
+        <filter name="my_sale_orders_filter" position="after">
+          <separator/>
+          <filter string="Created on this week" name="create_this_week"
+                  domain="[('create_date', '&gt;=', (context_today()+datetime.timedelta(days=-7)).strftime('%Y-%m-%d') + ' 00:00:00'),
+                           ('state', 'not in', ('cancel', 'done'))]"/>
+          <filter string="Created before this week"
+                  name="create_before_this_week"
+                  domain="[('create_date', '&lt;', (context_today()+datetime.timedelta(days=-7)).strftime('%Y-%m-%d') + ' 00:00:00'),
+                            ('state', 'not in', ('cancel', 'done'))]"/>
+          <filter string="Today" name="today"
+                  domain="['&amp;',
+                           ('date_order', '&gt;=', context_today().strftime('%Y-%m-%d') + ' 00:00:00'),
+                           ('date_order', '&lt;', (context_today()+datetime.timedelta(days=1)).strftime('%Y-%m-%d') + ' 00:00:00'),
+                           ('state', 'not in', ('cancel', 'done'))]"/>
+          <filter string="This Week" name="this_week"
+                  domain="['&amp;',
+                           ('date_order', '&gt;=', context_today().strftime('%Y-%m-%d') + ' 00:00:00'),
+                           ('date_order', '&lt;=', (context_today()+datetime.timedelta(days=7)).strftime('%Y-%m-%d') + ' 00:00:00'),
+                           ('state', 'not in', ('cancel', 'done'))
+                          ]"/>
+          <filter string="Overdue" name="overdue"
+                  domain="[('date_order', '&lt;', context_today().strftime('%Y-%m-%d') + ' 00:00:00'),
+                           ('state', 'not in', ('cancel', 'done'))]"/>
+        </filter>
+      </field>
+    </record>
+
+    <!-- Opportunities Report Search View -->
+    <record model="ir.ui.view" id="view_report_crm_opportunity_filter_inh">
+      <field name="name">crm.opportunity.report.select</field>
+      <field name="model">crm.opportunity.report</field>
+      <field name="inherit_id" ref="crm.view_report_crm_opportunity_filter"/>
+      <field name="arch" type="xml">
+        <filter name="opportunity" position="after">
+          <separator/>
+          <filter string="Won on this month" name="won_this_month"
+                  domain="[('date_closed', '&gt;=', (context_today().replace(day=1)).strftime('%Y-%m-%d') + ' 00:00:00')]"/>
+          <filter string="Won on last month" name="won_last_month"
+                  domain="['&amp;',
+                           ('date_closed', '&lt;', context_today().replace(day=1).strftime('%Y-%m-%d') + ' 00:00:00'),
+                           ('date_closed', '&gt;=', (context_today()-datetime.timedelta(days=30)).replace(day=1).strftime('%Y-%m-%d') + ' 00:00:00')]"/>
+          <separator/>
+          <filter string="Create on this month" name="done_this_month"
+                  domain="[('create_date', '&gt;=', (context_today().replace(day=1)).strftime('%Y-%m-%d') + ' 00:00:00')]"/>
+          <filter string="Create on last month" name="done_last_month"
+                  domain="['&amp;',
+                           ('create_date', '&lt;', context_today().replace(day=1).strftime('%Y-%m-%d') + ' 00:00:00'),
+                           ('create_date', '&gt;=', (context_today()-datetime.timedelta(days=30)).replace(day=1).strftime('%Y-%m-%d') + ' 00:00:00')]"/>
+        </filter>
+      </field>
+    </record>
+
+    <record model="ir.ui.view" id="view_account_invoice_report_search_inh">
+      <field name="name">account.invoice.report.search</field>
+      <field name="model">account.invoice.report</field>
+      <field name="inherit_id"
+             ref="account.view_account_invoice_report_search"/>
+      <field name="arch" type="xml">
+        <filter name="thisyear" position="after">
+          <separator/>
+          <filter string="This month" name="this_month"
+                  domain="[('date', '&gt;=', (context_today().replace(day=1)).strftime('%Y-%m-%d') + ' 00:00:00')]"/>
+          <filter string="Last month" name="last_month"
+                  domain="['&amp;',
+                           ('date', '&lt;', context_today().replace(day=1).strftime('%Y-%m-%d') + ' 00:00:00'),
+                           ('date', '&gt;=', (context_today()-datetime.timedelta(days=30)).replace(day=1).strftime('%Y-%m-%d') + ' 00:00:00')]"/>
+        </filter>
       </field>
     </record>
   </data>

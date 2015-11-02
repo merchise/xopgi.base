@@ -23,7 +23,8 @@
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from openerp import api, fields, models, _
-from xoeuf.tools import normalize_date as to_date, dt2str, date2str
+from xoeuf.tools import (
+    normalize_date as to_date, normalize_datetime as to_dt, dt2str, date2str)
 
 
 class XopgiBoard(models.Model):
@@ -54,86 +55,97 @@ class CrmLead(models.Model):
     
     @api.model
     def retrieve_sales_dashboard(self):
-        _super = getattr(super(CrmLead, self), 'retrieve_sales_dashboard', 
-                         False) 
+        _super = getattr(super(CrmLead, self), 'retrieve_sales_dashboard',
+                         False)
         if _super:
             return _super()
         res = {
             'meeting': {'today': 0, 'next_7_days': 0, },
-            'activity': {'today': 0, 'overdue': 0, 'next_7_days': 0, },
-            'closing': {'today': 0, 'overdue': 0, 'next_7_days': 0, },
-            'done': {'this_month': 0, 'last_month': 0, },
-            'won': {'this_month': 0, 'last_month': 0, },
+            'lead': {'today': 0, 'overdue': 0, 'next_7_days': 0, },
+            'opportunity': {'today': 0, 'overdue': 0, 'next_7_days': 0, },
+            'quotation': {'today': 0, 'overdue': 0, 'next_7_days': 0, },
+            'sale': {'today': 0, 'overdue': 0, 'next_7_days': 0, },
+            'done': {'this_month': 0, 'last_month': 0, 'sector': 0, },
+            'won': {'this_month': 0, 'last_month': 0, 'sector': 0, },
+            'invoiced': {'this_month': 0, 'last_month': 0, 'sector': 0, },
             'nb_opportunities': 0,
-            'invoiced': {'this_month': 0, 'last_month': 0, }
         }
         today = date.today()
         first_month_day = today.replace(day=1)
         first_last_month_day = first_month_day - relativedelta(months=+1)
         next_week = today + timedelta(days=7)
-        opportunities = self.search(
-            [('type', '=', 'opportunity'), ('user_id', '=', self._uid)])
+        last_week = today + timedelta(days=-7)
+        opportunities = self.search([('user_id', '=', self._uid)])
         for opp in opportunities:
-            # Expected closing
-            if opp.date_deadline:
-                date_deadline = to_date(opp.date_deadline)
-
-                if date_deadline == today:
-                    res['closing']['today'] += 1
-                if today <= date_deadline <= next_week:
-                    res['closing']['next_7_days'] += 1
-                if date_deadline < today:
-                    res['closing']['overdue'] += 1
-            # Next activities
-            if opp.date_action:
-                date_action = to_date(opp.date_action)
-                if date_action == today:
-                    res['activity']['today'] += 1
-                if today <= date_action <= next_week:
-                    res['activity']['next_7_days'] += 1
-                if date_action < today:
-                    res['activity']['overdue'] += 1
-            # Won in Opportunities
-            if opp.date_closed:
-                date_closed = to_date(opp.date_closed)
-                if today >= date_closed >= first_month_day:
-                    if opp.planned_revenue:
-                        res['won']['this_month'] += opp.planned_revenue
-                elif first_month_day > date_closed >= first_last_month_day:
-                    if opp.planned_revenue:
-                        res['won']['last_month'] += opp.planned_revenue
-        # crm.activity is a very messy model so we need to do that in
-        # order to retrieve the actions done.
-        self._cr.execute("""
-            SELECT m.id, m.subtype_id, m.date, l.user_id, l.type
-            FROM "mail_message" m
-            LEFT JOIN "crm_lead" l ON (m.res_id = l.id)
-            WHERE (m.model = 'crm.lead') AND (l.user_id = %s) AND
-                  (l.type = 'opportunity')
-        """, (self._uid,))
-        activites_done = self._cr.dictfetchall()
-        for act in activites_done:
-            if act['date']:
-                date_act = to_date(act['date'])
+            if opp.type == 'opportunity':
+                # Next activities
+                if opp.date_action:
+                    date_action = to_date(opp.date_action)
+                    if date_action == today:
+                        res['opportunity']['today'] += 1
+                    if today <= date_action <= next_week:
+                        res['opportunity']['next_7_days'] += 1
+                    if date_action < today:
+                        res['opportunity']['overdue'] += 1
+                # Won in Opportunities
+                if opp.date_closed:
+                    date_closed = to_date(opp.date_closed)
+                    if today >= date_closed >= first_month_day:
+                        if opp.planned_revenue:
+                            res['won']['this_month'] += opp.planned_revenue
+                    elif first_month_day > date_closed >= \
+                            first_last_month_day:
+                        if opp.planned_revenue:
+                            res['won']['last_month'] += opp.planned_revenue
+                # Actions done.
+                date_act = to_date(opp.create_date)
                 if today >= date_act >= first_month_day:
                     res['done']['this_month'] += 1
                 elif first_month_day > date_act >= first_last_month_day:
                     res['done']['last_month'] += 1
+            # Leads
+            else:
+                lead_date = to_date(opp.create_date)
+                if lead_date >= last_week:
+                    res['lead']['today'] += 1
+                if lead_date < last_week:
+                    res['lead']['overdue'] += 1
+        sales = self.env['sale.order'].search(
+            [('user_id', '=', self._uid),
+             ('state', 'not in', ('cancel', 'done'))])
+        for sale in sales:
+            # Quotations
+            if sale.state in ('draft', 'sent', 'cancel'):
+                quotation_date = to_date(sale.create_date)
+                if last_week <= quotation_date:
+                    res['quotation']['today'] += 1
+                if quotation_date < last_week:
+                    res['quotation']['overdue'] += 1
+            # Sales orders
+            else:
+                if sale.date_order:
+                    date_order = to_date(sale.date_order)
+                    if date_order == today:
+                        res['sale']['today'] += 1
+                    if today <= date_order <= next_week:
+                        res['sale']['next_7_days'] += 1
+                    if date_order < today:
+                        res['sale']['overdue'] += 1
         # Meetings
-        min_date = dt2str(datetime.now())
-        max_date = dt2str(datetime.now() + timedelta(days=8))
-        meetings_domain = [('start', '>=', min_date),
-            ('start', '<=', max_date)]
+        min_date = dt2str(today)
+        max_date = dt2str(today + timedelta(days=8))
         # We need to add 'mymeetings' in the context for the search to 
         # be correct.
-        meetings = self.with_context(mymeetings=1).env['calendar.event']
-        for meeting in meetings.search(meetings_domain):
+        meetings = self.env['calendar.event'].with_context(mymeetings=1)
+        for meeting in meetings.search(
+                [('start', '>=', min_date), ('start', '<=', max_date)]):
             if meeting.start:
                 start = to_date(meeting.start)
                 if start == today:
                     res['meeting']['today'] += 1
                 if today <= start <= next_week:
                     res['meeting']['next_7_days'] += 1
+        # Invoiced
         account_invoice_domain = [
             ('state', 'in', ['open', 'paid']),
             ('user_id', '=', self._uid),
@@ -150,6 +162,13 @@ class CrmLead(models.Model):
         res['won']['target'] = self.env.user.target_sales_won
         res['invoiced']['target'] = self.env.user.target_sales_invoiced
         res['currency_id'] = self.env.user.company_id.currency_id.id
+        for indicator in ['done', 'won', 'invoiced']:
+            sector = 11
+            target = res[indicator]['target']
+            value = res[indicator]['this_month']
+            if target:
+                sector = int(value / target) * 10
+            res[indicator]['sector'] = str(sector)
         return res
 
     @api.model

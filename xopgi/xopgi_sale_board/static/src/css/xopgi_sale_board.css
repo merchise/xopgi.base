@@ -6,6 +6,11 @@
     margin: -4px -12px 4px;
 }
 
+a.o_dashboard_action {
+    display: block;
+    max-width: 100%;
+}
+
 .o_sales_dashboard .o_welcome_message {
     width: 100%;
     bottom: auto;
@@ -33,7 +38,6 @@
 .o_sales_dashboard > div {
     display: inline-block;
     vertical-align: top;
-    width: 50%;
 }
 
 .o_sales_dashboard > div > table {
@@ -47,7 +51,7 @@
     vertical-align: middle;
     text-align: center;
     border-top: 1px solid #FFF;
-    width: 25%;
+    width: 16%;
     height: 33px;
 }
 
@@ -103,6 +107,7 @@
 
 .o_sales_dashboard .o_highlight {
     font-size: 20px;
+    text-align: center;
 }
 
 .o_highlight {
@@ -111,4 +116,91 @@
 
 .o_sales_dashboard .o_text {
     text-align: left;
+}
+
+.o_sales_dashboard .o_gradient0 {
+    background-color: #ff0000;
+}
+.o_sales_dashboard .o_gradient0 a {
+    color: white;
+}
+
+.o_sales_dashboard .o_gradient1 {
+    background-color: #ff4802;
+}
+
+.o_sales_dashboard .o_gradient1 a {
+    color: white;
+}
+
+.o_sales_dashboard .o_gradient2 {
+    background-color: #ff8802;
+}
+
+.o_sales_dashboard .o_gradient2 a {
+    color: white;
+}
+
+.o_sales_dashboard .o_gradient3 {
+    background-color: #ffb602;
+}
+
+.o_sales_dashboard .o_gradient3 a {
+    color: black;
+}
+
+.o_sales_dashboard .o_gradient4 {
+    background-color: #f9c805;
+}
+
+.o_sales_dashboard .o_gradient4 a {
+    color: black;
+}
+
+.o_sales_dashboard .o_gradient5 {
+    background-color: #F0Fa09;
+}
+
+.o_sales_dashboard .o_gradient5 a {
+    color: black;
+}
+
+.o_sales_dashboard .o_gradient6 {
+    background-color: #a9d70b;
+}
+
+.o_sales_dashboard .o_gradient6 a {
+    color: white;
+}
+
+.o_sales_dashboard .o_gradient7 {
+    background-color: #8ff70b;
+}
+
+.o_sales_dashboard .o_gradient7 a {
+    color: black;
+}
+
+.o_sales_dashboard .o_gradient8 {
+    background-color: #4fd70b;
+}
+
+.o_sales_dashboard .o_gradient8 a {
+    color: white;
+}
+
+.o_sales_dashboard .o_gradient9 {
+    background-color: #0fd70b;
+}
+
+.o_sales_dashboard .o_gradient9 a {
+    color: white;
+}
+
+.o_sales_dashboard .o_gradient10 {
+    background-color: #0fff0b;
+}
+
+.o_sales_dashboard .o_gradient10 a {
+    color: white;
 }
