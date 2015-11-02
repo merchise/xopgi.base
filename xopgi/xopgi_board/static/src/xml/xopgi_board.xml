@@ -2,11 +2,10 @@
 <templates>
   <t t-name="xopgi.board">
     <div t-if="values" class="oe_board">
-      <table t-att-data-layout="1"
-             class="oe_board"
-             cellspacing="0" cellpadding="0" border="0">
-        <tr t-foreach="values" t-as="action">
-          <td t-att-id="x_column_0"
+      <table t-foreach="values" t-as="category" t-att-data-layout="1"
+             class="oe_board" cellspacing="0" cellpadding="0" border="0">
+        <tr>
+          <td t-att-id="x_column_0" t-foreach="category" t-as="action"
               class="oe_board_container">
             <t t-call="xopgi.board.action"/>
           </td>

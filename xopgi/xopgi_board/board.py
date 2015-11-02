@@ -21,6 +21,7 @@
 ##############################################################################
 
 from openerp import api, models
+from itertools import groupby
 
 
 class XopgiBoard(models.Model):
@@ -28,11 +29,23 @@ class XopgiBoard(models.Model):
     _description = "Board"
 
     @api.model
+    def get_board_widgets(self):
+        lst = self.get_data()
+        lst.sort(key=lambda x: (x.get('category', 'z'),
+                                x.get('priority', 1000),
+                                x.get('string', '')))
+        result = [list(itr) for k, itr in
+                  groupby(lst, lambda x: x.get('category', x))]
+        return result
+
+    @api.model
     def get_data(self):
         """Override this method to add new board widget.
         :return: list of dict like {
             'template': 'template_x',  # Qweb template name to render.
             'string': 'widget x',  # Title of widget.
+            'priority': 1,  # Priority to putting on board.
+            'category': 'sale', # Each category will be a row.
             'xml_templa': ''' # String of qweb template to add and render.
                 <templates>
                   <t t-name="pruebaaa">

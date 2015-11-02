@@ -24,7 +24,7 @@ instance.web.form.XopgiBoard = instance.web.form.FormWidget.extend({
     fetch_data: function () {
         var board = new instance.web.Model('xopgi.board');
         var context = new instance.web.CompoundContext(board.context() || []);
-        return board.call('get_data', [context]);
+        return board.call('get_board_widgets', [context]);
     },
 
     render: function () {
@@ -36,21 +36,23 @@ instance.web.form.XopgiBoard = instance.web.form.FormWidget.extend({
                 values: result,
             });
             $(dashboard).prependTo(self.$el);
-            _.each(result, function(values){
-                var template_name = '';
-                if (!!values.template) {
-                    template_name = values.template
-                }else{
-                    template_name = 'no_content'
-                }
-                if (!!values.xml_template) {
-                    QWeb.add_template(values.xml_template);
-                }
-                var args = values;
-                args.widget = self;
-                var template = QWeb.render(template_name, args);
-                var selector = '.oe_' + template_name.replace('.', '_');
-                self.$el.find(selector).append(template);
+            _.each(result, function(category){
+                _.each(category, function (values) {
+                    var template_name = '';
+                    if (!!values.template) {
+                        template_name = values.template
+                    } else {
+                        template_name = 'no_content'
+                    }
+                    if (!!values.xml_template) {
+                        QWeb.add_template(values.xml_template);
+                    }
+                    var args = values;
+                    args.widget = self;
+                    var template = QWeb.render(template_name, args);
+                    var selector = '.oe_' + template_name.replace('.', '_');
+                    self.$el.find(selector).append(template);
+                })
             });
         });
     },
