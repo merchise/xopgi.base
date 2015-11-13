@@ -1,5 +1,5 @@
 .o_sales_dashboard {
-    padding: 10px 6px;
+    padding: 6px 4px;
     position: relative;
     background-color: white;
     flex: 1 0 100%;
@@ -41,7 +41,7 @@ a.o_dashboard_action {
 }
 
 .o_sales_dashboard > div > table {
-    border-spacing: 10px 0;
+    border-spacing: 6px 0;
     table-layout: fixed;
     border-collapse: separate;
     margin-bottom: 0;
@@ -112,6 +112,10 @@ a.o_dashboard_action {
 
 .o_highlight {
     font-size: 20px;
+}
+
+.o_monetary_highlight {
+    font-size: 14px;
 }
 
 .o_sales_dashboard .o_text {

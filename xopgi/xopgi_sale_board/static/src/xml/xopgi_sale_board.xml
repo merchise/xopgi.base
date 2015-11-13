@@ -317,7 +317,7 @@
                         '' : '\'search_default_my\': 1,'}
                       'search_default_this_month': 1
                   }">
-                <span class="o_highlight">
+                <span class="o_monetary_highlight">
                   <t t-if="!show_demo"
                      t-esc="widget.render_monetary_field(
                     values['margin']['this_month'], values['currency_id'])"/>
@@ -336,7 +336,7 @@
                         '' : '\'search_default_my\': 1,'}
                       'search_default_this_month': 1
                   }">
-                <span class="o_highlight">
+                <span class="o_monetary_highlight">
                   <t t-if="!show_demo"
                      t-esc="widget.render_monetary_field(
                     values['pax_margin']['this_month'],
@@ -370,7 +370,7 @@
                  name="crm.action_report_crm_opportunity"
                  data-context="{'search_default_won': 1,
                                 'search_default_won_this_month': 1}">
-                <span class="o_highlight">
+                <span class="o_monetary_highlight">
                   <t t-if="!show_demo">
                     <t t-esc="widget.render_monetary_field(
                         values['won']['this_month'], values['currency_id'])"/>
@@ -388,7 +388,7 @@
               <a href="#" class="o_dashboard_action"
                  name="account.action_account_invoice_report_all"
                  data-context="{'search_default_this_month': 1}">
-                <span class="o_highlight">
+                <span class="o_monetary_highlight">
                   <t t-if="!show_demo">
                     <t t-esc="widget.render_monetary_field(
                         values['invoiced']['this_month'],
