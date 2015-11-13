@@ -20,9 +20,11 @@ Create dashboard employee functions oriented.
 
     """, "author": "Merchise Autrement",
     "website": "http://xhg.ca.merchise.org/addons/xopgi_board",
-    'depends': ['web_kanban', 'hr'],
+    'depends': ['web_kanban', 'xopgi_hr_contract'],
     'data': [
         'views/xopgi_board_view.xml',
+        'views/hr_job_view.xml',
+        'views/xopgi_board_widget_view.xml',
         'security/security.xml',
     ],
     'qweb': ['static/src/xml/xopgi_board.xml'],

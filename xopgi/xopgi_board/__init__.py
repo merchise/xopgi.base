@@ -11,7 +11,11 @@
 #
 # @created: 2015-10-29
 
-import board
-# import controllers
+from __future__ import absolute_import as _py3_abs_imports
+
+from . import board  # noqa
+from . import board_widget  # noqa
+from . import hr_job  # noqa
+
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

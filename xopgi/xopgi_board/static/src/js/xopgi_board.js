@@ -39,8 +39,8 @@ instance.web.form.XopgiBoard = instance.web.form.FormWidget.extend({
             _.each(result, function(category){
                 _.each(category, function (values) {
                     var template_name = '';
-                    if (!!values.template) {
-                        template_name = values.template
+                    if (!!values.template_name) {
+                        template_name = values.template_name
                     } else {
                         template_name = 'no_content'
                     }

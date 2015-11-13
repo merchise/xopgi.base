@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 # ---------------------------------------------------------------------
-# xopgi_board.board
+# xopgi_board.hr_job
 # ---------------------------------------------------------------------
 # Copyright (c) 2014, 2015 Merchise Autrement and Contributors
 # All rights reserved.
@@ -9,24 +9,15 @@
 # terms of the LICENCE attached (see LICENCE file) in the distribution
 # package.
 #
-# Created on 2015-10-29
+# Created on 2015-11-12
 
-from openerp import api, models
-from itertools import groupby
+from openerp import fields, models
 
 
-class XopgiBoard(models.Model):
-    _name = 'xopgi.board'
-    _description = "Board"
+class HrJob(models.Model):
+    _inherit = 'hr.job'
 
-    @api.model
-    def get_board_widgets(self):
-        lst = self.get_data()
-        result = [list(itr) for k, itr in
-                  groupby(lst, lambda x: x.get('category', x))]
-        return result
+    widgets = fields.Many2many('xopgi.board.widget')
 
-    def get_data(self):
-        return self.env['xopgi.board.widget'].get_widgets_dict()
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

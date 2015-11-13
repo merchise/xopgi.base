@@ -23,18 +23,18 @@
   </t>
   <t t-name="xopgi.board.action">
     <div class="oe_board_widget">
-      <h2 t-attf-class="oe_header {{action.string ? '' : 'oe_header_empty'}}">
+      <h2 t-attf-class="oe_header {{action.name ? '' : 'oe_header_empty'}}">
         <span class="oe_header_txt">
-          <t t-esc="action.string"/>
+          <t t-esc="action.name"/>
         </span>
         <input class="oe_header_text" type="text"/>
-        <t t-if="!action.string">&amp;nbsp;</t>
+        <t t-if="!action.name">&amp;nbsp;</t>
         <span class='oe_icon oe_minimize oe_fold'/>
       </h2>
       <div class="oe_board_widget_content">
         <div
-            t-attf-class="oe_{{action.template ?
-                          action.template.replace('.', '_') :
+            t-attf-class="oe_{{action.template_name ?
+                          action.template_name.replace('.', '_') :
                           'no_content'}}"/>
       </div>
     </div>

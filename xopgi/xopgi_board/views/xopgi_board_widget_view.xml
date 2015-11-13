@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<openerp>
+  <data>
+    <record id="view_board_widget_tree" model="ir.ui.view">
+      <field name="name">xopgi.board.widget.tree</field>
+      <field name="model">xopgi.board.widget</field>
+      <field name="arch" type="xml">
+        <tree string="Board Widgets">
+          <field name="name"/>
+          <field name="category"/>
+          <field name="priority"/>
+          <field name="template_name" invisible="1"/>
+          <field name="job_positions" invisible="1"/>
+        </tree>
+      </field>
+    </record>
+
+    <record id="view_board_widget_form" model="ir.ui.view">
+      <field name="name">xopgi.board.widget.form</field>
+      <field name="model">xopgi.board.widget</field>
+      <field name="arch" type="xml">
+        <form string="Board Widget">
+          <group colspan="4" col="4">
+            <field name="name" required="1"/>
+            <field name="template_name"/>
+            <field name="category"/>
+            <field name="priority"/>
+            <label for="xml_template"/>
+            <newline/>
+            <field name="xml_template" nolabel="1" colspan="4"/>
+            <label for="python_code"/>
+            <newline/>
+            <field name="python_code" nolabel="1" colspan="4"/>
+          </group>
+        </form>
+      </field>
+    </record>
+
+    <record id="view_board_widget_search" model="ir.ui.view">
+      <field name="name">xopgi.board.widget.search</field>
+      <field name="model">xopgi.board.widget</field>
+      <field name="type">search</field>
+      <field name="priority" eval="8"/>
+      <field name="arch" type="xml">
+        <search string="Board Widgets">
+          <field name="name" select="True"/>
+          <field name="template_name" select="True"/>
+          <field name="category" select="True" widget="selection"/>
+          <field name="job_positions" select="True" widget="selection"/>
+          <group expand="0" string="Group By">
+            <filter name="priority" string="Partner"
+                    context="{'group_by':'priority'}"/>
+          </group>
+        </search>
+      </field>
+    </record>
+  </data>
+</openerp>
