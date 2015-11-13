@@ -13,12 +13,13 @@ instance.web.form.XopgiBoard.include({
         var $input = $(e.target);
         var target_name = $input.attr('name');
         var target_value = $input.val();
+        var target_mode = $input.data('mode');
 
         if (!!target_value && isNaN(target_value)) {
             this.do_warn(_t("Wrong value entered!"), _t("Only Integer Value should be valid."));
         } else {
             this._updated = new Model('crm.lead')
-                .call('modify_target_sales_dashboard', [target_name, target_value])
+                .call('modify_target_sales_dashboard', [target_name, target_value, target_mode])
                 .then(function () {
                     target_value = target_value ? target_value : 'Click to set';
                     var $span = $('<span>'+ target_value + '</span>');
@@ -43,10 +44,12 @@ instance.web.form.XopgiBoard.include({
         var $target = $(ev.currentTarget);
         var target_name = $target.attr('name');
         var target_value = $target.attr('value');
+        var target_mode = $target.data('mode');
 
         var $input = $('<input/>', {type: "text"});
         $input.attr('class', 'oe_changing');
         $input.attr('name', target_name);
+        $input.data('mode', target_mode);
         if (target_value) {
             $input.attr('value', target_value);
         }

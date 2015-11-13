@@ -23,7 +23,8 @@ Create Sale Person board widget.
     'depends': ['xopgi_board', 'sale'],
     'data': [
         'views/xopgi_board_view.xml',
-        'views/xopgi_sale_view.xml'
+        'views/xopgi_sale_view.xml',
+        'data/sale_widgets.xml'
     ],
     'qweb': ['static/src/xml/xopgi_sale_board.xml'],
     'installable': True,

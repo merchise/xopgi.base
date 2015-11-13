@@ -11,21 +11,30 @@
             <td class="o_text" title="To calendar">
               <a href="#" class="o_dashboard_action"
                  name="calendar.action_calendar_event"
-                 data-context="{'search_default_mymeetings': 1}">
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_mymeetings\': 1'}
+                  }">
                 Meetings
               </a>
             </td>
             <td class="o_text" title="To your leads">
               <a href="#" class="o_dashboard_action"
                  name="xopgi_sale_board.crm_leads_all"
-                 data-context="{'search_default_my_leads': 1}">
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_my_leads\': 1'}
+                  }">
                 Leads
               </a>
             </td>
             <td class="o_text" title="To your pipeline">
               <a href="#" class="o_dashboard_action"
                  name="crm.crm_case_category_act_oppor11"
-                 data-context="{'search_default_assigned_to_me': 1}">
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_assigned_to_me\': 1'}
+                  }">
                 Opportunities
               </a>
             </td>
@@ -49,7 +58,10 @@
             <td class="o_main" title="To Calendar">
               <a href="#" class="o_dashboard_action"
                  name="calendar.action_calendar_event"
-                 data-context="{'search_default_mymeetings': 1}">
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_mymeetings\': 1'}
+                  }">
                 <span class="o_highlight">
                   <t t-if="!show_demo">
                     <t t-esc="values['meeting']['today']"/>
@@ -63,8 +75,11 @@
             <td class="o_main" title="To your leads" rowspan="2">
               <a href="#" class="o_dashboard_action"
                  name="xopgi_sale_board.crm_leads_all"
-                 data-context="{'search_default_my_leads': 1,
-                                'search_default_today': 1}">
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_my_leads\': 1,'}
+                      'search_default_today': 1
+                  }">
                 <br/>
                 <span class="o_highlight">
                   <t t-if="!show_demo">
@@ -80,8 +95,11 @@
             <td class="o_main" title="Opportunities">
               <a href="#" class="o_dashboard_action"
                  name="crm.crm_case_category_act_oppor11"
-                 data-context="{'search_default_assigned_to_me': 1,
-                                'search_default_today': 1}">
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_assigned_to_me\': 1,'}
+                      'search_default_today': 1
+                  }">
                 <span class="o_highlight">
                   <t t-if="!show_demo">
                     <t t-esc="values['opportunity']['today']"/>
@@ -128,7 +146,10 @@
             <td class="o_main" title="To Calendar">
               <a href="#" class="o_dashboard_action"
                  name="calendar.action_calendar_event"
-                 data-context="{'search_default_mymeetings': 1}">
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_mymeetings\': 1'}
+                  }">
                 <t t-if="!show_demo">
                   <t t-esc="values['meeting']['next_7_days']"/>
                 </t>
@@ -140,8 +161,11 @@
             <td class="o_main" title="To Activities">
               <a href="#" class="o_dashboard_action"
                  name="crm.crm_case_category_act_oppor11"
-                 data-context="{'search_default_assigned_to_me': 1,
-                                'search_default_this_week': 1}">
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_assigned_to_me\': 1,'}
+                      'search_default_this_week': 1
+                  }">
                 <t t-if="!show_demo">
                   <t t-esc="values['opportunity']['next_7_days']"/>
                 </t>
@@ -167,27 +191,35 @@
             <td class="o_text">Overdue</td>
             <!-- Hide overdue when there is none -->
             <td/>
-            <td t-if="show_demo or (values and values['lead'] and values['lead']['overdue'] != 0)"
+            <td t-if="show_demo or (values and values['lead'] and
+                                    values['lead']['overdue'] != 0)"
                 class="o_warning">
               <a href="#" class="o_dashboard_action"
                  name="xopgi_sale_board.crm_leads_all"
-                 data-context="{'search_default_my_leads': 1,
-                                'search_default_overdue': 1}">
-                  <t t-if="!show_demo">
-                    <t t-esc="values['lead']['overdue']"/>
-                  </t>
-                  <t t-if="show_demo">
-                    0
-                  </t>
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_my_leads\': 1,'}
+                      'search_default_overdue': 1
+                  }">
+                <t t-if="!show_demo">
+                  <t t-esc="values['lead']['overdue']"/>
+                </t>
+                <t t-if="show_demo">
+                  0
+                </t>
                 <br/>
               </a>
             </td>
-            <td t-if="show_demo or (values and values['opportunity']['overdue'] != 0)"
+            <td t-if="show_demo or (values and
+                                    values['opportunity']['overdue'] != 0)"
                 class="o_warning" title="To Activities">
               <a href="#" class="o_dashboard_action"
                  name="crm.crm_case_category_act_oppor11"
-                 data-context="{'search_default_assigned_to_me': 1,
-                                'search_default_overdue': 1}">
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_assigned_to_me\': 1,'}
+                      'search_default_overdue': 1
+                  }">
                 <t t-if="!show_demo">
                   <t t-esc="values['opportunity']['overdue']"/>
                 </t>
@@ -196,7 +228,8 @@
                 </t>
               </a>
             </td>
-            <td t-if="show_demo or (values and values['quotation'] and values['quotation']['overdue'] != 0)"
+            <td t-if="show_demo or (values and values['quotation'] and
+                                    values['quotation']['overdue'] != 0)"
                 class="o_warning">
               <a href="#" class="o_dashboard_action"
                  name="sale.action_quotations"
@@ -210,7 +243,8 @@
                 <br/>
               </a>
             </td>
-            <td t-if="show_demo or (values and values['sale'] and values['sale']['overdue'] != 0)"
+            <td t-if="show_demo or (values and values['sale'] and
+                                    values['sale']['overdue'] != 0)"
                 class="o_warning">
               <a href="#" class="o_dashboard_action"
                  name="sale.action_orders"
@@ -252,7 +286,9 @@
             <td class="o_text">
               This Month
             </td>
-            <td t-attf-class="#{values and values['done']['target'] ? 'o_gradient' + values['done']['sector'] : 'o_secondary'}"
+            <td t-attf-class="#{values and values['done']['target'] ?
+                                'o_gradient' + values['done']['sector'] :
+                                'o_secondary'}"
                 title="To Activity Report">
               <a href="#" class="o_dashboard_action"
                  name="crm.action_report_crm_opportunity"
@@ -267,7 +303,9 @@
                 </span>
               </a>
             </td>
-            <td t-attf-class="#{values and values['won']['target'] ? 'o_gradient' + values['won']['sector'] : 'o_secondary'}"
+            <td t-attf-class="#{values and values['won']['target'] ?
+                                'o_gradient' + values['won']['sector'] :
+                                'o_secondary'}"
                 title="To Opportunity Report">
               <a href="#" class="o_dashboard_action"
                  name="crm.action_report_crm_opportunity"
@@ -275,7 +313,8 @@
                                 'search_default_won_this_month': 1}">
                 <span class="o_highlight">
                   <t t-if="!show_demo">
-                    <t t-esc="widget.render_monetary_field(values['won']['this_month'], values['currency_id'])"/>
+                    <t t-esc="widget.render_monetary_field(
+                        values['won']['this_month'], values['currency_id'])"/>
                   </t>
                   <t t-if="show_demo">
                     78,140.03€
@@ -283,14 +322,18 @@
                 </span>
               </a>
             </td>
-            <td t-attf-class="#{values and values['invoiced']['target'] ? 'o_gradient' + values['invoiced']['sector'] : 'o_secondary'}"
+            <td t-attf-class="#{values and values['invoiced']['target'] ?
+                                'o_gradient' + values['invoiced']['sector'] :
+                                'o_secondary'}"
                 title="To Invoice Report">
               <a href="#" class="o_dashboard_action"
                  name="account.action_account_invoice_report_all"
                  data-context="{'search_default_this_month': 1}">
                 <span class="o_highlight">
                   <t t-if="!show_demo">
-                    <t t-esc="widget.render_monetary_field(values['invoiced']['this_month'], values['currency_id'])"/>
+                    <t t-esc="widget.render_monetary_field(
+                        values['invoiced']['this_month'],
+                        values['currency_id'])"/>
                   </t>
                   <t t-if="show_demo">
                     35,029.39€
@@ -303,7 +346,9 @@
             <td class="o_text">Target</td>
             <td class="o_secondary">
               <span t-if="!show_demo" class="o_target_to_set" name='done'
-                    t-att-value="values['done']['target'] ? values['done']['target'] : undefined"
+                    t-att-data-mode="mode"
+                    t-att-value="values['done']['target'] ?
+                                 values['done']['target'] : undefined"
                     title="Click to set">
                 <t t-if="values['done']['target']">
                   <t t-esc="values['done']['target']"/>
@@ -318,7 +363,9 @@
             </td>
             <td class="o_secondary">
               <span t-if="!show_demo" class="o_target_to_set" name='won'
-                    t-att-value="values['won']['target'] ? values['won']['target'] : undefined"
+                    t-att-data-mode="mode"
+                    t-att-value="values['won']['target'] ?
+                                 values['won']['target'] : undefined"
                     title="Click to set">
                 <t t-if="values['won']['target']">
                   <t t-esc="values['won']['target']"/>
@@ -333,7 +380,9 @@
             </td>
             <td class="o_secondary">
               <span t-if="!show_demo" class="o_target_to_set" name='invoiced'
-                    t-att-value="values['invoiced']['target'] ? values['invoiced']['target'] : undefined"
+                    t-att-data-mode="mode"
+                    t-att-value="values['invoiced']['target'] ?
+                                 values['invoiced']['target'] : undefined"
                     title="Click to set">
                 <t t-if="values['invoiced']['target']">
                   <t t-esc="values['invoiced']['target']"/>
@@ -363,7 +412,8 @@
                  data-context="{'search_default_won': 1,
                                 'search_default_won_last_month': 1}">
                 <t t-if="!show_demo"
-                   t-esc="widget.render_monetary_field(values['won']['last_month'], values['currency_id'])"/>
+                   t-esc="widget.render_monetary_field(
+                      values['won']['last_month'], values['currency_id'])"/>
                 <t t-if="show_demo" t-esc="$10"/>
               </a>
             </td>
@@ -372,7 +422,9 @@
                  name="account.action_account_invoice_report_all"
                  data-context="{'search_default_last_month': 1}">
                 <t t-if="!show_demo"
-                    t-esc="widget.render_monetary_field(values['invoiced']['last_month'], values['currency_id'])"/>
+                    t-esc="widget.render_monetary_field(
+                        values['invoiced']['last_month'],
+                        values['currency_id'])"/>
                 <t t-if="show_demo" t-esc="$10"/>
               </a>
             </td>

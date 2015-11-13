@@ -20,46 +20,22 @@
 #
 ##############################################################################
 
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 from dateutil.relativedelta import relativedelta
 from openerp import api, fields, models, _
-from xoeuf.tools import (
-    normalize_date as to_date, normalize_datetime as to_dt, dt2str, date2str)
+from xoeuf.tools import normalize_date as to_date, dt2str, date2str
 
-
-class XopgiBoard(models.Model):
-    _inherit = 'xopgi.board'
-    _description = "Board"
-
-    @api.model
-    def get_data(self):
-        """Override this method to add new board widget.
-        :return: list of dict like {
-            'template': 'template_x',  # qweb template to show
-            'string': 'widget x',  # title of widget
-            'values': {},  # dict with values to show
-        }
-        """
-        res = super(XopgiBoard, self).get_data()
-        # get values
-        values = self.env['crm.lead'].retrieve_sales_dashboard()
-        return res + [dict(
-            template='sales_team.SalesDashboard',
-            string=_('Sales'),
-            values=values,
-        )]
-    
     
 class CrmLead(models.Model):
     _inherit = 'crm.lead'
     
     @api.model
-    def retrieve_sales_dashboard(self):
-        _super = getattr(super(CrmLead, self), 'retrieve_sales_dashboard',
-                         False)
-        if _super:
-            return _super()
+    def retrieve_sales_dashboard_data(self, mode=None):
+        base_domain = ([]
+                       if mode and mode == 'company'
+                       else [('user_id', '=', self._uid)])
         res = {
+            'mode': mode or '',
             'meeting': {'today': 0, 'next_7_days': 0, },
             'lead': {'today': 0, 'overdue': 0, 'next_7_days': 0, },
             'opportunity': {'today': 0, 'overdue': 0, 'next_7_days': 0, },
@@ -75,7 +51,7 @@ class CrmLead(models.Model):
         first_last_month_day = first_month_day - relativedelta(months=+1)
         next_week = today + timedelta(days=7)
         last_week = today + timedelta(days=-7)
-        opportunities = self.search([('user_id', '=', self._uid)])
+        opportunities = self.search(base_domain)
         for opp in opportunities:
             if opp.type == 'opportunity':
                 # Next activities
@@ -111,8 +87,7 @@ class CrmLead(models.Model):
                 if lead_date < last_week:
                     res['lead']['overdue'] += 1
         sales = self.env['sale.order'].search(
-            [('user_id', '=', self._uid),
-             ('state', 'not in', ('cancel', 'done'))])
+            base_domain + [('state', 'not in', ('cancel', 'done'))])
         for sale in sales:
             # Quotations
             if sale.state in ('draft', 'sent', 'cancel'):
@@ -136,7 +111,9 @@ class CrmLead(models.Model):
         max_date = dt2str(today + timedelta(days=8))
         # We need to add 'mymeetings' in the context for the search to 
         # be correct.
-        meetings = self.env['calendar.event'].with_context(mymeetings=1)
+        meetings = self.env['calendar.event']
+        if base_domain:
+            meetings = meetings.with_context(mymeetings=1)
         for meeting in meetings.search(
                 [('start', '>=', min_date), ('start', '<=', max_date)]):
             if meeting.start:
@@ -158,9 +135,10 @@ class CrmLead(models.Model):
                 elif first_month_day > inv_date >= first_last_month_day:
                     res['invoiced']['last_month'] += inv.amount_untaxed
         res['nb_opportunities'] = len(opportunities)
-        res['done']['target'] = self.env.user.target_sales_done
-        res['won']['target'] = self.env.user.target_sales_won
-        res['invoiced']['target'] = self.env.user.target_sales_invoiced
+        target_obj = self.env.user if base_domain else self.env.user.company_id
+        res['done']['target'] = target_obj.target_sales_done
+        res['won']['target'] = target_obj.target_sales_won
+        res['invoiced']['target'] = target_obj.target_sales_invoiced
         res['currency_id'] = self.env.user.company_id.currency_id.id
         for indicator in ['done', 'won', 'invoiced']:
             sector = 11
@@ -175,7 +153,11 @@ class CrmLead(models.Model):
         return res
 
     @api.model
-    def modify_target_sales_dashboard(self, target_name, target_value):
+    def modify_target_sales_dashboard(self, target_name, target_value,
+                                      mode=None):
+        target_obj = (self.env.user.company_id.sudo()
+                      if mode == 'company'
+                      else self.env.user.sudo())
         if not target_value:
             target_value = 0
         _super = getattr(super(CrmLead, self),
@@ -183,13 +165,21 @@ class CrmLead(models.Model):
         if _super:
             return _super()
         if target_name in ['won', 'done', 'invoiced']:
-            return setattr(self.env.user.sudo(),
+            return setattr(target_obj,
                            'target_sales_' + target_name,
                            target_value)
 
 
 class ResUsers(models.Model):
     _inherit = 'res.users'
+
+    target_sales_done = fields.Integer()
+    target_sales_won = fields.Integer()
+    target_sales_invoiced = fields.Integer()
+
+
+class ResCompany(models.Model):
+    _inherit = 'res.company'
 
     target_sales_done = fields.Integer()
     target_sales_won = fields.Integer()
