@@ -41,18 +41,18 @@ class CrmLead(models.Model):
             'opportunity': {'today': 0, 'overdue': 0, 'next_7_days': 0, },
             'quotation': {'today': 0, 'overdue': 0, 'next_7_days': 0, },
             'sale': {'today': 0, 'overdue': 0, 'next_7_days': 0, },
+            'margin': {'this_month': 0, 'last_month': 0, 'sector': 0, },
+            'pax_margin': {'this_month': 0, 'last_month': 0, 'sector': 0, },
             'done': {'this_month': 0, 'last_month': 0, 'sector': 0, },
             'won': {'this_month': 0, 'last_month': 0, 'sector': 0, },
             'invoiced': {'this_month': 0, 'last_month': 0, 'sector': 0, },
-            'nb_opportunities': 0,
         }
         today = date.today()
         first_month_day = today.replace(day=1)
         first_last_month_day = first_month_day - relativedelta(months=+1)
         next_week = today + timedelta(days=7)
         last_week = today + timedelta(days=-7)
-        opportunities = self.search(base_domain)
-        for opp in opportunities:
+        for opp in self.search(base_domain):
             if opp.type == 'opportunity':
                 # Next activities
                 if opp.date_action:
@@ -125,22 +125,66 @@ class CrmLead(models.Model):
         # Invoiced
         account_invoice_domain = [
             ('state', 'in', ['open', 'paid']),
-            ('user_id', '=', self._uid),
             ('date_invoice', '>=', first_last_month_day)]
-        for inv in self.env['account.invoice'].search(account_invoice_domain):
+        for inv in self.env['account.invoice'].search(
+                base_domain + account_invoice_domain):
             if inv.date_invoice:
                 inv_date = to_date(inv.date_invoice)
                 if today >= inv_date >= first_month_day:
                     res['invoiced']['this_month'] += inv.amount_untaxed
                 elif first_month_day > inv_date >= first_last_month_day:
                     res['invoiced']['last_month'] += inv.amount_untaxed
-        res['nb_opportunities'] = len(opportunities)
+        # margin
+        operation_result_domain = [
+            ('date', '>=', first_last_month_day)]
+        if base_domain:
+            operation_result_domain += [
+                ('primary_salesperson_id', '=', self._uid)]
+        this_month_balance = 0
+        this_month_pax_balance = 0
+        this_month_pax_count = 0
+        this_month_operation_count = 0
+        last_month_balance = 0
+        last_month_pax_balance = 0
+        last_month_pax_count = 0
+        last_month_operation_count = 0
+        for operation in self.env[
+                'xopgi_operations_performance.opresult_report'].search(
+                    operation_result_domain):
+            if operation.date:
+                op_date = to_date(operation.date)
+                if today >= op_date >= first_month_day:
+                    this_month_balance += operation.balance
+                    this_month_operation_count += 1
+                    if operation.pax:
+                        this_month_pax_balance += operation.balance
+                        this_month_pax_count += operation.pax
+                elif first_month_day > op_date >= first_last_month_day:
+                    last_month_balance += operation.balance
+                    last_month_operation_count += 1
+                    if operation.pax:
+                        last_month_pax_balance += operation.balance
+                        last_month_pax_count += operation.pax
+        res['margin']['this_month'] = (
+            float(this_month_balance / this_month_operation_count)
+            if this_month_operation_count else 0.00)
+        res['margin']['last_month'] = (
+            float(last_month_balance / last_month_operation_count)
+            if last_month_operation_count else 0.00)
+        res['pax_margin']['this_month'] = (
+            float(this_month_pax_balance / this_month_pax_count)
+            if this_month_pax_count else 0.00)
+        res['pax_margin']['last_month'] = (
+            float(last_month_pax_balance / last_month_pax_count)
+            if last_month_pax_count else 0.00)
         target_obj = self.env.user if base_domain else self.env.user.company_id
+        res['margin']['target'] = target_obj.target_sales_margin
+        res['pax_margin']['target'] = target_obj.target_sales_pax_margin
         res['done']['target'] = target_obj.target_sales_done
         res['won']['target'] = target_obj.target_sales_won
         res['invoiced']['target'] = target_obj.target_sales_invoiced
         res['currency_id'] = self.env.user.company_id.currency_id.id
-        for indicator in ['done', 'won', 'invoiced']:
+        for indicator in ['margin', 'pax_margin', 'done', 'won', 'invoiced']:
             sector = 11
             target = res[indicator]['target']
             value = res[indicator]['this_month']
@@ -164,7 +208,7 @@ class CrmLead(models.Model):
                          'modify_target_sales_dashboard', False)
         if _super:
             return _super()
-        if target_name in ['won', 'done', 'invoiced']:
+        if target_name in ['margin', 'pax_margin', 'won', 'done', 'invoiced']:
             return setattr(target_obj,
                            'target_sales_' + target_name,
                            target_value)
@@ -173,6 +217,8 @@ class CrmLead(models.Model):
 class ResUsers(models.Model):
     _inherit = 'res.users'
 
+    target_sales_margin = fields.Integer()
+    target_sales_pax_margin = fields.Integer()
     target_sales_done = fields.Integer()
     target_sales_won = fields.Integer()
     target_sales_invoiced = fields.Integer()
@@ -181,6 +227,8 @@ class ResUsers(models.Model):
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
+    target_sales_margin = fields.Integer()
+    target_sales_pax_margin = fields.Integer()
     target_sales_done = fields.Integer()
     target_sales_won = fields.Integer()
     target_sales_invoiced = fields.Integer()

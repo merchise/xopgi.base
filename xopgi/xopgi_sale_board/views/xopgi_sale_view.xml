@@ -133,5 +133,28 @@
         </filter>
       </field>
     </record>
+
+    <record model="ir.ui.view" id="result_performance_reports_view_search_inh">
+      <field name="name">
+        xopgi_operations_performance.result_performance_report.search
+      </field>
+      <field name="model">xopgi_operations_performance.opresult_report</field>
+      <field name="inherit_id"
+             ref="xopgi_operations_performance.result_performance_reports_view_search"/>
+      <field name="arch" type="xml">
+        <field name="primary_salesperson_id" position="after">
+          <separator/>
+          <filter string="My operations" name="my"
+                  domain="[('primary_salesperson_id', '=', uid)]"/>
+          <separator/>
+          <filter string="This month" name="this_month"
+                  domain="[('date', '&gt;=', context_today().replace(day=1).strftime('%Y-%m-%d'))]"/>
+          <filter string="Last month" name="last_month"
+                  domain="['&amp;',
+                           ('date', '&lt;', context_today().replace(day=1).strftime('%Y-%m-%d')),
+                           ('date', '&gt;=', (context_today()-datetime.timedelta(days=30)).replace(day=1).strftime('%Y-%m-%d'))]"/>
+        </field>
+      </field>
+    </record>
   </data>
 </openerp>

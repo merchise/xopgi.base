@@ -20,7 +20,7 @@ Create Sale Person board widget.
 
     """, "author": "Merchise Autrement",
     "website": "http://xhg.ca.merchise.org/addons/xopgi_board",
-    'depends': ['xopgi_board', 'sale'],
+    'depends': ['xopgi_board', 'sale', 'xopgi_operations_performance'],
     'data': [
         'views/xopgi_board_view.xml',
         'views/xopgi_sale_view.xml',

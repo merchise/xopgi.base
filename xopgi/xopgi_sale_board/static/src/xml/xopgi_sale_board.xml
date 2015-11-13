@@ -3,7 +3,7 @@
   <t t-name="sales_team.SalesDashboard">
     <div t-if="show_demo or values" class="o_sales_dashboard">
       <div t-attf-class="#{show_demo ? 'o_demo' : ''}"
-           style="width: 60%;">
+           style="width: 50%;">
         <div class="o_highlight">To do</div>
         <table class="table table-condensed">
           <tr>
@@ -261,11 +261,31 @@
           </tr>
         </table>
       </div><div t-attf-class="#{show_demo ? 'o_demo' : ''}"
-                 style="width: 40%;">
+                 style="width: 50%;">
         <div class="o_highlight">Performance</div>
         <table class="hidden-xs table table-condensed">
           <tr>
             <td/>
+            <td class="o_text">
+              <a href="#" class="o_dashboard_action"
+                 name="xopgi_operations_performance.operations_result_report_action"
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_my\': 1'}
+                  }">
+                Margin
+              </a>
+            </td>
+            <td class="o_text">
+              <a href="#" class="o_dashboard_action"
+                 name="xopgi_operations_performance.operations_result_report_action"
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_my\': 1'}
+                  }">
+                Margin by Pax
+              </a>
+            </td>
             <td class="o_text" >
               <a href="#" class="o_dashboard_action"
                  name="crm.action_report_crm_opportunity">Activities Done</a>
@@ -285,6 +305,45 @@
           <tr>
             <td class="o_text">
               This Month
+            </td>
+            <td t-attf-class="#{values and values['margin']['target'] ?
+                                'o_gradient' + values['margin']['sector'] :
+                                'o_secondary'}"
+                title="To Operation Result">
+              <a href="#" class="o_dashboard_action"
+                 name="xopgi_operations_performance.operations_result_report_action"
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_my\': 1,'}
+                      'search_default_this_month': 1
+                  }">
+                <span class="o_highlight">
+                  <t t-if="!show_demo"
+                     t-esc="widget.render_monetary_field(
+                    values['margin']['this_month'], values['currency_id'])"/>
+                  <t t-if="show_demo" t-esc="$10"/>
+                </span>
+              </a>
+            </td>
+            <td t-attf-class="#{values and values['pax_margin']['target'] ?
+                                'o_gradient' + values['pax_margin']['sector'] :
+                                'o_secondary'}"
+                title="To Operation Result">
+              <a href="#" class="o_dashboard_action"
+                 name="xopgi_operations_performance.operations_result_report_action"
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_my\': 1,'}
+                      'search_default_this_month': 1
+                  }">
+                <span class="o_highlight">
+                  <t t-if="!show_demo"
+                     t-esc="widget.render_monetary_field(
+                    values['pax_margin']['this_month'],
+                    values['currency_id'])"/>
+                  <t t-if="show_demo" t-esc="$10"/>
+                </span>
+              </a>
             </td>
             <td t-attf-class="#{values and values['done']['target'] ?
                                 'o_gradient' + values['done']['sector'] :
@@ -345,6 +404,41 @@
           <tr>
             <td class="o_text">Target</td>
             <td class="o_secondary">
+              <span t-if="!show_demo" class="o_target_to_set" name='margin'
+                    t-att-data-mode="mode"
+                    t-att-value="values['margin']['target'] ?
+                                 values['margin']['target'] : undefined"
+                    title="Click to set">
+                <t t-if="values['margin']['target']">
+                  <t t-esc="values['margin']['target']"/>
+                </t>
+                <t t-if="!values['margin']['target']">
+                  Click to set
+                </t>
+              </span>
+              <span t-if="show_demo">
+                100
+              </span>
+            </td>
+            <td class="o_secondary">
+              <span t-if="!show_demo" class="o_target_to_set"
+                    name='pax_margin'
+                    t-att-data-mode="mode"
+                    t-att-value="values['pax_margin']['target'] ?
+                                 values['pax_margin']['target'] : undefined"
+                    title="Click to set">
+                <t t-if="values['pax_margin']['target']">
+                  <t t-esc="values['pax_margin']['target']"/>
+                </t>
+                <t t-if="!values['pax_margin']['target']">
+                  Click to set
+                </t>
+              </span>
+              <span t-if="show_demo">
+                100
+              </span>
+            </td>
+            <td class="o_secondary">
               <span t-if="!show_demo" class="o_target_to_set" name='done'
                     t-att-data-mode="mode"
                     t-att-value="values['done']['target'] ?
@@ -398,6 +492,35 @@
           </tr>
           <tr>
             <td class="o_text">Last Month</td>
+            <td class="o_secondary" title="To Operation Result">
+              <a href="#" class="o_dashboard_action"
+                 name="xopgi_operations_performance.operations_result_report_action"
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_my\': 1,'}
+                      'search_default_last_month': 1
+                  }">
+                <t t-if="!show_demo"
+                   t-esc="widget.render_monetary_field(
+                      values['margin']['last_month'], values['currency_id'])"/>
+                <t t-if="show_demo" t-esc="$10"/>
+              </a>
+            </td>
+            <td class="o_secondary" title="To Operation Result">
+              <a href="#" class="o_dashboard_action"
+                 name="xopgi_operations_performance.operations_result_report_action"
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_my\': 1,'}
+                      'search_default_last_month': 1
+                  }">
+                <t t-if="!show_demo"
+                   t-esc="widget.render_monetary_field(
+                      values['pax_margin']['last_month'],
+                      values['currency_id'])"/>
+                <t t-if="show_demo" t-esc="$10"/>
+              </a>
+            </td>
             <td class="o_secondary" title="To Activity Report">
               <a href="#" class="o_dashboard_action"
                  name="crm.action_report_crm_opportunity"
