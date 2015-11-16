@@ -55,12 +55,6 @@ a.o_dashboard_action {
     height: 33px;
 }
 
-.o_sales_dashboard > div > table > tbody > tr > td > input {
-    vertical-align: middle;
-    text-align: center;
-    width: 100%;
-}
-
 .o_sales_dashboard > div > table > tbody > tr > td > span {
     display: inline;
 }

@@ -42,11 +42,11 @@ class CrmLead(models.Model):
             'opportunity': {'today': 0, 'overdue': 0, 'next_7_days': 0, },
             'quotation': {'today': 0, 'overdue': 0, 'next_7_days': 0, },
             'sale': {'today': 0, 'overdue': 0, 'next_7_days': 0, },
-            'margin': {'this_month': 0, 'last_month': 0, 'sector': 0, },
-            'pax_margin': {'this_month': 0, 'last_month': 0, 'sector': 0, },
-            'done': {'this_month': 0, 'last_month': 0, 'color': '', },
-            'won': {'this_month': 0, 'last_month': 0, 'color': '', },
-            'invoiced': {'this_month': 0, 'last_month': 0, 'color': '', },
+            'sale_margin': {'this_month': 0, 'last_month': 0, 'sector': 0, },
+            'sale_pax_margin': {'this_month': 0, 'last_month': 0, 'sector': 0, },
+            'sale_done': {'this_month': 0, 'last_month': 0, 'color': '', },
+            'sale_won': {'this_month': 0, 'last_month': 0, 'color': '', },
+            'sale_invoiced': {'this_month': 0, 'last_month': 0, 'color': '', },
         }
         today = date.today()
         first_month_day = today.replace(day=1)
@@ -69,17 +69,17 @@ class CrmLead(models.Model):
                     date_closed = to_date(opp.date_closed)
                     if today >= date_closed >= first_month_day:
                         if opp.planned_revenue:
-                            res['won']['this_month'] += opp.planned_revenue
+                            res['sale_won']['this_month'] += opp.planned_revenue
                     elif first_month_day > date_closed >= \
                             first_last_month_day:
                         if opp.planned_revenue:
-                            res['won']['last_month'] += opp.planned_revenue
-                # Actions done.
+                            res['sale_won']['last_month'] += opp.planned_revenue
+                # Actions sale_done.
                 date_act = to_date(opp.create_date)
                 if today >= date_act >= first_month_day:
-                    res['done']['this_month'] += 1
+                    res['sale_done']['this_month'] += 1
                 elif first_month_day > date_act >= first_last_month_day:
-                    res['done']['last_month'] += 1
+                    res['sale_done']['last_month'] += 1
             # Leads
             else:
                 lead_date = to_date(opp.create_date)
@@ -88,7 +88,7 @@ class CrmLead(models.Model):
                 if lead_date < last_week:
                     res['lead']['overdue'] += 1
         sales = self.env['sale.order'].search(
-            base_domain + [('state', 'not in', ('cancel', 'done'))])
+            base_domain + [('state', 'not in', ('cancel', 'sale_done'))])
         for sale in sales:
             # Quotations
             if sale.state in ('draft', 'sent', 'cancel'):
@@ -132,10 +132,10 @@ class CrmLead(models.Model):
             if inv.date_invoice:
                 inv_date = to_date(inv.date_invoice)
                 if today >= inv_date >= first_month_day:
-                    res['invoiced']['this_month'] += inv.amount_untaxed
+                    res['sale_invoiced']['this_month'] += inv.amount_untaxed
                 elif first_month_day > inv_date >= first_last_month_day:
-                    res['invoiced']['last_month'] += inv.amount_untaxed
-        # margin
+                    res['sale_invoiced']['last_month'] += inv.amount_untaxed
+        # sale_margin
         operation_result_domain = [
             ('date', '>=', first_last_month_day)]
         if base_domain:
@@ -166,26 +166,27 @@ class CrmLead(models.Model):
                     if operation.pax:
                         last_month_pax_balance += operation.balance
                         last_month_pax_count += operation.pax
-        res['margin']['this_month'] = (
+        res['sale_margin']['this_month'] = (
             float(this_month_balance / this_month_operation_count)
             if this_month_operation_count else 0.00)
-        res['margin']['last_month'] = (
+        res['sale_margin']['last_month'] = (
             float(last_month_balance / last_month_operation_count)
             if last_month_operation_count else 0.00)
-        res['pax_margin']['this_month'] = (
+        res['sale_pax_margin']['this_month'] = (
             float(this_month_pax_balance / this_month_pax_count)
             if this_month_pax_count else 0.00)
-        res['pax_margin']['last_month'] = (
+        res['sale_pax_margin']['last_month'] = (
             float(last_month_pax_balance / last_month_pax_count)
             if last_month_pax_count else 0.00)
         target_obj = self.env.user if base_domain else self.env.user.company_id
-        res['margin']['target'] = target_obj.target_sales_margin
-        res['pax_margin']['target'] = target_obj.target_sales_pax_margin
-        res['done']['target'] = target_obj.target_sales_done
-        res['won']['target'] = target_obj.target_sales_won
-        res['invoiced']['target'] = target_obj.target_sales_invoiced
+        res['sale_margin']['target'] = target_obj.target_sale_margin
+        res['sale_pax_margin']['target'] = target_obj.target_sale_pax_margin
+        res['sale_done']['target'] = target_obj.target_sale_done
+        res['sale_won']['target'] = target_obj.target_sale_won
+        res['sale_invoiced']['target'] = target_obj.target_sale_invoiced
         res['currency_id'] = self.env.user.company_id.currency_id.id
-        for indicator in ['margin', 'pax_margin', 'done', 'won', 'invoiced']:
+        for indicator in ['sale_margin', 'sale_pax_margin', 'sale_done',
+                          'sale_won', 'sale_invoiced']:
             sector = 11
             target = res[indicator]['target']
             value = res[indicator]['this_month']
@@ -201,41 +202,24 @@ class CrmLead(models.Model):
             res[indicator]['color'] = color
         return res
 
-    @api.model
-    def modify_target_sales_dashboard(self, target_name, target_value,
-                                      mode=None):
-        target_obj = (self.env.user.company_id.sudo()
-                      if mode == 'company'
-                      else self.env.user.sudo())
-        if not target_value:
-            target_value = 0
-        _super = getattr(super(CrmLead, self),
-                         'modify_target_sales_dashboard', False)
-        if _super:
-            return _super()
-        if target_name in ['margin', 'pax_margin', 'won', 'done', 'invoiced']:
-            return setattr(target_obj,
-                           'target_sales_' + target_name,
-                           target_value)
-
 
 class ResUsers(models.Model):
     _inherit = 'res.users'
 
-    target_sales_margin = fields.Integer()
-    target_sales_pax_margin = fields.Integer()
-    target_sales_done = fields.Integer()
-    target_sales_won = fields.Integer()
-    target_sales_invoiced = fields.Integer()
+    target_sale_margin = fields.Integer()
+    target_sale_pax_margin = fields.Integer()
+    target_sale_done = fields.Integer()
+    target_sale_won = fields.Integer()
+    target_sale_invoiced = fields.Integer()
 
 
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
-    target_sales_margin = fields.Integer()
-    target_sales_pax_margin = fields.Integer()
-    target_sales_done = fields.Integer()
-    target_sales_won = fields.Integer()
-    target_sales_invoiced = fields.Integer()
+    target_sale_margin = fields.Integer()
+    target_sale_pax_margin = fields.Integer()
+    target_sale_done = fields.Integer()
+    target_sale_won = fields.Integer()
+    target_sale_invoiced = fields.Integer()
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

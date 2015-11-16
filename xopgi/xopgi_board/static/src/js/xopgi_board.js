@@ -19,6 +19,8 @@ instance.web.form.XopgiBoard = instance.web.form.FormWidget.extend({
                           'click', this.on_fold_action);
         this.$el.delegate('.o_dashboard_action', 'click',
                           this.on_dashboard_action_clicked);
+        this.$el.delegate('.o_target_to_set', 'click',
+                          this.on_dashboard_target_clicked);
     },
 
     fetch_data: function () {
@@ -119,6 +121,67 @@ instance.web.form.XopgiBoard = instance.web.form.FormWidget.extend({
                     self.currency = result ? result : self.currency;
                 });
         }
+    },
+
+    on_change_input_target: function (e) {
+        var self = this;
+        var $input = $(e.target);
+        var target_name = $input.attr('name');
+        var target_value = $input.val();
+        var target_mode = $input.data('mode');
+
+        if (!!target_value && isNaN(target_value)) {
+            this.do_warn(_t("Wrong value entered!"),
+                         _t("Only Integer Value should be valid."));
+        } else {
+            this._updated = new Model('xopgi.board')
+                .call('modify_target_dashboard',
+                      [target_name, target_value, target_mode])
+                .then(function () {
+                    target_value = target_value ? target_value : 'Click to set';
+                    var $span = $('<span>' + target_value + '</span>');
+                    $span.attr('name', target_name);
+                    $span.attr('class', 'o_target_to_set');
+                    $span.attr('title', 'Click to set');
+                    $span.attr('value', target_value);
+                    $.when(self._updated).then(function () {
+                        $span.replaceAll(self.$('.oe_changing[name=' + target_name + ']'));
+                    });
+                });
+        }
+    },
+
+    on_dashboard_target_clicked: function (ev) {
+        if (this.show_demo) {
+            // The user is not allowed to modify the targets in demo mode
+            return;
+        }
+        var self = this;
+        var $target = $(ev.currentTarget);
+        var target_name = $target.attr('name');
+        var target_value = $target.attr('value');
+        var target_mode = $target.data('mode');
+        var $input = $('<input/>', {type: "text"});
+        $input.attr('class', 'oe_changing');
+        $input.attr('name', target_name);
+        $input.data('mode', target_mode);
+        if (target_value) {
+            $input.attr('value', target_value);
+        }
+        $input.on('keyup input', function (e) {
+            if (e.which === $.ui.keyCode.ENTER) {
+                self.on_change_input_target(e);
+            }
+        });
+        $input.on('blur', function (e) {
+            self.on_change_input_target(e);
+        });
+        $.when(this._updated).then(function () {
+            $input.replaceAll(
+                self.$('.o_target_to_set[name=' + target_name + ']'))
+                .focus()
+                .select();
+        });
     },
 });
 

@@ -307,7 +307,7 @@
               This Month
             </td>
             <td title="To Operation Result" class="o_secondary"
-                t-attf-style="background-color: #{values['margin']['color']};">
+                t-attf-style="background-color: #{values['sale_margin']['color']};">
               <a href="#" class="o_dashboard_action"
                  name="xopgi_operations_performance.operations_result_report_action"
                  t-attf-data-context="{
@@ -318,13 +318,13 @@
                 <span class="o_monetary_highlight">
                   <t t-if="!show_demo"
                      t-esc="widget.render_monetary_field(
-                    values['margin']['this_month'], values['currency_id'])"/>
+                    values['sale_margin']['this_month'], values['currency_id'])"/>
                   <t t-if="show_demo" t-esc="$10"/>
                 </span>
               </a>
             </td>
             <td title="To Operation Result" class="o_secondary"
-                t-attf-style="background-color: #{values['pax_margin']['color']};">
+                t-attf-style="background-color: #{values['sale_pax_margin']['color']};">
               <a href="#" class="o_dashboard_action"
                  name="xopgi_operations_performance.operations_result_report_action"
                  t-attf-data-context="{
@@ -335,20 +335,20 @@
                 <span class="o_monetary_highlight">
                   <t t-if="!show_demo"
                      t-esc="widget.render_monetary_field(
-                    values['pax_margin']['this_month'],
+                    values['sale_pax_margin']['this_month'],
                     values['currency_id'])"/>
                   <t t-if="show_demo" t-esc="$10"/>
                 </span>
               </a>
             </td>
             <td title="To Activity Report" class="o_secondary"
-                t-attf-style="background-color: #{values['done']['color']};">
+                t-attf-style="background-color: #{values['sale_done']['color']};">
               <a href="#" class="o_dashboard_action"
                  name="crm.action_report_crm_opportunity"
                  data-context="{'search_default_done_this_month': 1}">
                 <span class="o_highlight">
                   <t t-if="!show_demo">
-                    <t t-esc="values['done']['this_month']"/>
+                    <t t-esc="values['sale_done']['this_month']"/>
                   </t>
                   <t t-if="show_demo">
                     94
@@ -357,7 +357,7 @@
               </a>
             </td>
             <td title="To Opportunity Report" class="o_secondary"
-                t-attf-style="background-color: #{values['won']['color']};">
+                t-attf-style="background-color: #{values['sale_won']['color']};">
               <a href="#" class="o_dashboard_action"
                  name="crm.action_report_crm_opportunity"
                  data-context="{'search_default_won': 1,
@@ -365,7 +365,7 @@
                 <span class="o_monetary_highlight">
                   <t t-if="!show_demo">
                     <t t-esc="widget.render_monetary_field(
-                        values['won']['this_month'], values['currency_id'])"/>
+                        values['sale_won']['this_month'], values['currency_id'])"/>
                   </t>
                   <t t-if="show_demo">
                     78,140.03€
@@ -374,14 +374,14 @@
               </a>
             </td>
             <td title="To Invoice Report" class="o_secondary"
-                t-attf-style="background-color: #{values['invoiced']['color']};">
+                t-attf-style="background-color: #{values['sale_invoiced']['color']};">
               <a href="#" class="o_dashboard_action"
                  name="account.action_account_invoice_report_all"
                  data-context="{'search_default_this_month': 1}">
                 <span class="o_monetary_highlight">
                   <t t-if="!show_demo">
                     <t t-esc="widget.render_monetary_field(
-                        values['invoiced']['this_month'],
+                        values['sale_invoiced']['this_month'],
                         values['currency_id'])"/>
                   </t>
                   <t t-if="show_demo">
@@ -394,15 +394,15 @@
           <tr>
             <td class="o_text">Target</td>
             <td class="o_secondary">
-              <span t-if="!show_demo" class="o_target_to_set" name='margin'
+              <span t-if="!show_demo" class="o_target_to_set" name='sale_margin'
                     t-att-data-mode="mode"
-                    t-att-value="values['margin']['target'] ?
-                                 values['margin']['target'] : undefined"
+                    t-att-value="values['sale_margin']['target'] ?
+                                 values['sale_margin']['target'] : undefined"
                     title="Click to set">
-                <t t-if="values['margin']['target']">
-                  <t t-esc="values['margin']['target']"/>
+                <t t-if="values['sale_margin']['target']">
+                  <t t-esc="values['sale_margin']['target']"/>
                 </t>
-                <t t-if="!values['margin']['target']">
+                <t t-if="!values['sale_margin']['target']">
                   Click to set
                 </t>
               </span>
@@ -412,15 +412,15 @@
             </td>
             <td class="o_secondary">
               <span t-if="!show_demo" class="o_target_to_set"
-                    name='pax_margin'
+                    name='sale_pax_margin'
                     t-att-data-mode="mode"
-                    t-att-value="values['pax_margin']['target'] ?
-                                 values['pax_margin']['target'] : undefined"
+                    t-att-value="values['sale_pax_margin']['target'] ?
+                                 values['sale_pax_margin']['target'] : undefined"
                     title="Click to set">
-                <t t-if="values['pax_margin']['target']">
-                  <t t-esc="values['pax_margin']['target']"/>
+                <t t-if="values['sale_pax_margin']['target']">
+                  <t t-esc="values['sale_pax_margin']['target']"/>
                 </t>
-                <t t-if="!values['pax_margin']['target']">
+                <t t-if="!values['sale_pax_margin']['target']">
                   Click to set
                 </t>
               </span>
@@ -429,15 +429,15 @@
               </span>
             </td>
             <td class="o_secondary">
-              <span t-if="!show_demo" class="o_target_to_set" name='done'
+              <span t-if="!show_demo" class="o_target_to_set" name='sale_done'
                     t-att-data-mode="mode"
-                    t-att-value="values['done']['target'] ?
-                                 values['done']['target'] : undefined"
+                    t-att-value="values['sale_done']['target'] ?
+                                 values['sale_done']['target'] : undefined"
                     title="Click to set">
-                <t t-if="values['done']['target']">
-                  <t t-esc="values['done']['target']"/>
+                <t t-if="values['sale_done']['target']">
+                  <t t-esc="values['sale_done']['target']"/>
                 </t>
-                <t t-if="!values['done']['target']">
+                <t t-if="!values['sale_done']['target']">
                   Click to set
                 </t>
               </span>
@@ -446,15 +446,15 @@
               </span>
             </td>
             <td class="o_secondary">
-              <span t-if="!show_demo" class="o_target_to_set" name='won'
+              <span t-if="!show_demo" class="o_target_to_set" name='sale_won'
                     t-att-data-mode="mode"
-                    t-att-value="values['won']['target'] ?
-                                 values['won']['target'] : undefined"
+                    t-att-value="values['sale_won']['target'] ?
+                                 values['sale_won']['target'] : undefined"
                     title="Click to set">
-                <t t-if="values['won']['target']">
-                  <t t-esc="values['won']['target']"/>
+                <t t-if="values['sale_won']['target']">
+                  <t t-esc="values['sale_won']['target']"/>
                 </t>
-                <t t-if="!values['won']['target']">
+                <t t-if="!values['sale_won']['target']">
                   Click to set
                 </t>
               </span>
@@ -463,15 +463,15 @@
               </span>
             </td>
             <td class="o_secondary">
-              <span t-if="!show_demo" class="o_target_to_set" name='invoiced'
+              <span t-if="!show_demo" class="o_target_to_set" name='sale_invoiced'
                     t-att-data-mode="mode"
-                    t-att-value="values['invoiced']['target'] ?
-                                 values['invoiced']['target'] : undefined"
+                    t-att-value="values['sale_invoiced']['target'] ?
+                                 values['sale_invoiced']['target'] : undefined"
                     title="Click to set">
-                <t t-if="values['invoiced']['target']">
-                  <t t-esc="values['invoiced']['target']"/>
+                <t t-if="values['sale_invoiced']['target']">
+                  <t t-esc="values['sale_invoiced']['target']"/>
                 </t>
-                <t t-if="!values['invoiced']['target']">
+                <t t-if="!values['sale_invoiced']['target']">
                   Click to set
                 </t>
               </span>
@@ -492,7 +492,7 @@
                   }">
                 <t t-if="!show_demo"
                    t-esc="widget.render_monetary_field(
-                      values['margin']['last_month'], values['currency_id'])"/>
+                      values['sale_margin']['last_month'], values['currency_id'])"/>
                 <t t-if="show_demo" t-esc="$10"/>
               </a>
             </td>
@@ -506,7 +506,7 @@
                   }">
                 <t t-if="!show_demo"
                    t-esc="widget.render_monetary_field(
-                      values['pax_margin']['last_month'],
+                      values['sale_pax_margin']['last_month'],
                       values['currency_id'])"/>
                 <t t-if="show_demo" t-esc="$10"/>
               </a>
@@ -515,7 +515,7 @@
               <a href="#" class="o_dashboard_action"
                  name="crm.action_report_crm_opportunity"
                  data-context="{'search_default_done_last_month': 1}">
-                <t t-if="!show_demo" t-esc="values['done']['last_month']"/>
+                <t t-if="!show_demo" t-esc="values['sale_done']['last_month']"/>
                 <t t-if="show_demo" t-esc="10"/>
               </a>
             </td>
@@ -526,7 +526,7 @@
                                 'search_default_won_last_month': 1}">
                 <t t-if="!show_demo"
                    t-esc="widget.render_monetary_field(
-                      values['won']['last_month'], values['currency_id'])"/>
+                      values['sale_won']['last_month'], values['currency_id'])"/>
                 <t t-if="show_demo" t-esc="$10"/>
               </a>
             </td>
@@ -536,7 +536,7 @@
                  data-context="{'search_default_last_month': 1}">
                 <t t-if="!show_demo"
                     t-esc="widget.render_monetary_field(
-                        values['invoiced']['last_month'],
+                        values['sale_invoiced']['last_month'],
                         values['currency_id'])"/>
                 <t t-if="show_demo" t-esc="$10"/>
               </a>

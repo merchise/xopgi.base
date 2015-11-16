@@ -52,4 +52,14 @@ class XopgiBoard(models.Model):
     def get_data(self):
         return self.env['xopgi.board.widget'].get_widgets_dict()
 
+    @api.model
+    def modify_target_dashboard(self, target_name, target_value,
+                                mode='individual'):
+        target_obj = (self.env.user.company_id.sudo()
+                      if mode == 'company'
+                      else self.env.user.sudo())
+        target_value = int(target_value) if target_value else 0
+        if hasattr(target_obj, 'target_' + target_name):
+            return setattr(target_obj, 'target_' + target_name, target_value)
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

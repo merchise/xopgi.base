@@ -6,8 +6,6 @@
       <xpath expr="." position="inside">
         <link rel="stylesheet"
               href="/xopgi_sale_board/static/src/css/xopgi_sale_board.css"/>
-        <script type="text/javascript"
-                src="/xopgi_sale_board/static/src/js/xopgi_sale_board.js"/>
       </xpath>
     </template>
   </data>
