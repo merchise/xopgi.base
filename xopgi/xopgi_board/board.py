@@ -15,6 +15,29 @@ from openerp import api, models
 from itertools import groupby
 
 
+def lineal_color_scaling(value,  # 0-1 float
+                         start_point=(255, 0, 0),  # red
+                         end_point=(0, 255, 0)):  # green
+    from colorsys import rgb_to_hsv, hsv_to_rgb as _hsv_to_rgb
+    start_point = rgb_to_hsv(*start_point)
+    end_point = rgb_to_hsv(*end_point)
+
+    def hsv_to_rgb(*a):
+        res = _hsv_to_rgb(*a)
+        return tuple(int(x) for x in res)
+
+    def transition(value, start_point, end_point):
+        return start_point + (end_point - start_point) * value
+
+    def transition3(value, (s1, s2, s3), (e1, e2, e3)):
+        r1 = transition(value, s1, e1)
+        r2 = transition(value, s2, e2)
+        r3 = transition(value, s3, e3)
+        return (r1, r2, r3)
+
+    return hsv_to_rgb(*transition3(value, start_point, end_point))
+
+
 class XopgiBoard(models.Model):
     _name = 'xopgi.board'
     _description = "Board"

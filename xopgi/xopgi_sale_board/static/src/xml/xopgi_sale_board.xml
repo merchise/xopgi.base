@@ -306,10 +306,8 @@
             <td class="o_text">
               This Month
             </td>
-            <td t-attf-class="#{values and values['margin']['target'] ?
-                                'o_gradient' + values['margin']['sector'] :
-                                'o_secondary'}"
-                title="To Operation Result">
+            <td title="To Operation Result" class="o_secondary"
+                t-attf-style="background-color: #{values['margin']['color']};">
               <a href="#" class="o_dashboard_action"
                  name="xopgi_operations_performance.operations_result_report_action"
                  t-attf-data-context="{
@@ -325,10 +323,8 @@
                 </span>
               </a>
             </td>
-            <td t-attf-class="#{values and values['pax_margin']['target'] ?
-                                'o_gradient' + values['pax_margin']['sector'] :
-                                'o_secondary'}"
-                title="To Operation Result">
+            <td title="To Operation Result" class="o_secondary"
+                t-attf-style="background-color: #{values['pax_margin']['color']};">
               <a href="#" class="o_dashboard_action"
                  name="xopgi_operations_performance.operations_result_report_action"
                  t-attf-data-context="{
@@ -345,10 +341,8 @@
                 </span>
               </a>
             </td>
-            <td t-attf-class="#{values and values['done']['target'] ?
-                                'o_gradient' + values['done']['sector'] :
-                                'o_secondary'}"
-                title="To Activity Report">
+            <td title="To Activity Report" class="o_secondary"
+                t-attf-style="background-color: #{values['done']['color']};">
               <a href="#" class="o_dashboard_action"
                  name="crm.action_report_crm_opportunity"
                  data-context="{'search_default_done_this_month': 1}">
@@ -362,10 +356,8 @@
                 </span>
               </a>
             </td>
-            <td t-attf-class="#{values and values['won']['target'] ?
-                                'o_gradient' + values['won']['sector'] :
-                                'o_secondary'}"
-                title="To Opportunity Report">
+            <td title="To Opportunity Report" class="o_secondary"
+                t-attf-style="background-color: #{values['won']['color']};">
               <a href="#" class="o_dashboard_action"
                  name="crm.action_report_crm_opportunity"
                  data-context="{'search_default_won': 1,
@@ -381,10 +373,8 @@
                 </span>
               </a>
             </td>
-            <td t-attf-class="#{values and values['invoiced']['target'] ?
-                                'o_gradient' + values['invoiced']['sector'] :
-                                'o_secondary'}"
-                title="To Invoice Report">
+            <td title="To Invoice Report" class="o_secondary"
+                t-attf-style="background-color: #{values['invoiced']['color']};">
               <a href="#" class="o_dashboard_action"
                  name="account.action_account_invoice_report_all"
                  data-context="{'search_default_this_month': 1}">

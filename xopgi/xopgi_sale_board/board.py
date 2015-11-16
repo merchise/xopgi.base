@@ -23,12 +23,13 @@
 from datetime import date, timedelta
 from dateutil.relativedelta import relativedelta
 from openerp import api, fields, models, _
+from openerp.addons.xopgi_board.board import lineal_color_scaling
 from xoeuf.tools import normalize_date as to_date, dt2str, date2str
 
-    
+
 class CrmLead(models.Model):
     _inherit = 'crm.lead'
-    
+
     @api.model
     def retrieve_sales_dashboard_data(self, mode=None):
         base_domain = ([]
@@ -43,9 +44,9 @@ class CrmLead(models.Model):
             'sale': {'today': 0, 'overdue': 0, 'next_7_days': 0, },
             'margin': {'this_month': 0, 'last_month': 0, 'sector': 0, },
             'pax_margin': {'this_month': 0, 'last_month': 0, 'sector': 0, },
-            'done': {'this_month': 0, 'last_month': 0, 'sector': 0, },
-            'won': {'this_month': 0, 'last_month': 0, 'sector': 0, },
-            'invoiced': {'this_month': 0, 'last_month': 0, 'sector': 0, },
+            'done': {'this_month': 0, 'last_month': 0, 'color': '', },
+            'won': {'this_month': 0, 'last_month': 0, 'color': '', },
+            'invoiced': {'this_month': 0, 'last_month': 0, 'color': '', },
         }
         today = date.today()
         first_month_day = today.replace(day=1)
@@ -109,7 +110,7 @@ class CrmLead(models.Model):
         # Meetings
         min_date = dt2str(today)
         max_date = dt2str(today + timedelta(days=8))
-        # We need to add 'mymeetings' in the context for the search to 
+        # We need to add 'mymeetings' in the context for the search to
         # be correct.
         meetings = self.env['calendar.event']
         if base_domain:
@@ -190,10 +191,14 @@ class CrmLead(models.Model):
             value = res[indicator]['this_month']
             if target:
                 if target < value:
-                    sector = 10
+                    sector = 1.0
                 else:
-                    sector = int(float(value) / target * 10)
-            res[indicator]['sector'] = str(sector)
+                    sector = float(value) / target
+            if sector > 1.0:
+                color = '#e2e2e0'
+            else:
+                color = 'rgb(%s, %s, %s)' % lineal_color_scaling(sector)
+            res[indicator]['color'] = color
         return res
 
     @api.model
