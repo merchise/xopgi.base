@@ -40,7 +40,7 @@
             </td>
             <td class="o_text" title="To quotations">
               <a href="#" class="o_dashboard_action"
-                 name="sale.action_quotations">
+                 name="action_quotations_inh">
                 Quotations
               </a>
             </td>
@@ -112,7 +112,7 @@
             </td>
             <td class="o_main" title="Quotations" rowspan="2">
               <a href="#" class="o_dashboard_action"
-                 name="sale.action_quotations"
+                 name="action_quotations_inh"
                  data-context="{'search_default_create_this_week': 1}">
                 <br/>
                 <span class="o_highlight">
@@ -232,7 +232,7 @@
                                     values['quotation']['overdue'] != 0)"
                 class="o_warning">
               <a href="#" class="o_dashboard_action"
-                 name="sale.action_quotations"
+                 name="action_quotations_inh"
                  data-context="{'search_default_create_before_this_week': 1}">
                   <t t-if="!show_demo">
                     <t t-esc="values['quotation']['overdue']"/>
