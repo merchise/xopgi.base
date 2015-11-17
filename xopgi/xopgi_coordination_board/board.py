@@ -64,7 +64,7 @@ class CoordinationBoardUtil(models.AbstractModel):
                 else:
                     res['program']['today'] += 1
             # Dossier a coordinar
-            if dossier.project_ids and dossier.project_ids[0].arrival_date:
+            elif dossier.project_ids and dossier.project_ids[0].arrival_date:
                 arrival_date = to_date(dossier.project_ids[0].arrival_date)
                 if arrival_date > today:
                     if arrival_date <= next_21_days:
@@ -74,19 +74,20 @@ class CoordinationBoardUtil(models.AbstractModel):
                         if arrival_date <= next_30_days:
                             res['coord_dossier']['today'] += 1
             # Dossier a cerrar
-            if dossier.project_ids and dossier.project_ids[0].departure_date:
-                depart_date = to_date(dossier.project_ids[0].departure_date)
+            elif dossier.date:
+                depart_date = to_date(dossier.date)
                 if depart_date <= last2_week:
-                    res['coord_dossier']['overdue'] += 1
+                    res['close_dossier']['overdue'] += 1
                 elif depart_date < today:
-                    res['coord_dossier']['next_7_days'] += 1
+                    res['close_dossier']['next_7_days'] += 1
                     if depart_date <= last_week:
-                        res['coord_dossier']['today'] += 1
+                        res['close_dossier']['today'] += 1
         #indicadores
         indicators = ['planification_time', 'reserve_send_time',
                       'supplier_response_time', 'purchase_time']
         operation_count = {'this_month': 0, 'last_month': 0}
-        indicator_sum = dict.fromkeys(indicators, operation_count)
+        indicator_sum = {indicator: dict(operation_count)
+                         for indicator in indicators}
         for operation in self.env[
                 'xopgi_operations_performance.coordperf_report'].search(
                 [('account_analytic_id.create_date', '>=', dt2str(
@@ -96,11 +97,11 @@ class CoordinationBoardUtil(models.AbstractModel):
             position = ('this_month'
                         if today >= op_date >= first_month_day
                         else 'last_month')
-
             for indicator in indicators:
-                indicator_sum[indicator][position] += getattr(operation,
-                                                              indicator, 0)
-                operation_count[position] += 1
+                value = getattr(operation, indicator, 0)
+                if value:
+                    indicator_sum[indicator][position] += value
+            operation_count[position] += 1
         for position in operation_count.keys():
             for indicator in indicators:
                 res[indicator][position] = (float(

@@ -151,7 +151,8 @@
                  name="account.action_account_analytic_account_form"
                  t-attf-data-context="{
                       #{values['mode'] and values['mode'] == 'company' ?
-                        '' : '\'search_default_assigned_to_me\': 1'}
+                        '' : '\'search_default_assigned_to_me\': 1,'}
+                        'search_default_closed': 1
                   }">
                 <t t-if="values and values['close_dossier'] and
                          values['close_dossier']['next_7_days'] != 0">
@@ -396,7 +397,7 @@
                  t-attf-data-context="{
                       #{values['mode'] and values['mode'] == 'company' ?
                         '' : '\'search_default_my\': 1,'}
-                      'search_default_this_month': 1
+                      'search_default_last_month': 1
                   }">
                 <t t-esc="values['planification_time']['last_month']"/>
               </a>
@@ -407,7 +408,7 @@
                  t-attf-data-context="{
                       #{values['mode'] and values['mode'] == 'company' ?
                         '' : '\'search_default_my\': 1,'}
-                      'search_default_this_month': 1
+                      'search_default_last_month': 1
                   }">
                   <t t-esc="values['reserve_send_time']['last_month']"/>
               </a>
@@ -418,7 +419,7 @@
                  t-attf-data-context="{
                       #{values['mode'] and values['mode'] == 'company' ?
                         '' : '\'search_default_my\': 1,'}
-                      'search_default_this_month': 1
+                      'search_default_last_month': 1
                   }">
                 <t t-esc="values['supplier_response_time']['last_month']"/>
               </a>
@@ -429,7 +430,7 @@
                  t-attf-data-context="{
                       #{values['mode'] and values['mode'] == 'company' ?
                         '' : '\'search_default_my\': 1,'}
-                      'search_default_this_month': 1
+                      'search_default_last_month': 1
                   }">
                 <t t-esc="values['purchase_time']['last_month']"/>
               </a>

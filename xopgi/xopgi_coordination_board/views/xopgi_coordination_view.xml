@@ -74,7 +74,7 @@
                     ('dossier', '=', True),
                     ('project_ids.arrival_date', '&gt;', datetime.datetime.combine(
                       context_today() + datetime.timedelta(days=21),
-                      datetime.time(23,59,59)))
+                      datetime.time(23,59,59))),
                     ('project_ids.arrival_date', '&lt;=', datetime.datetime.combine(
                       context_today() + datetime.timedelta(days=30),
                       datetime.time(23,59,59)))
@@ -83,7 +83,7 @@
                   name="closed_before_last_week"
                   domain="[
                     ('dossier', '=', True),
-                    ('project_ids.departure_date', '&lt;=', datetime.datetime.combine(
+                    ('date', '&lt;=', datetime.datetime.combine(
                       context_today() - datetime.timedelta(days=15),
                       datetime.time(0,0,0)))
                   ]"/>
@@ -91,12 +91,19 @@
                   name="closed_last_week"
                   domain="[
                     ('dossier', '=', True),
-                    ('project_ids.departure_date', '&gt;', datetime.datetime.combine(
+                    ('date', '&gt;', datetime.datetime.combine(
                       context_today() - datetime.timedelta(days=15),
                       datetime.time(0,0,0))),
-                    ('project_ids.departure_date', '&lt;=', datetime.datetime.combine(
+                    ('date', '&lt;=', datetime.datetime.combine(
                       context_today() - datetime.timedelta(days=7),
                       datetime.time(0,0,0)))
+                  ]"/>
+          <filter string="Closed "
+                  name="closed"
+                  domain="[
+                    ('dossier', '=', True),
+                    ('date', '&lt;=', datetime.datetime.combine(
+                      context_today(), datetime.time(0,0,0)))
                   ]"/>
           <separator/>
         </xpath>
@@ -125,14 +132,12 @@
           <filter string="Create before last week " name="before_last_week"
                   domain="[
                     ('account_analytic_id.create_date', '&lt;=', datetime.datetime.combine(
-                      context_today() + datetime.timedelta(days=7),
-                      datetime.time(0,0,0))
+                      context_today() - datetime.timedelta(days=7), datetime.time(0,0,0)))
                   ]"/>
           <filter string="Create last week " name="last_week"
                   domain="[
                     ('account_analytic_id.create_date', '&gt;', datetime.datetime.combine(
-                      context_today() + datetime.timedelta(days=7),
-                      datetime.time(0,0,0))
+                      context_today() - datetime.timedelta(days=7), datetime.time(0,0,0)))
                   ]"/>
           <separator/>
         </xpath>
