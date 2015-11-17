@@ -116,6 +116,7 @@
       </field>
     </record>
 
+    <!-- Invoice Report Search View -->
     <record model="ir.ui.view" id="view_account_invoice_report_search_inh">
       <field name="name">account.invoice.report.search</field>
       <field name="model">account.invoice.report</field>
@@ -134,6 +135,7 @@
       </field>
     </record>
 
+    <!-- Results Report Search View -->
     <record model="ir.ui.view" id="result_performance_reports_view_search_inh">
       <field name="name">
         xopgi_operations_performance.result_performance_report.search
@@ -157,7 +159,7 @@
       </field>
     </record>
 
-
+    <!-- Sale orders Action -->
     <record id="action_quotations_inh" model="ir.actions.act_window">
       <field name="name">Quotations</field>
       <field name="type">ir.actions.act_window</field>
