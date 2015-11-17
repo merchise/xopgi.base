@@ -333,7 +333,7 @@
             <td class="o_text">Target</td>
             <td class="o_secondary">
               <span class="o_target_to_set" name='planification_time'
-                    t-att-data-mode="mode"
+                    t-att-data-mode="values['mode']"
                     t-att-value="values['planification_time']['target'] ?
                                  values['planification_time']['target'] : undefined"
                     title="Click to set">
@@ -347,7 +347,7 @@
             </td>
             <td class="o_secondary">
               <span class="o_target_to_set" name='reserve_send_time'
-                    t-att-data-mode="mode"
+                    t-att-data-mode="values['mode']"
                     t-att-value="values['reserve_send_time']['target'] ?
                                  values['reserve_send_time']['target'] : undefined"
                     title="Click to set">
@@ -361,7 +361,7 @@
             </td>
             <td class="o_secondary">
               <span class="o_target_to_set" name='supplier_response_time'
-                    t-att-data-mode="mode"
+                    t-att-data-mode="values['mode']"
                     t-att-value="values['supplier_response_time']['target'] ?
                                  values['supplier_response_time']['target'] : undefined"
                     title="Click to set">
@@ -375,7 +375,7 @@
             </td>
             <td class="o_secondary">
               <span class="o_target_to_set" name='purchase_time'
-                    t-att-data-mode="mode"
+                    t-att-data-mode="values['mode']"
                     t-att-value="values['purchase_time']['target'] ?
                                  values['purchase_time']['target'] : undefined"
                     title="Click to set">
@@ -390,8 +390,7 @@
           </tr>
           <tr>
             <td class="o_text">Last Month</td>
-            <td title="To Coordination Analysis" class="o_secondary"
-                t-attf-style="background-color: #{values['planification_time']['color']};">
+            <td title="To Coordination Analysis" class="o_secondary">
               <a href="#" class="o_dashboard_action"
                  name="xopgi_operations_performance.operations_result_report_action"
                  t-attf-data-context="{
@@ -402,8 +401,7 @@
                 <t t-esc="values['planification_time']['last_month']"/>
               </a>
             </td>
-            <td title="To Coordination Analysis" class="o_secondary"
-                t-attf-style="background-color: #{values['planification_time']['color']};">
+            <td title="To Coordination Analysis" class="o_secondary">
               <a href="#" class="o_dashboard_action"
                  name="xopgi_operations_performance.operations_result_report_action"
                  t-attf-data-context="{
@@ -414,8 +412,7 @@
                   <t t-esc="values['reserve_send_time']['last_month']"/>
               </a>
             </td>
-            <td title="To Coordination Analysis" class="o_secondary"
-                t-attf-style="background-color: #{values['supplier_response_time']['color']};">
+            <td title="To Coordination Analysis" class="o_secondary">
               <a href="#" class="o_dashboard_action"
                  name="xopgi_operations_performance.operations_result_report_action"
                  t-attf-data-context="{
@@ -426,8 +423,7 @@
                 <t t-esc="values['supplier_response_time']['last_month']"/>
               </a>
             </td>
-            <td title="To Coordination Analysis" class="o_secondary"
-                t-attf-style="background-color: #{values['purchase_time']['color']};">
+            <td title="To Coordination Analysis" class="o_secondary">
               <a href="#" class="o_dashboard_action"
                  name="xopgi_operations_performance.operations_result_report_action"
                  t-attf-data-context="{

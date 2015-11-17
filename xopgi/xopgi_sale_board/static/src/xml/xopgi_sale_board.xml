@@ -395,7 +395,7 @@
             <td class="o_text">Target</td>
             <td class="o_secondary">
               <span t-if="!show_demo" class="o_target_to_set" name='sale_margin'
-                    t-att-data-mode="mode"
+                    t-att-data-mode="values['mode']"
                     t-att-value="values['sale_margin']['target'] ?
                                  values['sale_margin']['target'] : undefined"
                     title="Click to set">
@@ -413,7 +413,7 @@
             <td class="o_secondary">
               <span t-if="!show_demo" class="o_target_to_set"
                     name='sale_pax_margin'
-                    t-att-data-mode="mode"
+                    t-att-data-mode="values['mode']"
                     t-att-value="values['sale_pax_margin']['target'] ?
                                  values['sale_pax_margin']['target'] : undefined"
                     title="Click to set">
@@ -430,7 +430,7 @@
             </td>
             <td class="o_secondary">
               <span t-if="!show_demo" class="o_target_to_set" name='sale_done'
-                    t-att-data-mode="mode"
+                    t-att-data-mode="values['mode']"
                     t-att-value="values['sale_done']['target'] ?
                                  values['sale_done']['target'] : undefined"
                     title="Click to set">
@@ -447,7 +447,7 @@
             </td>
             <td class="o_secondary">
               <span t-if="!show_demo" class="o_target_to_set" name='sale_won'
-                    t-att-data-mode="mode"
+                    t-att-data-mode="values['mode']"
                     t-att-value="values['sale_won']['target'] ?
                                  values['sale_won']['target'] : undefined"
                     title="Click to set">
@@ -464,7 +464,7 @@
             </td>
             <td class="o_secondary">
               <span t-if="!show_demo" class="o_target_to_set" name='sale_invoiced'
-                    t-att-data-mode="mode"
+                    t-att-data-mode="values['mode']"
                     t-att-value="values['sale_invoiced']['target'] ?
                                  values['sale_invoiced']['target'] : undefined"
                     title="Click to set">
