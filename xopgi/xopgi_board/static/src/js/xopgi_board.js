@@ -13,6 +13,8 @@ instance.web.form.XopgiBoard = instance.web.form.FormWidget.extend({
     start: function() {
         this._super.apply(this, arguments);
 
+        var self = this;
+
         this.render();
         // Events
         this.$el.delegate('.oe_board_container .oe_fold',
@@ -21,6 +23,12 @@ instance.web.form.XopgiBoard = instance.web.form.FormWidget.extend({
                           this.on_dashboard_action_clicked);
         this.$el.delegate('.o_target_to_set', 'click',
                           this.on_dashboard_target_clicked);
+        // Get the function to format currencies
+        new instance.web.Model("res.currency")
+            .call("get_format_currencies_js_function")
+            .then(function (data) {
+                self.formatCurrency = new Function("amount, currency_id", data);
+            });
     },
 
     fetch_data: function () {
@@ -85,42 +93,6 @@ instance.web.form.XopgiBoard = instance.web.form.FormWidget.extend({
                     self.do_action(data, options);
                 }
             });
-    },
-
-    render_monetary_field: function (value, currency_id) {
-        var self = this;
-        this.currency = false;
-        this.get_currency_info(currency_id);
-        if (this.currency) {
-            var digits_precision = [69, this.currency.decimal_places || 2];
-            value = instance.web.format_value(value || 0, {
-                type: "float",
-                digits: digits_precision
-            });
-            if (this.currency.position === "after") {
-                value += this.currency.symbol;
-            } else {
-                value = this.currency.symbol + value;
-            }
-        }
-        return value
-    },
-
-    get_currency_info: function (currency_id) {
-        this.currency = {
-            symbol: '$',
-            position: 'after',
-            decimal_places: 2
-        };
-        var self = this;
-        if (currency_id) {
-            new Model("res.currency").query(
-                ["symbol", "position", "decimal_places"])
-                .filter([["id", "=", currency_id]]).first()
-                .then(function (result) {
-                    self.currency = result ? result : self.currency;
-                });
-        }
     },
 
     on_change_input_target: function (e) {

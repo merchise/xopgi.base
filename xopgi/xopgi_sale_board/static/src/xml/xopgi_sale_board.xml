@@ -317,7 +317,7 @@
                   }">
                 <span class="o_monetary_highlight">
                   <t t-if="!show_demo"
-                     t-esc="widget.render_monetary_field(
+                     t-esc="widget.formatCurrency(
                     values['sale_margin']['this_month'], values['currency_id'])"/>
                   <t t-if="show_demo" t-esc="$10"/>
                 </span>
@@ -334,7 +334,7 @@
                   }">
                 <span class="o_monetary_highlight">
                   <t t-if="!show_demo"
-                     t-esc="widget.render_monetary_field(
+                     t-esc="widget.formatCurrency(
                     values['sale_pax_margin']['this_month'],
                     values['currency_id'])"/>
                   <t t-if="show_demo" t-esc="$10"/>
@@ -364,7 +364,7 @@
                                 'search_default_won_this_month': 1}">
                 <span class="o_monetary_highlight">
                   <t t-if="!show_demo">
-                    <t t-esc="widget.render_monetary_field(
+                    <t t-esc="widget.formatCurrency(
                         values['sale_won']['this_month'], values['currency_id'])"/>
                   </t>
                   <t t-if="show_demo">
@@ -380,7 +380,7 @@
                  data-context="{'search_default_this_month': 1}">
                 <span class="o_monetary_highlight">
                   <t t-if="!show_demo">
-                    <t t-esc="widget.render_monetary_field(
+                    <t t-esc="widget.formatCurrency(
                         values['sale_invoiced']['this_month'],
                         values['currency_id'])"/>
                   </t>
@@ -491,7 +491,7 @@
                       'search_default_last_month': 1
                   }">
                 <t t-if="!show_demo"
-                   t-esc="widget.render_monetary_field(
+                   t-esc="widget.formatCurrency(
                       values['sale_margin']['last_month'], values['currency_id'])"/>
                 <t t-if="show_demo" t-esc="$10"/>
               </a>
@@ -505,7 +505,7 @@
                       'search_default_last_month': 1
                   }">
                 <t t-if="!show_demo"
-                   t-esc="widget.render_monetary_field(
+                   t-esc="widget.formatCurrency(
                       values['sale_pax_margin']['last_month'],
                       values['currency_id'])"/>
                 <t t-if="show_demo" t-esc="$10"/>
@@ -525,7 +525,7 @@
                  data-context="{'search_default_won': 1,
                                 'search_default_won_last_month': 1}">
                 <t t-if="!show_demo"
-                   t-esc="widget.render_monetary_field(
+                   t-esc="widget.formatCurrency(
                       values['sale_won']['last_month'], values['currency_id'])"/>
                 <t t-if="show_demo" t-esc="$10"/>
               </a>
@@ -535,7 +535,7 @@
                  name="account.action_account_invoice_report_all"
                  data-context="{'search_default_last_month': 1}">
                 <t t-if="!show_demo"
-                    t-esc="widget.render_monetary_field(
+                    t-esc="widget.formatCurrency(
                         values['sale_invoiced']['last_month'],
                         values['currency_id'])"/>
                 <t t-if="show_demo" t-esc="$10"/>
