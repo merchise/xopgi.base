@@ -46,7 +46,7 @@ class XopgiBoard(models.Model):
     def get_board_widgets(self):
         lst = self.get_data()
         result = [list(itr) for k, itr in
-                  groupby(lst, lambda x: x.get('category', x))]
+                  groupby(lst, lambda x: x.get('category', x) or x)]
         return result
 
     def get_data(self):
