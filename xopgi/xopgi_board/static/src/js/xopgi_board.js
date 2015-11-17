@@ -138,15 +138,7 @@ instance.web.form.XopgiBoard = instance.web.form.FormWidget.extend({
                 .call('modify_target_dashboard',
                       [target_name, target_value, target_mode])
                 .then(function () {
-                    target_value = target_value ? target_value : 'Click to set';
-                    var $span = $('<span>' + target_value + '</span>');
-                    $span.attr('name', target_name);
-                    $span.attr('class', 'o_target_to_set');
-                    $span.attr('title', 'Click to set');
-                    $span.attr('value', target_value);
-                    $.when(self._updated).then(function () {
-                        $span.replaceAll(self.$('.oe_changing[name=' + target_name + ']'));
-                    });
+                    self.do_reload();
                 });
         }
     },
@@ -183,6 +175,13 @@ instance.web.form.XopgiBoard = instance.web.form.FormWidget.extend({
                 .select();
         });
     },
+
+    do_reload: function () {
+        var view_manager = this.view.getParent(),
+            action_manager = view_manager.getParent();
+        this.view.destroy();
+        action_manager.do_action(view_manager.action);
+    }
 });
 
 instance.web.form.tags.add('xopgi_board', 'instance.web.form.XopgiBoard');
