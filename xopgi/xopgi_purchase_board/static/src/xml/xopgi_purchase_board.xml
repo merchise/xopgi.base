@@ -1,0 +1,443 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+  <t t-name="purchase_widget">
+    <div class="o_sales_dashboard">
+      <div style="width: 50%;">
+        <div class="o_highlight">To do</div>
+        <table class="table table-condensed">
+          <tr>
+            <td/>
+            <td class="o_text">
+              <a href="#" class="o_dashboard_action"
+                 name="sale.action_quotations"
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_coordinate_by_me\': 1'}
+                  }">
+                Presupuestos a confirmar
+              </a>
+            </td>
+            <td class="o_text">
+              <a href="#" class="o_dashboard_action"
+                 name="purchase_requisition.action_purchase_requisition">
+                Programas de compra
+              </a>
+            </td>
+            <td class="o_text">
+              <a href="#" class="o_dashboard_action"
+                 name="account.action_account_analytic_account_form"
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_assigned_to_me\': 1'}
+                  }">
+                Dossiers a coordinar
+              </a>
+            </td>
+            <td class="o_text">
+              <a href="#" class="o_dashboard_action"
+                 name="account.action_account_analytic_account_form">
+                Dossiers a cerrar
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td class="o_text">
+              Today
+            </td>
+            <td class="o_main" title="Presupuestos confirmar" rowspan="2">
+              <a href="#" class="o_dashboard_action"
+                 name="sale.action_quotations"
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_coordinate_by_me\': 1,'}
+                      'search_default_create_this_week': 1
+                  }">
+                <span class="o_highlight">
+                  <t t-if="values and values['quotation'] and
+                       values['quotation']['today'] != 0">
+                    <t t-esc="values['quotation']['today']"/>
+                  </t>
+                  <t t-if="!(values and values['quotation'] and
+                         values['quotation']['today'] != 0)">
+                    0
+                  </t>
+                </span>
+              </a>
+            </td>
+            <td class="o_main" title="Programas de compra" rowspan="2">
+              <a href="#" class="o_dashboard_action"
+                 name="purchase_requisition.action_purchase_requisition"
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '\'search_default_group_by_dossier\': 1,' :
+                        '\'search_default_my_dossiers\': 1,'}
+                      'search_default_last_week': 1,
+                      'search_default_requisitions_open': 1
+                  }">
+                <span class="o_highlight">
+                  <t t-if="values and values['program'] and
+                       values['program']['today'] != 0">
+                    <t t-esc="values['program']['today']"/>
+                  </t>
+                  <t t-if="!(values and values['program'] and
+                         values['program']['today'] != 0)">
+                    0
+                  </t>
+                </span>
+              </a>
+            </td>
+            <td class="o_main" title="Dossiers a coordinar">
+              <a href="#" class="o_dashboard_action"
+                 name="account.action_account_analytic_account_form"
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_assigned_to_me\': 1,'}
+                      'search_default_arrival_next_month': 1
+                  }">
+                <span class="o_highlight">
+                  <t t-if="values and values['coord_dossier'] and
+                           values['coord_dossier']['today'] != 0">
+                    <t t-esc="values['coord_dossier']['today']"/>
+                  </t>
+                  <t t-if="!(values and values['coord_dossier'] and
+                            values['coord_dossier']['today'] != 0)">
+                    0
+                  </t>
+                </span>
+              </a>
+            </td>
+            <td class="o_main" title="Dossiers a cerrar">
+              <a href="#" class="o_dashboard_action"
+                 name="account.action_account_analytic_account_form"
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_assigned_to_me\': 1,'}
+                      'search_default_closed_last_week': 1
+                  }">
+                <span class="o_highlight">
+                  <t t-if="values and values['close_dossier'] and
+                           values['close_dossier']['today'] != 0">
+                    <t t-esc="values['close_dossier']['today']"/>
+                  </t>
+                  <t t-if="!(values and values['close_dossier'] and
+                            values['close_dossier']['today'] != 0)">
+                    0
+                  </t>
+                </span>
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td class="o_text">Next 7 days</td>
+            <td class="o_main" title="Dossiers a coordinar">
+              <a href="#" class="o_dashboard_action"
+                 name="account.action_account_analytic_account_form"
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_assigned_to_me\': 1'}
+                  }">
+                <t t-if="values and values['coord_dossier'] and
+                         values['coord_dossier']['next_7_days'] != 0">
+                  <t t-esc="values['coord_dossier']['next_7_days']"/>
+                </t>
+                <t t-if="!(values and values['coord_dossier'] and
+                          values['coord_dossier']['next_7_days'] != 0)">
+                  0
+                </t>
+              </a>
+            </td>
+            <td class="o_main" title="Dossiers a coordinar">
+              <a href="#" class="o_dashboard_action"
+                 name="account.action_account_analytic_account_form"
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_assigned_to_me\': 1,'}
+                        'search_default_closed': 1
+                  }">
+                <t t-if="values and values['close_dossier'] and
+                         values['close_dossier']['next_7_days'] != 0">
+                  <t t-esc="values['close_dossier']['next_7_days']"/>
+                </t>
+                <t t-if="!(values and values['close_dossier'] and
+                          values['close_dossier']['next_7_days'] != 0)">
+                  0
+                </t>
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td class="o_text">Overdue</td>
+            <td class="o_warning" title="Presupuestos confirmar"
+                t-if="values and values['quotation'] and
+                      values['quotation']['overdue'] != 0">
+              <a href="#" class="o_dashboard_action"
+                 name="sale.action_quotations"
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_coordinate_by_me\': 1,'}
+                      'search_default_create_before_this_week': 1
+                  }">
+                <t t-esc="values['quotation']['overdue']"/>
+              </a>
+            </td>
+            <td class="o_warning" title="Programas de compra"
+                t-if="values and values['program'] and
+                      values['program']['overdue'] != 0">
+              <a href="#" class="o_dashboard_action"
+                 name="purchase_requisition.action_purchase_requisition"
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '\'search_default_group_by_dossier\': 1,' :
+                        '\'search_default_my_dossiers\': 1,'}
+                      'search_default_before_last_week': 1,
+                      'search_default_requisitions_open': 1
+                  }">
+                <t t-esc="values['program']['overdue']"/>
+              </a>
+            </td>
+            <td class="o_warning" title="Dossiers a coordinar"
+                t-if="values and values['coord_dossier'] and
+                      values['coord_dossier']['overdue'] != 0">
+              <a href="#" class="o_dashboard_action"
+                 name="account.action_account_analytic_account_form"
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_assigned_to_me\': 1,'}
+                      'search_default_arrival_21_days': 1
+                  }">
+                <t t-esc="values['coord_dossier']['overdue']"/>
+              </a>
+            </td>
+            <td class="o_warning" title="Dossiers a cerrar"
+                t-if="values and values['close_dossier'] and
+                      values['close_dossier']['overdue'] != 0">
+              <a href="#" class="o_dashboard_action"
+                 name="account.action_account_analytic_account_form"
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_assigned_to_me\': 1,'}
+                      'search_default_closed_before_last_week': 1
+                  }">
+                <t t-esc="values['close_dossier']['overdue']"/>
+              </a>
+            </td>
+          </tr>
+        </table>
+      </div><div style="width: 50%;">
+        <div class="o_highlight">Performance</div>
+        <table class="hidden-xs table table-condensed">
+          <tr>
+            <td/>
+            <td class="o_text">
+              <a href="#" class="o_dashboard_action"
+                 name="xopgi_operations_performance.coordination_performance_report_action"
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_my\': 1'}
+                  }">
+                Tiempo de planificación
+              </a>
+            </td>
+            <td class="o_text">
+              <a href="#" class="o_dashboard_action"
+                 name="xopgi_operations_performance.coordination_performance_report_action"
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_my\': 1'}
+                  }">
+                Tiempo envío de reserva
+              </a>
+            </td>
+            <td class="o_text">
+              <a href="#" class="o_dashboard_action"
+                 name="xopgi_operations_performance.coordination_performance_report_action"
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_my\': 1'}
+                  }">
+                Tiempo respuesta del proveedor
+              </a>
+            </td>
+            <td class="o_text">
+              <a href="#" class="o_dashboard_action"
+                 name="xopgi_operations_performance.coordination_performance_report_action"
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_my\': 1'}
+                  }">
+                Tiempo de compra
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td class="o_text">
+              This Month
+            </td>
+            <td title="To Coordination Analysis" class="o_secondary"
+                t-attf-style="background-color: #{values['planification_time']['color']};">
+              <a href="#" class="o_dashboard_action"
+                 name="xopgi_operations_performance.operations_result_report_action"
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_my\': 1,'}
+                      'search_default_this_month': 1
+                  }">
+                <span class="o_highlight">
+                  <t t-esc="values['planification_time']['this_month']"/>
+                </span>
+              </a>
+            </td>
+            <td title="To Coordination Analysis" class="o_secondary"
+                t-attf-style="background-color: #{values['reserve_send_time']['color']};">
+              <a href="#" class="o_dashboard_action"
+                 name="xopgi_operations_performance.operations_result_report_action"
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_my\': 1,'}
+                      'search_default_this_month': 1
+                  }">
+                <span class="o_highlight">
+                  <t t-esc="values['reserve_send_time']['this_month']"/>
+                </span>
+              </a>
+            </td>
+            <td title="To Coordination Analysis" class="o_secondary"
+                t-attf-style="background-color: #{values['supplier_response_time']['color']};">
+              <a href="#" class="o_dashboard_action"
+                 name="xopgi_operations_performance.operations_result_report_action"
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_my\': 1,'}
+                      'search_default_this_month': 1
+                  }">
+                <span class="o_highlight">
+                  <t t-esc="values['supplier_response_time']['this_month']"/>
+                </span>
+              </a>
+            </td>
+            <td title="To Coordination Analysis" class="o_secondary"
+                t-attf-style="background-color: #{values['purchase_time']['color']};">
+              <a href="#" class="o_dashboard_action"
+                 name="xopgi_operations_performance.operations_result_report_action"
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_my\': 1,'}
+                      'search_default_this_month': 1
+                  }">
+                <span class="o_highlight">
+                  <t t-esc="values['purchase_time']['this_month']"/>
+                </span>
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td class="o_text">Target</td>
+            <td class="o_secondary">
+              <span class="o_target_to_set" name='planification_time'
+                    t-att-data-mode="values['mode']"
+                    t-att-value="values['planification_time']['target'] ?
+                                 values['planification_time']['target'] : undefined"
+                    title="Click to set">
+                <t t-if="values['planification_time']['target']">
+                  <t t-esc="values['planification_time']['target']"/>
+                </t>
+                <t t-if="!values['planification_time']['target']">
+                  Click to set
+                </t>
+              </span>
+            </td>
+            <td class="o_secondary">
+              <span class="o_target_to_set" name='reserve_send_time'
+                    t-att-data-mode="values['mode']"
+                    t-att-value="values['reserve_send_time']['target'] ?
+                                 values['reserve_send_time']['target'] : undefined"
+                    title="Click to set">
+                <t t-if="values['reserve_send_time']['target']">
+                  <t t-esc="values['reserve_send_time']['target']"/>
+                </t>
+                <t t-if="!values['reserve_send_time']['target']">
+                  Click to set
+                </t>
+              </span>
+            </td>
+            <td class="o_secondary">
+              <span class="o_target_to_set" name='supplier_response_time'
+                    t-att-data-mode="values['mode']"
+                    t-att-value="values['supplier_response_time']['target'] ?
+                                 values['supplier_response_time']['target'] : undefined"
+                    title="Click to set">
+                <t t-if="values['supplier_response_time']['target']">
+                  <t t-esc="values['supplier_response_time']['target']"/>
+                </t>
+                <t t-if="!values['supplier_response_time']['target']">
+                  Click to set
+                </t>
+              </span>
+            </td>
+            <td class="o_secondary">
+              <span class="o_target_to_set" name='purchase_time'
+                    t-att-data-mode="values['mode']"
+                    t-att-value="values['purchase_time']['target'] ?
+                                 values['purchase_time']['target'] : undefined"
+                    title="Click to set">
+                <t t-if="values['purchase_time']['target']">
+                  <t t-esc="values['purchase_time']['target']"/>
+                </t>
+                <t t-if="!values['purchase_time']['target']">
+                  Click to set
+                </t>
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td class="o_text">Last Month</td>
+            <td title="To Coordination Analysis" class="o_secondary">
+              <a href="#" class="o_dashboard_action"
+                 name="xopgi_operations_performance.operations_result_report_action"
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_my\': 1,'}
+                      'search_default_last_month': 1
+                  }">
+                <t t-esc="values['planification_time']['last_month']"/>
+              </a>
+            </td>
+            <td title="To Coordination Analysis" class="o_secondary">
+              <a href="#" class="o_dashboard_action"
+                 name="xopgi_operations_performance.operations_result_report_action"
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_my\': 1,'}
+                      'search_default_last_month': 1
+                  }">
+                  <t t-esc="values['reserve_send_time']['last_month']"/>
+              </a>
+            </td>
+            <td title="To Coordination Analysis" class="o_secondary">
+              <a href="#" class="o_dashboard_action"
+                 name="xopgi_operations_performance.operations_result_report_action"
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_my\': 1,'}
+                      'search_default_last_month': 1
+                  }">
+                <t t-esc="values['supplier_response_time']['last_month']"/>
+              </a>
+            </td>
+            <td title="To Coordination Analysis" class="o_secondary">
+              <a href="#" class="o_dashboard_action"
+                 name="xopgi_operations_performance.operations_result_report_action"
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_my\': 1,'}
+                      'search_default_last_month': 1
+                  }">
+                <t t-esc="values['purchase_time']['last_month']"/>
+              </a>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </t>
+</templates>
