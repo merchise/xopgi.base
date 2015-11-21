@@ -22,11 +22,11 @@ class XopgiBoardWidget(models.Model):
 
     _order = 'category, priority, name'
 
-    name = fields.Char()
+    name = fields.Char(translate=True)
     priority = fields.Integer(default=1000)
     category = fields.Many2one('ir.module.category')
     template_name = fields.Char(required=True)
-    xml_template = fields.Text()
+    xml_template = fields.Text(translate=True)
     python_code = fields.Text()
     job_positions = fields.Many2many('hr.job')
     users = fields.Many2many('res.users', compute=lambda *a: False,
