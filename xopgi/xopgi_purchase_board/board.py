@@ -25,11 +25,10 @@ class PurchaseBoard(models.AbstractModel):
     def get_data(self, mode=None):
         res = {
             'mode': mode or '',
-            'quotation': {'today': 0, 'overdue': 0},
             'program': {'today': 0, 'overdue': 0},
             'coord_dossier': {'today': 0, 'overdue': 0, 'next_7_days': 0},
-            'close_dossier': {'today': 0, 'overdue': 0, 'next_7_days': 0},
-            'planification_time': {'this_month': 0, 'last_month': 0, 'color': 0},
+            'confirm_order': {'today': 0, 'overdue': 0, 'next_7_days': 0},
+            'not_invoiced': {'today': 0, 'overdue': 0, 'next_7_days': 0},
             'reserve_send_time': {
                 'this_month': 0, 'last_month': 0, 'color': 0},
             'supplier_response_time': {
@@ -43,16 +42,7 @@ class PurchaseBoard(models.AbstractModel):
         next_21_days = today + timedelta(days=21)
         next_30_days = today + timedelta(days=30)
         last_week = today + timedelta(days=-7)
-        last2_week = today + timedelta(days=-15)
-        for quotation in self.env['sale.order'].search(
-                [('state', 'in', ('draft', 'sent'))] +
-                    ([] if mode else [('coordinator_id', '=', self._uid)])):
-            # Presupuestos de venta a confirmar
-            quotation_date = to_date(quotation.create_date)
-            if quotation_date <= last_week:
-                res['quotation']['overdue'] += 1
-            else:
-                res['quotation']['today'] += 1
+        next_week = today + timedelta(days=7)
         for dossier in self.env['account.analytic.account'].search(
                 [('dossier', '=', True)] + (
                     [] if mode else [('manager_id', '=', self._uid)])):
@@ -73,18 +63,28 @@ class PurchaseBoard(models.AbstractModel):
                         res['coord_dossier']['next_7_days'] += 1
                         if arrival_date <= next_30_days:
                             res['coord_dossier']['today'] += 1
-            # Dossier a cerrar
-            elif dossier.date:
-                depart_date = to_date(dossier.date)
-                if depart_date <= last2_week:
-                    res['close_dossier']['overdue'] += 1
-                elif depart_date < today:
-                    res['close_dossier']['next_7_days'] += 1
-                    if depart_date <= last_week:
-                        res['close_dossier']['today'] += 1
+        for po in self.env['purchase.order'].search(
+                [('minimum_planned_date', '!=', False),
+                 ('minimum_planned_date', '>=', dt2str(today)),
+                 ('minimum_planned_date', '<=', dt2str(next_30_days))] + (
+                    [] if mode else [('user_id', '=', self._uid)])):
+            #  Presupuestos a confirmar y por facturar
+            po_date = to_date(po.minimum_planned_date)
+            if po_date <= next_week:
+                res['confirm_order']['overdue'] += 1
+                if po.open:
+                    res['not_invoiced']['overdue'] += 1
+            elif last_week < po_date <= next_21_days:
+                res['confirm_order']['today'] += 1
+                if po.open:
+                    res['not_invoiced']['today'] += 1
+            if last_week < po_date <= next_21_days:
+                res['confirm_order']['next_7_days'] += 1
+                if po.open:
+                    res['not_invoiced']['next_7_days'] += 1
         #indicadores
-        indicators = ['planification_time', 'reserve_send_time',
-                      'supplier_response_time', 'purchase_time']
+        indicators = ['reserve_send_time', 'supplier_response_time',
+                      'purchase_time']
         operation_count = {'this_month': 0, 'last_month': 0}
         indicator_sum = {indicator: dict(operation_count)
                          for indicator in indicators}

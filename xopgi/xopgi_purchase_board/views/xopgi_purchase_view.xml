@@ -1,5 +1,53 @@
 <?xml version="1.0"?>
 <openerp>
   <data>
+    <!-- Purchase orders action-->
+    <record id="purchase_form_action" model="ir.actions.act_window">
+      <field name="name">Purchase Orders</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">purchase.order</field>
+      <field name="view_mode">tree,form,graph,calendar</field>
+      <field name="search_view_id" ref="purchase.view_purchase_order_filter"/>
+    </record>
+
+    <!-- Purchase orders filtes-->
+    <record id="view_purchase_order_filter_inh" model="ir.ui.view">
+      <field name="name">purchase.order.list.select</field>
+      <field name="model">purchase.order</field>
+      <field name="inherit_id" ref="xhg_autrement_purchase_business_adapter.purchase_order_search_inherit2"/>
+      <field name="arch" type="xml">
+        <xpath expr="//filter[@string='Next week']" position="attributes">
+          <attribute name="name">next_week</attribute>
+        </xpath>
+        <xpath expr="//filter[@string='Next week']" position="after">
+          <filter string="Next 21 days "
+                  name="next_21_days"
+                  domain="[
+                  ('minimum_planned_date', '!=', False),
+                  ('state', 'not in', ['cancel']),
+                  ('minimum_planned_date', '&gt;', datetime.datetime.combine(
+                    context_today() + datetime.timedelta(7),
+                    datetime.time(23,59,59))),
+                  ('minimum_planned_date', '&lt;=', datetime.datetime.combine(
+                    context_today() + datetime.timedelta(21),
+                    datetime.time(0,0,0)))]"/>
+          <filter string="Next month "
+                  name="next_month"
+                  domain="[
+                  ('minimum_planned_date', '!=', False),
+                  ('state', 'not in', ['cancel']),
+                  ('minimum_planned_date', '&gt;', datetime.datetime.combine(
+                    context_today() + datetime.timedelta(7),
+                    datetime.time(23,59,59))),
+                  ('minimum_planned_date', '&lt;=', datetime.datetime.combine(
+                    context_today() + datetime.timedelta(30),
+                    datetime.time(0,0,0)))]"/>
+          <separator/>
+          <filter string="My" name="my_orders"
+                  domain="[('user_id', '=', uid)]"/>
+          <separator/>
+        </xpath>
+      </field>
+    </record>
   </data>
 </openerp>

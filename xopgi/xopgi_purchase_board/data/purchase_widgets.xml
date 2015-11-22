@@ -2,7 +2,7 @@
 <openerp>
   <data>
     <record id="individual_purchase_widget" model="xopgi.board.widget">
-      <field name="name">Coordination</field>
+      <field name="name">Purchase</field>
       <field name="template_name">individual_purchase_widget</field>
       <field name="xml_template"><![CDATA[
         <templates>
@@ -18,7 +18,7 @@
     </record>
 
     <record id="company_purchase_widget" model="xopgi.board.widget">
-      <field name="name">Coordination (Company)</field>
+      <field name="name">Purchase (Company)</field>
       <field name="template_name">company_purchase_widget</field>
       <field name="xml_template"><![CDATA[
         <templates>
