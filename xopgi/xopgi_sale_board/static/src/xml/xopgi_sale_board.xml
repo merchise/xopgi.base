@@ -18,7 +18,7 @@
                 Meetings
               </a>
             </td>
-            <td class="o_text" title="To your leads">
+            <td class="o_text" title="To leads">
               <a href="#" class="o_dashboard_action"
                  name="xopgi_sale_board.crm_leads_all"
                  t-attf-data-context="{
@@ -28,14 +28,14 @@
                 Leads
               </a>
             </td>
-            <td class="o_text" title="To your pipeline">
+            <td class="o_text" title="To opportunities">
               <a href="#" class="o_dashboard_action"
                  name="crm.crm_case_category_act_oppor11"
                  t-attf-data-context="{
                       #{values['mode'] and values['mode'] == 'company' ?
                         '' : '\'search_default_assigned_to_me\': 1'}
                   }">
-                Opportunities
+                Activities
               </a>
             </td>
             <td class="o_text" title="To quotations">
@@ -46,7 +46,11 @@
             </td>
             <td class="o_text" title="To Sale Orders">
               <a href="#" class="o_dashboard_action"
-                 name="sale.action_orders">
+                 name="xopgi_sale_board.action_orders"
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_my_sale_orders_filter\': 1'}
+                  }">
                 Sale Orders
               </a>
             </td>
@@ -55,7 +59,7 @@
             <td class="o_text">
               Today
             </td>
-            <td class="o_main" title="To Calendar">
+            <td class="o_main" title="Today's Meetings">
               <a href="#" class="o_dashboard_action"
                  name="calendar.action_calendar_event"
                  t-attf-data-context="{
@@ -72,7 +76,7 @@
                 </span>
               </a>
             </td>
-            <td class="o_main" title="To your leads" rowspan="2">
+            <td class="o_main" title="Leads from last 7 days" rowspan="2">
               <a href="#" class="o_dashboard_action"
                  name="xopgi_sale_board.crm_leads_all"
                  t-attf-data-context="{
@@ -92,7 +96,7 @@
                 <br/>
               </a>
             </td>
-            <td class="o_main" title="Opportunities">
+            <td class="o_main" title="Opportunities with next action today">
               <a href="#" class="o_dashboard_action"
                  name="crm.crm_case_category_act_oppor11"
                  t-attf-data-context="{
@@ -110,10 +114,14 @@
                 </span>
               </a>
             </td>
-            <td class="o_main" title="Quotations" rowspan="2">
+            <td class="o_main" title="Quotations from last 7 days"
+                rowspan="2">
               <a href="#" class="o_dashboard_action"
                  name="xopgi_sale_board.action_quotations_inh"
-                 data-context="{'search_default_create_this_week': 1}">
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_my_sale_orders_filter\': 1,'}
+                        'search_default_create_this_week': 1}">
                 <br/>
                 <span class="o_highlight">
                   <t t-if="!show_demo">
@@ -126,10 +134,13 @@
                 <br/>
               </a>
             </td>
-            <td class="o_main" title="Sale Orders">
+            <td class="o_main" title="Today's Sale Orders">
               <a href="#" class="o_dashboard_action"
-                 name="sale.action_orders"
-                 data-context="{'search_default_today': 1}">
+                 name="xopgi_sale_board.action_orders"
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_my_sale_orders_filter\': 1,'}
+                        'search_default_today': 1}">
                 <span class="o_highlight">
                   <t t-if="!show_demo">
                     <t t-esc="values['sale']['today']"/>
@@ -143,7 +154,7 @@
           </tr>
           <tr>
             <td class="o_text">Next 7 days</td>
-            <td class="o_main" title="To Calendar">
+            <td class="o_main" title="Next 7 days Meetings">
               <a href="#" class="o_dashboard_action"
                  name="calendar.action_calendar_event"
                  t-attf-data-context="{
@@ -158,7 +169,8 @@
                 </t>
               </a>
             </td>
-            <td class="o_main" title="To Activities">
+            <td class="o_main"
+                title="Opportunities with next action in next 7 days">
               <a href="#" class="o_dashboard_action"
                  name="crm.crm_case_category_act_oppor11"
                  t-attf-data-context="{
@@ -174,10 +186,13 @@
                 </t>
               </a>
             </td>
-            <td class="o_main" title="Sale Orders">
+            <td class="o_main" title="Next 7 days Sale Orders">
               <a href="#" class="o_dashboard_action"
-                 name="sale.action_orders"
-                 data-context="{'search_default_this_week': 1}">
+                 name="xopgi_sale_board.action_orders"
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_my_sale_orders_filter\': 1,'}
+                        'search_default_this_week': 1}">
                 <t t-if="!show_demo">
                   <t t-esc="values['sale']['next_7_days']"/>
                 </t>
@@ -193,7 +208,7 @@
             <td/>
             <td t-if="show_demo or (values and values['lead'] and
                                     values['lead']['overdue'] != 0)"
-                class="o_warning">
+                class="o_warning" title="Leads created before last 7 days">
               <a href="#" class="o_dashboard_action"
                  name="xopgi_sale_board.crm_leads_all"
                  t-attf-data-context="{
@@ -212,7 +227,8 @@
             </td>
             <td t-if="show_demo or (values and
                                     values['opportunity']['overdue'] != 0)"
-                class="o_warning" title="To Activities">
+                class="o_warning"
+                title="Opportunities with next action before today">
               <a href="#" class="o_dashboard_action"
                  name="crm.crm_case_category_act_oppor11"
                  t-attf-data-context="{
@@ -230,10 +246,14 @@
             </td>
             <td t-if="show_demo or (values and values['quotation'] and
                                     values['quotation']['overdue'] != 0)"
-                class="o_warning">
+                class="o_warning"
+                title="Quotations created before last 7 days">
               <a href="#" class="o_dashboard_action"
                  name="xopgi_sale_board.action_quotations_inh"
-                 data-context="{'search_default_create_before_this_week': 1}">
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_my_sale_orders_filter\': 1,'}
+                        'search_default_create_before_this_week': 1}">
                   <t t-if="!show_demo">
                     <t t-esc="values['quotation']['overdue']"/>
                   </t>
@@ -245,10 +265,13 @@
             </td>
             <td t-if="show_demo or (values and values['sale'] and
                                     values['sale']['overdue'] != 0)"
-                class="o_warning">
+                class="o_warning" title="Overdue Sale Orders">
               <a href="#" class="o_dashboard_action"
-                 name="sale.action_orders"
-                 data-context="{'search_default_overdue': 1}">
+                 name="xopgi_sale_board.action_orders"
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_my_sale_orders_filter\': 1,'}
+                        'search_default_overdue': 1}">
                   <t t-if="!show_demo">
                     <t t-esc="values['sale']['overdue']"/>
                   </t>
@@ -266,7 +289,7 @@
         <table class="hidden-xs table table-condensed">
           <tr>
             <td/>
-            <td class="o_text">
+            <td class="o_text" title="To Operations Results Report">
               <a href="#" class="o_dashboard_action"
                  name="xopgi_operations_performance.operations_result_report_action"
                  t-attf-data-context="{
@@ -276,7 +299,7 @@
                 Margin
               </a>
             </td>
-            <td class="o_text">
+            <td class="o_text" title="To Operations Results Report">
               <a href="#" class="o_dashboard_action"
                  name="xopgi_operations_performance.operations_result_report_action"
                  t-attf-data-context="{
@@ -286,19 +309,23 @@
                 Margin by Pax
               </a>
             </td>
-            <td class="o_text" >
+            <td class="o_text" title="To Opportunities Analysis Report">
               <a href="#" class="o_dashboard_action"
-                 name="crm.action_report_crm_opportunity">Activities Done</a>
+                 name="crm.action_report_crm_opportunity">Opportunities</a>
             </td>
-            <td class="o_text">
+            <td class="o_text" title="To Opportunities Analysis Report">
               <a href="#" class="o_dashboard_action"
                  name="crm.action_report_crm_opportunity"
                  data-context="{'search_default_won': 1}">Won in
               Opportunities</a>
             </td>
-            <td class="o_text">
+            <td class="o_text" title="To Invoices Analysis Report">
               <a href="#" class="o_dashboard_action"
-                 name="account.action_account_invoice_report_all">Invoiced
+                 name="account.action_account_invoice_report_all"
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_my\': 1'}
+                  }">Invoiced
               </a>
             </td>
           </tr>
@@ -306,7 +333,7 @@
             <td class="o_text">
               This Month
             </td>
-            <td title="To Operation Result" class="o_secondary"
+            <td title="Margin on this month operations" class="o_secondary"
                 t-attf-style="background-color: #{values['sale_margin']['color']};">
               <a href="#" class="o_dashboard_action"
                  name="xopgi_operations_performance.operations_result_report_action"
@@ -323,7 +350,8 @@
                 </span>
               </a>
             </td>
-            <td title="To Operation Result" class="o_secondary"
+            <td title="Margin by Pax on this month operations"
+                class="o_secondary"
                 t-attf-style="background-color: #{values['sale_pax_margin']['color']};">
               <a href="#" class="o_dashboard_action"
                  name="xopgi_operations_performance.operations_result_report_action"
@@ -341,7 +369,8 @@
                 </span>
               </a>
             </td>
-            <td title="To Activity Report" class="o_secondary"
+            <td title="Opportunities started on this month"
+                class="o_secondary"
                 t-attf-style="background-color: #{values['sale_done']['color']};">
               <a href="#" class="o_dashboard_action"
                  name="crm.action_report_crm_opportunity"
@@ -356,7 +385,8 @@
                 </span>
               </a>
             </td>
-            <td title="To Opportunity Report" class="o_secondary"
+            <td title="Won in opportunities on this month"
+                class="o_secondary"
                 t-attf-style="background-color: #{values['sale_won']['color']};">
               <a href="#" class="o_dashboard_action"
                  name="crm.action_report_crm_opportunity"
@@ -373,11 +403,15 @@
                 </span>
               </a>
             </td>
-            <td title="To Invoice Report" class="o_secondary"
+            <td title="Amount invoiced on this month" class="o_secondary"
                 t-attf-style="background-color: #{values['sale_invoiced']['color']};">
               <a href="#" class="o_dashboard_action"
                  name="account.action_account_invoice_report_all"
-                 data-context="{'search_default_this_month': 1}">
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_my\': 1,'}
+                        'search_default_this_month': 1
+                  }">
                 <span class="o_monetary_highlight">
                   <t t-if="!show_demo">
                     <t t-esc="widget.formatCurrency(
@@ -482,7 +516,7 @@
           </tr>
           <tr>
             <td class="o_text">Last Month</td>
-            <td class="o_secondary" title="To Operation Result">
+            <td class="o_secondary" title="Margin on last month operations">
               <a href="#" class="o_dashboard_action"
                  name="xopgi_operations_performance.operations_result_report_action"
                  t-attf-data-context="{
@@ -496,7 +530,8 @@
                 <t t-if="show_demo" t-esc="$10"/>
               </a>
             </td>
-            <td class="o_secondary" title="To Operation Result">
+            <td class="o_secondary"
+                title="Margin by Pax on last month operations">
               <a href="#" class="o_dashboard_action"
                  name="xopgi_operations_performance.operations_result_report_action"
                  t-attf-data-context="{
@@ -511,7 +546,8 @@
                 <t t-if="show_demo" t-esc="$10"/>
               </a>
             </td>
-            <td class="o_secondary" title="To Activity Report">
+            <td class="o_secondary"
+                title="Opportunities started on last month">
               <a href="#" class="o_dashboard_action"
                  name="crm.action_report_crm_opportunity"
                  data-context="{'search_default_done_last_month': 1}">
@@ -519,7 +555,7 @@
                 <t t-if="show_demo" t-esc="10"/>
               </a>
             </td>
-            <td class="o_secondary" title="To Opportunity Report">
+            <td class="o_secondary" title="Won in opportunities on last month">
               <a href="#" class="o_dashboard_action"
                  name="crm.action_report_crm_opportunity"
                  data-context="{'search_default_won': 1,
@@ -530,10 +566,14 @@
                 <t t-if="show_demo" t-esc="$10"/>
               </a>
             </td>
-            <td class="o_secondary" title="To Invoice Report">
+            <td class="o_secondary" title="Amount invoiced on last month">
               <a href="#" class="o_dashboard_action"
                  name="account.action_account_invoice_report_all"
-                 data-context="{'search_default_last_month': 1}">
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_my\': 1,'}
+                        'search_default_last_month': 1
+                  }">
                 <t t-if="!show_demo"
                     t-esc="widget.formatCurrency(
                         values['sale_invoiced']['last_month'],
@@ -543,19 +583,6 @@
             </td>
           </tr>
         </table>
-      </div>
-      <div t-if="show_demo" class="o_welcome_message">
-        <div class="o_welcome_image">
-          <i class="fa fa-smile-o fa-5x"></i>
-        </div>
-        <div class="o_welcome_content">
-          <h2>Hi there!</h2>
-          <h4>Great sales journeys start with a clean pipeline.</h4>
-          <h4>Create a few opportunities to activate your dashboard.</h4>
-          <a class="btn btn-primary o_dashboard_action"
-             name="xopgi_sale_board.crm_lead_action_activities">Your Pipeline
-          </a>
-        </div>
       </div>
     </div>
   </t>

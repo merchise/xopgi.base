@@ -9,7 +9,7 @@
       <field name="arch" type="xml">
         <filter name="unassigned" position="after">
           <separator/>
-          <filter string="Today Activities" name="today"
+          <filter string="Today's Activities" name="today"
                   domain="[('date_action', '=', context_today().strftime('%Y-%m-%d'))]"/>
           <filter string="This Week Activities" name="this_week"
                   domain="['&amp;', ('date_action', '&gt;=', context_today().strftime('%Y-%m-%d')),
@@ -91,6 +91,19 @@
       </field>
     </record>
 
+    <!-- Sale orders Action -->
+    <record id="action_orders" model="ir.actions.act_window">
+      <field name="name">Sales Orders</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">sale.order</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">tree,form,calendar,graph</field>
+      <field name="search_view_id" ref="sale.view_sales_order_filter"/>
+      <field name="domain">
+        [('state', 'not in', ('draft', 'sent', 'cancel'))]
+      </field>
+    </record>
+
     <!-- Opportunities Report Search View -->
     <record model="ir.ui.view" id="view_report_crm_opportunity_filter_inh">
       <field name="name">crm.opportunity.report.select</field>
@@ -123,14 +136,20 @@
       <field name="inherit_id"
              ref="account.view_account_invoice_report_search"/>
       <field name="arch" type="xml">
+
+        <filter name="thisyear" position="before">
+          <filter string="My invoices" name="my"
+                  domain="[('user_id', '=', uid)]"/>
+          <separator/>
+        </filter>
         <filter name="thisyear" position="after">
           <separator/>
           <filter string="This month" name="this_month"
                   domain="[('date', '&gt;=', (context_today().replace(day=1)).strftime('%Y-%m-%d') + ' 00:00:00')]"/>
           <filter string="Last month" name="last_month"
                   domain="['&amp;',
-                           ('date', '&lt;', context_today().replace(day=1).strftime('%Y-%m-%d') + ' 00:00:00'),
-                           ('date', '&gt;=', (context_today()-datetime.timedelta(days=30)).replace(day=1).strftime('%Y-%m-%d') + ' 00:00:00')]"/>
+                           ('date', '&lt;', context_today().replace(day=1).strftime('%Y-%m-%d')),
+                           ('date', '&gt;=', (context_today()-datetime.timedelta(days=30)).replace(day=1).strftime('%Y-%m-%d'))]"/>
         </filter>
       </field>
     </record>
@@ -159,7 +178,7 @@
       </field>
     </record>
 
-    <!-- Sale orders Action -->
+    <!-- Quotations Action -->
     <record id="action_quotations_inh" model="ir.actions.act_window">
       <field name="name">Quotations</field>
       <field name="type">ir.actions.act_window</field>
@@ -167,23 +186,8 @@
       <field name="view_type">form</field>
       <field name="view_id" ref="sale.view_quotation_tree"/>
       <field name="view_mode">tree,form,calendar,graph</field>
-      <field name="domain">[('state','in',('draft','sent','cancel'))]</field>
+      <field name="domain">[('state','in',('draft','sent'))]</field>
       <field name="search_view_id" ref="sale.view_sales_order_filter"/>
-      <field name="help" type="html">
-        <p class="oe_view_nocontent_create">
-          Click to create a quotation, the first step of a new sale.
-        </p>
-        <p>
-          Odoo will help you handle efficiently the complete sale flow:
-          from the quotation to the sales order, the
-          delivery, the invoicing and the payment collection.
-        </p>
-        <p>
-          The social feature helps you organize discussions on each sales
-          order, and allow your customers to keep track of the evolution
-          of the sales order.
-        </p>
-      </field>
     </record>
   </data>
 </openerp>
