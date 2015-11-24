@@ -1,0 +1,518 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* xopgi_sale_board
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 8.0.20151103.180513+8e15968\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-11-24 15:33+0000\n"
+"PO-Revision-Date: 2015-11-24 15:33+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:37
+#, python-format
+msgid "Activities"
+msgstr "Activities"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:569
+#, python-format
+msgid "Amount invoiced on last month"
+msgstr "Amount invoiced on last month"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:407
+#, python-format
+msgid "Amount invoiced on this month"
+msgstr "Amount invoiced on this month"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:435
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:439
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:453
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:457
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:470
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:474
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:487
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:491
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:504
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:508
+#, python-format
+msgid "Click to set"
+msgstr "Click to set"
+
+#. module: xopgi_sale_board
+#: model:ir.model,name:xopgi_sale_board.model_res_company
+msgid "Companies"
+msgstr "Sociétés"
+
+#. module: xopgi_sale_board
+#: view:crm.opportunity.report:xopgi_sale_board.view_report_crm_opportunity_filter_inh
+msgid "Create on last month"
+msgstr "Create on last month"
+
+#. module: xopgi_sale_board
+#: view:crm.opportunity.report:xopgi_sale_board.view_report_crm_opportunity_filter_inh
+msgid "Create on this month"
+msgstr "Create on this month"
+
+#. module: xopgi_sale_board
+#: view:sale.order:xopgi_sale_board.view_sale_order_filter_inh
+msgid "Created before this week"
+msgstr "Created before this week"
+
+#. module: xopgi_sale_board
+#: view:sale.order:xopgi_sale_board.view_sale_order_filter_inh
+msgid "Created on this week"
+msgstr "Created on this week"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:328
+#, python-format
+msgid "Invoiced"
+msgstr "Facturée"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:518
+#, python-format
+msgid "Last Month"
+msgstr "Last Month"
+
+#. module: xopgi_sale_board
+#: view:account.invoice.report:xopgi_sale_board.view_account_invoice_report_search_inh
+#: view:xopgi_operations_performance.opresult_report:xopgi_sale_board.result_performance_reports_view_search_inh
+msgid "Last month"
+msgstr "Last month"
+
+#. module: xopgi_sale_board
+#: model:ir.model,name:xopgi_sale_board.model_crm_lead
+msgid "Lead/Opportunity"
+msgstr "Piste/opportunité"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:27
+#: model:ir.actions.act_window,name:xopgi_sale_board.crm_leads_all
+#, python-format
+msgid "Leads"
+msgstr "Pistes"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:211
+#, python-format
+msgid "Leads created before last 7 days"
+msgstr "Leads created before last 7 days"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:79
+#, python-format
+msgid "Leads from last 7 days"
+msgstr "Leads from last 7 days"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:298
+#, python-format
+msgid "Margin"
+msgstr "Margin"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:308
+#, python-format
+msgid "Margin by Pax"
+msgstr "Margin by Pax"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:534
+#, python-format
+msgid "Margin by Pax on last month operations"
+msgstr "Margin by Pax on last month operations"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:355
+#, python-format
+msgid "Margin by Pax on this month operations"
+msgstr "Margin by Pax on this month operations"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:519
+#, python-format
+msgid "Margin on last month operations"
+msgstr "Margin on last month operations"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:337
+#, python-format
+msgid "Margin on this month operations"
+msgstr "Margin on this month operations"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:17
+#, python-format
+msgid "Meetings"
+msgstr "Rendez-vous"
+
+#. module: xopgi_sale_board
+#: view:account.invoice.report:xopgi_sale_board.view_account_invoice_report_search_inh
+msgid "My invoices"
+msgstr "My invoices"
+
+#. module: xopgi_sale_board
+#: view:xopgi_operations_performance.opresult_report:xopgi_sale_board.result_performance_reports_view_search_inh
+msgid "My operations"
+msgstr "My operations"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:156
+#, python-format
+msgid "Next 7 days"
+msgstr "Next 7 days"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:157
+#, python-format
+msgid "Next 7 days Meetings"
+msgstr "Next 7 days Meetings"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:189
+#, python-format
+msgid "Next 7 days Sale Orders"
+msgstr "Next 7 days Sale Orders"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:314
+#, python-format
+msgid "Opportunities"
+msgstr "Opportunités"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:550
+#, python-format
+msgid "Opportunities started on last month"
+msgstr "Opportunities started on last month"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:374
+#, python-format
+msgid "Opportunities started on this month"
+msgstr "Opportunities started on this month"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:231
+#, python-format
+msgid "Opportunities with next action before today"
+msgstr "Opportunities with next action before today"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:173
+#, python-format
+msgid "Opportunities with next action in next 7 days"
+msgstr "Opportunities with next action in next 7 days"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:99
+#, python-format
+msgid "Opportunities with next action today"
+msgstr "Opportunities with next action today"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:206
+#: view:sale.order:xopgi_sale_board.view_sale_order_filter_inh
+#, python-format
+msgid "Overdue"
+msgstr "Overdue"
+
+#. module: xopgi_sale_board
+#: view:crm.lead:xopgi_sale_board.view_crm_case_opportunities_filter_inh
+msgid "Overdue Activities"
+msgstr "Overdue Activities"
+
+#. module: xopgi_sale_board
+#: view:crm.lead:xopgi_sale_board.view_crm_case_leads_filter_inh
+msgid "Overdue Leads"
+msgstr "Overdue Leads"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:268
+#, python-format
+msgid "Overdue Sale Orders"
+msgstr "Overdue Sale Orders"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:288
+#, python-format
+msgid "Performance"
+msgstr "Performance"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:43
+#: model:ir.actions.act_window,name:xopgi_sale_board.action_quotations_inh
+#, python-format
+msgid "Quotations"
+msgstr "Devis"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:250
+#, python-format
+msgid "Quotations created before last 7 days"
+msgstr "Quotations created before last 7 days"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:118
+#, python-format
+msgid "Quotations from last 7 days"
+msgstr "Quotations from last 7 days"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:53
+#, python-format
+msgid "Sale Orders"
+msgstr "Bons de commande"
+
+#. module: xopgi_sale_board
+#: model:xopgi.board.widget,name:xopgi_sale_board.individual_sale_widget
+msgid "Sales"
+msgstr "Sales"
+
+#. module: xopgi_sale_board
+#: model:xopgi.board.widget,name:xopgi_sale_board.company_sale_widget
+msgid "Sales (company)"
+msgstr "Sales (company)"
+
+#. module: xopgi_sale_board
+#: model:ir.actions.act_window,name:xopgi_sale_board.action_orders
+msgid "Sales Orders"
+msgstr "Bons de commande"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:429
+#, python-format
+msgid "Target"
+msgstr "Target"
+
+#. module: xopgi_sale_board
+#: field:res.company,target_sale_done:0
+#: field:res.users,target_sale_done:0
+msgid "Target sale done"
+msgstr "Target sale done"
+
+#. module: xopgi_sale_board
+#: field:res.company,target_sale_invoiced:0
+#: field:res.users,target_sale_invoiced:0
+msgid "Target sale invoiced"
+msgstr "Target sale invoiced"
+
+#. module: xopgi_sale_board
+#: field:res.company,target_sale_margin:0
+#: field:res.users,target_sale_margin:0
+msgid "Target sale margin"
+msgstr "Target sale margin"
+
+#. module: xopgi_sale_board
+#: field:res.company,target_sale_pax_margin:0
+#: field:res.users,target_sale_pax_margin:0
+msgid "Target sale pax margin"
+msgstr "Target sale pax margin"
+
+#. module: xopgi_sale_board
+#: field:res.company,target_sale_won:0
+#: field:res.users,target_sale_won:0
+msgid "Target sale won"
+msgstr "Target sale won"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:333
+#, python-format
+msgid "This Month"
+msgstr "This Month"
+
+#. module: xopgi_sale_board
+#: view:sale.order:xopgi_sale_board.view_sale_order_filter_inh
+msgid "This Week"
+msgstr "This Week"
+
+#. module: xopgi_sale_board
+#: view:crm.lead:xopgi_sale_board.view_crm_case_opportunities_filter_inh
+msgid "This Week Activities"
+msgstr "This Week Activities"
+
+#. module: xopgi_sale_board
+#: view:account.invoice.report:xopgi_sale_board.view_account_invoice_report_search_inh
+#: view:xopgi_operations_performance.opresult_report:xopgi_sale_board.result_performance_reports_view_search_inh
+msgid "This month"
+msgstr "This month"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:322
+#, python-format
+msgid "To Invoices Analysis Report"
+msgstr "To Invoices Analysis Report"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:292
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:302
+#, python-format
+msgid "To Operations Results Report"
+msgstr "To Operations Results Report"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:312
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:316
+#, python-format
+msgid "To Opportunities Analysis Report"
+msgstr "To Opportunities Analysis Report"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:47
+#, python-format
+msgid "To Sale Orders"
+msgstr "To Sale Orders"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:11
+#, python-format
+msgid "To calendar"
+msgstr "To calendar"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:7
+#, python-format
+msgid "To do"
+msgstr "To do"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:21
+#, python-format
+msgid "To leads"
+msgstr "To leads"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:31
+#, python-format
+msgid "To opportunities"
+msgstr "To opportunities"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:41
+#, python-format
+msgid "To quotations"
+msgstr "To quotations"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:59
+#: view:sale.order:xopgi_sale_board.view_sale_order_filter_inh
+#, python-format
+msgid "Today"
+msgstr "Aujourd'hui"
+
+#. module: xopgi_sale_board
+#: view:crm.lead:xopgi_sale_board.view_crm_case_opportunities_filter_inh
+msgid "Today Activities"
+msgstr "Today Activities"
+
+#. module: xopgi_sale_board
+#: view:crm.lead:xopgi_sale_board.view_crm_case_leads_filter_inh
+msgid "Today Leads"
+msgstr "Today Leads"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:62
+#, python-format
+msgid "Today's Meetings"
+msgstr "Today's Meetings"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:137
+#, python-format
+msgid "Today's Sale Orders"
+msgstr "Today's Sale Orders"
+
+#. module: xopgi_sale_board
+#: model:ir.model,name:xopgi_sale_board.model_res_users
+msgid "Users"
+msgstr "Utilisateurs"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:319
+#, python-format
+msgid "Won in\n"
+"              Opportunities"
+msgstr "Won in\n"
+"              Opportunities"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:558
+#, python-format
+msgid "Won in opportunities on last month"
+msgstr "Won in opportunities on last month"
+
+#. module: xopgi_sale_board
+#. openerp-web
+#: code:addons/xopgi_sale_board/static/src/xml/xopgi_sale_board.xml:390
+#, python-format
+msgid "Won in opportunities on this month"
+msgstr "Won in opportunities on this month"
+
+#. module: xopgi_sale_board
+#: view:crm.opportunity.report:xopgi_sale_board.view_report_crm_opportunity_filter_inh
+msgid "Won on last month"
+msgstr "Won on last month"
+
+#. module: xopgi_sale_board
+#: view:crm.opportunity.report:xopgi_sale_board.view_report_crm_opportunity_filter_inh
+msgid "Won on this month"
+msgstr "Won on this month"
