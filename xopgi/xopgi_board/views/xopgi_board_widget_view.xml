@@ -48,7 +48,7 @@
           <field name="category" select="True" widget="selection"/>
           <field name="job_positions" select="True" widget="selection"/>
           <group expand="0" string="Group By">
-            <filter name="priority" string="Partner"
+            <filter name="priority" string="Priority"
                     context="{'group_by':'priority'}"/>
           </group>
         </search>
