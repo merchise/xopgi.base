@@ -32,12 +32,9 @@ class XopgiBoardWidget(models.Model):
     users = fields.Many2many('res.users', compute=lambda *a: False,
                              search='_search_by_user')
 
-    # @api.one
-    # @api.multi
-    # def name_get(self):
-    #     res = super(XopgiBoardWidget, self).name_get()
-    #     if res and not res[-1]:
-    #         return res[0], self.template_name
+    @api.multi
+    def name_get(self):
+        return [(item.id, item.name or item.template_name) for item in self]
 
     def _search_by_user(self, operator, operand):
         """ This is made to allow create an ir.rule based on logged user jobs.
@@ -54,6 +51,8 @@ class XopgiBoardWidget(models.Model):
         widgets = self.search_read(fields=[
             'name', 'category', 'template_name', 'xml_template',
             'python_code'])
+        logger.debug(
+            'Widgets to show %r' % [w['name'] for w in widgets])
         for widget in widgets:
             self._eval_python_code(widget)
         return widgets
@@ -62,12 +61,16 @@ class XopgiBoardWidget(models.Model):
         python_code = widget.get('python_code', '')
         if not python_code:
             return
-        name = widget.get('python_code', '')
+        name = widget.get('name', '')
         env = self.env
         local_dict = locals()
         local_dict.update(globals().get('__builtins__', {}))
         try:
+            logger.debug('Starting evaluation of Python code for widget %s' %
+                         name)
             safe_eval(python_code, local_dict, mode='exec', nocopy=True)
+            logger.debug('Python code for widget %s evaluated sussefully.' %
+                         name)
         except:
             logger.exception('An error happen trying to execute the Python '
                              'code for \'%s\' board widget, python code: %s'

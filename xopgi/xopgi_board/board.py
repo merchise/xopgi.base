@@ -13,6 +13,7 @@
 
 from openerp import api, models
 from itertools import groupby
+from xoutil import logger
 
 
 def lineal_color_scaling(value,  # 0-1 float
@@ -44,6 +45,8 @@ class XopgiBoard(models.Model):
 
     @api.model
     def get_board_widgets(self):
+        logger.debug(
+            'Starting search widgets for user: %s' % self.env.user.login)
         lst = self.get_data()
         result = [list(itr) for k, itr in
                   groupby(lst, lambda x: x.get('category', x) or x)]
@@ -61,5 +64,4 @@ class XopgiBoard(models.Model):
         target_value = int(target_value) if target_value else 0
         if hasattr(target_obj, 'target_' + target_name):
             return setattr(target_obj, 'target_' + target_name, target_value)
-
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
