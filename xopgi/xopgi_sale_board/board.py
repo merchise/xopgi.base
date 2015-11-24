@@ -248,6 +248,8 @@ class CrmLead(models.Model):
 
     def _get_sale_margin(self, base_domain, today, first_month_day,
                            first_last_month_day):
+        base_domain = ([('primary_salesperson_id', '=', self._uid)]
+                       if base_domain else [])
         inv_query = """
             SELECT
               SUM(CASE WHEN date >= %%s
