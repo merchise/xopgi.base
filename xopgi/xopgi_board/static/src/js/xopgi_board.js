@@ -7,6 +7,8 @@ instance.xopgi_board = instance.xopgi_board || {};
 instance.web.form.XopgiBoard = instance.web.form.FormWidget.extend({
     init: function(view, node) {
         view.ViewManager.$('.oe_view_manager_buttons').hide();
+        var $webclient = view.$el.parents('.oe_webclient');
+        $webclient.find('.oe_leftbar').hide();
         this._super(view, node);
     },
 
