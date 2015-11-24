@@ -39,6 +39,38 @@ def lineal_color_scaling(value,  # 0-1 float
     return hsv_to_rgb(*transition3(value, start_point, end_point))
 
 
+def get_query_from_domain(self, domain):
+    query = self._where_calc(domain)
+    self._apply_ir_rules(query, 'read')
+    from_clause, where_clause, where_params = query.get_sql()
+    where_str = where_clause and (" WHERE %s" % where_clause) or ''
+    return from_clause, where_str, where_params
+
+
+def get_targets(self, values, indicators=(), from_company=False):
+    target_obj = self.env.user if from_company else self.env.user.company_id
+    for indicator in indicators:
+        target = getattr(target_obj, 'target_%s' % indicator, 0)
+        values[indicator].update(
+            target=target,
+            color=get_indicator_color(target, values[indicator]['this_month'])
+        )
+
+
+def get_indicator_color(target, value):
+    sector = 11
+    if target:
+        if target < value:
+            sector = 1.0
+        else:
+            sector = float(value) / target
+    if sector > 1.0:
+        color = '#e2e2e0'
+    else:
+        color = 'rgb(%s, %s, %s)' % lineal_color_scaling(sector)
+    return color
+
+
 class XopgiBoard(models.Model):
     _name = 'xopgi.board'
     _description = "Board"
