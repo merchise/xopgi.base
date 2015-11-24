@@ -374,7 +374,10 @@
                 t-attf-style="background-color: #{values['sale_done']['color']};">
               <a href="#" class="o_dashboard_action"
                  name="crm.action_report_crm_opportunity"
-                 data-context="{'search_default_done_this_month': 1}">
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_my\': 1,'}
+                        'search_default_done_this_month': 1}">
                 <span class="o_highlight">
                   <t t-if="!show_demo">
                     <t t-esc="values['sale_done']['this_month']"/>
@@ -390,8 +393,11 @@
                 t-attf-style="background-color: #{values['sale_won']['color']};">
               <a href="#" class="o_dashboard_action"
                  name="crm.action_report_crm_opportunity"
-                 data-context="{'search_default_won': 1,
-                                'search_default_won_this_month': 1}">
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_my\': 1,'}
+                        'search_default_won': 1,
+                        'search_default_won_this_month': 1}">
                 <span class="o_monetary_highlight">
                   <t t-if="!show_demo">
                     <t t-esc="widget.formatCurrency(
@@ -550,7 +556,10 @@
                 title="Opportunities started on last month">
               <a href="#" class="o_dashboard_action"
                  name="crm.action_report_crm_opportunity"
-                 data-context="{'search_default_done_last_month': 1}">
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_my\': 1,'}
+                        'search_default_done_last_month': 1}">
                 <t t-if="!show_demo" t-esc="values['sale_done']['last_month']"/>
                 <t t-if="show_demo" t-esc="10"/>
               </a>
@@ -558,8 +567,11 @@
             <td class="o_secondary" title="Won in opportunities on last month">
               <a href="#" class="o_dashboard_action"
                  name="crm.action_report_crm_opportunity"
-                 data-context="{'search_default_won': 1,
-                                'search_default_won_last_month': 1}">
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '' : '\'search_default_my\': 1,'}
+                        'search_default_won': 1,
+                        'search_default_won_last_month': 1}">
                 <t t-if="!show_demo"
                    t-esc="widget.formatCurrency(
                       values['sale_won']['last_month'], values['currency_id'])"/>

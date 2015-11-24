@@ -112,6 +112,9 @@
       <field name="arch" type="xml">
         <filter name="opportunity" position="after">
           <separator/>
+          <filter string="My opportunities" name="my"
+                  domain="[('user_id', '=', uid)]"/>
+          <separator/>
           <filter string="Won on this month" name="won_this_month"
                   domain="[('date_closed', '&gt;=', (context_today().replace(day=1)).strftime('%Y-%m-%d') + ' 00:00:00')]"/>
           <filter string="Won on last month" name="won_last_month"

@@ -516,3 +516,8 @@ msgstr "Won on last month"
 #: view:crm.opportunity.report:xopgi_sale_board.view_report_crm_opportunity_filter_inh
 msgid "Won on this month"
 msgstr "Won on this month"
+
+#. module: xopgi_sale_board
+#: view:crm.opportunity.report:xopgi_sale_board.view_report_crm_opportunity_filter_inh
+msgid "My opportunities"
+msgstr "My opportunities"
