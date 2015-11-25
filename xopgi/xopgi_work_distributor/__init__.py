@@ -13,6 +13,9 @@
 # terms of the LICENCE attached (see LICENCE file) in the distribution
 # package.
 
-import work_distributor
-import res_config
+from __future__ import (division as _py3_division,
+                        print_function as _py3_print,
+                        absolute_import as _py3_abs_import)
 
+from . import work_distributor  # noqa
+from . import res_config  # noqa

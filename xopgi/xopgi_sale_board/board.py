@@ -20,11 +20,17 @@
 #
 ##############################################################################
 
+from __future__ import (division as _py3_division,
+                        print_function as _py3_print,
+                        absolute_import as _py3_abs_import)
+
 from datetime import date, timedelta
 from dateutil.relativedelta import relativedelta
-from openerp import api, fields, models, _
+
+from openerp import api, fields, models
 from openerp.addons.xopgi_board.board import lineal_color_scaling
-from xoeuf.tools import normalize_date as to_date, dt2str, date2str
+
+from xoeuf.tools import normalize_date as to_date, dt2str
 
 
 class CrmLead(models.Model):
