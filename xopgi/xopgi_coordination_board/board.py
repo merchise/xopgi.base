@@ -183,5 +183,3 @@ class AnalyticAccount(models.Model):
                                        search='_search_open_requisitions')
     close_requisitions = fields.Integer(compute='_get_requisitions',
                                         search='_search_close_requisitions')
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

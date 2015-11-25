@@ -221,5 +221,3 @@ class ResCompany(models.Model):
     target_sale_done = fields.Integer()
     target_sale_won = fields.Integer()
     target_sale_invoiced = fields.Integer()
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

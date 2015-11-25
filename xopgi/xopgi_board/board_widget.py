@@ -73,5 +73,3 @@ class XopgiBoardWidget(models.Model):
                              'code for \'%s\' board widget, python code: %s'
                              % (name, python_code))
         widget.update(local_dict.get('result', {}))
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
