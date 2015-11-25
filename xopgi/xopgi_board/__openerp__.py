@@ -20,6 +20,8 @@ Create dashboard employee functions oriented.
 
     """, "author": "Merchise Autrement",
     "website": "http://xhg.ca.merchise.org/addons/xopgi_board",
+    # FIXME:  xopgi.base is supposed to provide the basis for other xopgi and
+    # xhg modules, it's suspicious we depend on xopgi_hr_contract.
     'depends': ['web_kanban', 'xopgi_hr_contract'],
     'data': [
         'views/xopgi_board_view.xml',

@@ -20,6 +20,7 @@ Create Sale Person board widget.
 
     """, "author": "Merchise Autrement",
     "website": "http://xhg.ca.merchise.org/addons/xopgi_board",
+    # FIXME:  Suspicious dependency on xopgi_operations_performance.
     'depends': ['xopgi_board', 'sale', 'xopgi_operations_performance'],
     'data': [
         'views/xopgi_board_view.xml',
