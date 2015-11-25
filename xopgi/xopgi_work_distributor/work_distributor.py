@@ -3,7 +3,7 @@
 # --------------------------------------------------------------------------
 # xopgi_work_distributor.work_distributor
 # --------------------------------------------------------------------------
-# Copyright (c) 2014 Merchise Autrement and Contributors
+# Copyright (c) 2014, 2015 Merchise Autrement and Contributors
 # All rights reserved.
 #
 # Author: Merchise Autrement
