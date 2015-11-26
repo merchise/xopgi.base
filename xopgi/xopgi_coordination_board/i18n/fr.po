@@ -1,0 +1,408 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* xopgi_coordination_board
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 8.0.20151103.180513+8e15968\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-11-26 02:36+0000\n"
+"PO-Revision-Date: 2015-11-26 02:36+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: xopgi_coordination_board
+#: model:ir.model,name:xopgi_coordination_board.model_account_analytic_account
+msgid "Analytic Account"
+msgstr "Compte analytique"
+
+#. module: xopgi_coordination_board
+#: view:account.analytic.account:xopgi_coordination_board.view_account_analytic_account_search_inh
+msgid "Arrivals after this month"
+msgstr "Arrivals after this month"
+
+#. module: xopgi_coordination_board
+#: view:account.analytic.account:xopgi_coordination_board.view_account_analytic_account_search_inh
+msgid "Arrivals in coming 3 or 4 weeks"
+msgstr "Arrivals in coming 3 or 4 weeks"
+
+#. module: xopgi_coordination_board
+#: view:account.analytic.account:xopgi_coordination_board.view_account_analytic_account_search_inh
+msgid "Arrivals next 21 days"
+msgstr "Arrivals next 21 days"
+
+#. module: xopgi_coordination_board
+#: view:account.analytic.account:xopgi_coordination_board.view_account_analytic_account_search_inh
+msgid "Assigned to me"
+msgstr "Assigned to me"
+
+#. module: xopgi_coordination_board
+#: model:ir.actions.act_window,name:xopgi_coordination_board.action_purchase_requisition
+msgid "Calls for Bids"
+msgstr "Licitations"
+
+#. module: xopgi_coordination_board
+#. openerp-web
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:363
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:367
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:377
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:381
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:391
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:395
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:405
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:409
+#, python-format
+msgid "Click to set"
+msgstr "Click to set"
+
+#. module: xopgi_coordination_board
+#: model:ir.model,name:xopgi_coordination_board.model_res_company
+msgid "Companies"
+msgstr "Sociétés"
+
+#. module: xopgi_coordination_board
+#: view:sale.order:xopgi_coordination_board.view_sale_order_filter_inh
+msgid "Coordinate by me"
+msgstr "Coordinate by me"
+
+#. module: xopgi_coordination_board
+#: model:xopgi.board.widget,name:xopgi_coordination_board.individual_coordination_widget
+msgid "Coordination"
+msgstr "Coordination"
+
+#. module: xopgi_coordination_board
+#: model:xopgi.board.widget,name:xopgi_coordination_board.company_coordination_widget
+msgid "Coordination (Company)"
+msgstr "Coordination (Company)"
+
+#. module: xopgi_coordination_board
+#: view:purchase.requisition:xopgi_coordination_board.view_purchase_requisition_filter_inh
+msgid "Create before last week"
+msgstr "Create before last week"
+
+#. module: xopgi_coordination_board
+#: view:purchase.requisition:xopgi_coordination_board.view_purchase_requisition_filter_inh
+msgid "Create last week"
+msgstr "Create last week"
+
+#. module: xopgi_coordination_board
+#. openerp-web
+#: view:account.analytic.account:xopgi_coordination_board.view_account_analytic_account_search_inh
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:161
+#, python-format
+msgid "Dossiers expired"
+msgstr "Dossiers expired"
+
+#. module: xopgi_coordination_board
+#. openerp-web
+#: view:account.analytic.account:xopgi_coordination_board.view_account_analytic_account_search_inh
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:234
+#, python-format
+msgid "Dossiers expired before last week"
+msgstr "Dossiers expired before last week"
+
+#. module: xopgi_coordination_board
+#. openerp-web
+#: view:account.analytic.account:xopgi_coordination_board.view_account_analytic_account_search_inh
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:119
+#, python-format
+msgid "Dossiers expired on last week"
+msgstr "Dossiers expired on last week"
+
+#. module: xopgi_coordination_board
+#. openerp-web
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:44
+#, python-format
+msgid "Dossiers to close"
+msgstr "Dossiers to close"
+
+#. module: xopgi_coordination_board
+#. openerp-web
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:38
+#, python-format
+msgid "Dossiers to coordinate"
+msgstr "Dossiers to coordinate"
+
+#. module: xopgi_coordination_board
+#. openerp-web
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:143
+#, python-format
+msgid "Dossiers with arrival date after 30 days"
+msgstr "Dossiers with arrival date after 30 days"
+
+#. module: xopgi_coordination_board
+#. openerp-web
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:219
+#, python-format
+msgid "Dossiers with arrival date on next 21 days"
+msgstr "Dossiers with arrival date on next 21 days"
+
+#. module: xopgi_coordination_board
+#. openerp-web
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:99
+#, python-format
+msgid "Dossiers with arrival date on next 3 or 4 week"
+msgstr "Dossiers with arrival date on next 3 or 4 week"
+
+#. module: xopgi_coordination_board
+#. openerp-web
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:416
+#, python-format
+msgid "Last Month"
+msgstr "Last Month"
+
+#. module: xopgi_coordination_board
+#: view:xopgi_operations_performance.coordperf_report:xopgi_coordination_board.coordination_performance_reports_view_search_inh
+msgid "Last month"
+msgstr "Last month"
+
+#. module: xopgi_coordination_board
+#. openerp-web
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:417
+#, python-format
+msgid "Last month planning time average"
+msgstr "Last month planning time average"
+
+#. module: xopgi_coordination_board
+#. openerp-web
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:452
+#, python-format
+msgid "Last month purchase time average"
+msgstr "Last month purchase time average"
+
+#. module: xopgi_coordination_board
+#. openerp-web
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:429
+#, python-format
+msgid "Last month reserve sending time average"
+msgstr "Last month reserve sending time average"
+
+#. module: xopgi_coordination_board
+#. openerp-web
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:441
+#, python-format
+msgid "Last month supplier response time average"
+msgstr "Last month supplier response time average"
+
+#. module: xopgi_coordination_board
+#. openerp-web
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:141
+#, python-format
+msgid "Next 7 days"
+msgstr "Next 7 days"
+
+#. module: xopgi_coordination_board
+#. openerp-web
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:181
+#, python-format
+msgid "Overdue"
+msgstr "Overdue"
+
+#. module: xopgi_coordination_board
+#. openerp-web
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:248
+#, python-format
+msgid "Performance"
+msgstr "Performance"
+
+#. module: xopgi_coordination_board
+#. openerp-web
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:258
+#, python-format
+msgid "Planning Time"
+msgstr "Planning Time"
+
+#. module: xopgi_coordination_board
+#. openerp-web
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:28
+#, python-format
+msgid "Purchase Programs"
+msgstr "Purchase Programs"
+
+#. module: xopgi_coordination_board
+#. openerp-web
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:288
+#, python-format
+msgid "Purchase Time"
+msgstr "Purchase Time"
+
+#. module: xopgi_coordination_board
+#. openerp-web
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:201
+#, python-format
+msgid "Purchase requisitions from open dossier created before last 7 days"
+msgstr "Purchase requisitions from open dossier created before last 7 days"
+
+#. module: xopgi_coordination_board
+#. openerp-web
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:76
+#, python-format
+msgid "Purchase requisitions from open dossier created on last 7 days"
+msgstr "Purchase requisitions from open dossier created on last 7 days"
+
+#. module: xopgi_coordination_board
+#. openerp-web
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:185
+#, python-format
+msgid "Quotations create before last week"
+msgstr "Quotations create before last week"
+
+#. module: xopgi_coordination_board
+#. openerp-web
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:54
+#, python-format
+msgid "Quotations create last week"
+msgstr "Quotations create last week"
+
+#. module: xopgi_coordination_board
+#. openerp-web
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:16
+#, python-format
+msgid "Quotations to confirm"
+msgstr "Quotations to confirm"
+
+#. module: xopgi_coordination_board
+#. openerp-web
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:268
+#, python-format
+msgid "Reserve Sending Time"
+msgstr "Reserve Sending Time"
+
+#. module: xopgi_coordination_board
+#. openerp-web
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:278
+#, python-format
+msgid "Supplier Response Time"
+msgstr "Supplier Response Time"
+
+#. module: xopgi_coordination_board
+#. openerp-web
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:357
+#, python-format
+msgid "Target"
+msgstr "Target"
+
+#. module: xopgi_coordination_board
+#: field:res.company,target_planification_time:0
+#: field:res.users,target_planification_time:0
+msgid "Target planification time"
+msgstr "Target planification time"
+
+#. module: xopgi_coordination_board
+#: field:res.company,target_purchase_time:0
+#: field:res.users,target_purchase_time:0
+msgid "Target purchase time"
+msgstr "Target purchase time"
+
+#. module: xopgi_coordination_board
+#: field:res.company,target_reserve_send_time:0
+#: field:res.users,target_reserve_send_time:0
+msgid "Target reserve send time"
+msgstr "Target reserve send time"
+
+#. module: xopgi_coordination_board
+#: field:res.company,target_supplier_response_time:0
+#: field:res.users,target_supplier_response_time:0
+msgid "Target supplier response time"
+msgstr "Target supplier response time"
+
+#. module: xopgi_coordination_board
+#. openerp-web
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:294
+#, python-format
+msgid "This Month"
+msgstr "This Month"
+
+#. module: xopgi_coordination_board
+#: view:xopgi_operations_performance.coordperf_report:xopgi_coordination_board.coordination_performance_reports_view_search_inh
+msgid "This month"
+msgstr "This month"
+
+#. module: xopgi_coordination_board
+#. openerp-web
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:298
+#, python-format
+msgid "This month planning time average"
+msgstr "This month planning time average"
+
+#. module: xopgi_coordination_board
+#. openerp-web
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:342
+#, python-format
+msgid "This month purchase time average"
+msgstr "This month purchase time average"
+
+#. module: xopgi_coordination_board
+#. openerp-web
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:313
+#, python-format
+msgid "This month reserve sending time average"
+msgstr "This month reserve sending time average"
+
+#. module: xopgi_coordination_board
+#. openerp-web
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:328
+#, python-format
+msgid "This month supplier response time average"
+msgstr "This month supplier response time average"
+
+#. module: xopgi_coordination_board
+#. openerp-web
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:252
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:262
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:272
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:282
+#, python-format
+msgid "To Coordination Analysis Report"
+msgstr "To Coordination Analysis Report"
+
+#. module: xopgi_coordination_board
+#. openerp-web
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:32
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:42
+#, python-format
+msgid "To Dossiers"
+msgstr "To Dossiers"
+
+#. module: xopgi_coordination_board
+#. openerp-web
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:10
+#, python-format
+msgid "To Quotations"
+msgstr "To Quotations"
+
+#. module: xopgi_coordination_board
+#. openerp-web
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:20
+#, python-format
+msgid "To Requisitions"
+msgstr "To Requisitions"
+
+#. module: xopgi_coordination_board
+#. openerp-web
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:6
+#, python-format
+msgid "To do"
+msgstr "To do"
+
+#. module: xopgi_coordination_board
+#. openerp-web
+#: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:50
+#, python-format
+msgid "Today"
+msgstr "Today"
+
+#. module: xopgi_coordination_board
+#: model:ir.model,name:xopgi_coordination_board.model_res_users
+msgid "Users"
+msgstr "Utilisateurs"
+
+#. module: xopgi_coordination_board
+#: view:purchase.requisition:xopgi_coordination_board.view_purchase_requisition_filter_inh
+msgid "With requisitions pendent"
+msgstr "With requisitions pendent"
+
