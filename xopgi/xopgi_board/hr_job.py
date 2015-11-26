@@ -18,6 +18,3 @@ class HrJob(models.Model):
     _inherit = 'hr.job'
 
     widgets = fields.Many2many('xopgi.board.widget')
-
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

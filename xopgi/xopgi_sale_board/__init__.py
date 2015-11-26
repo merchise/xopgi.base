@@ -11,7 +11,8 @@
 #
 # @created: 2015-10-29
 
-import board
-# import controllers
+from __future__ import (division as _py3_division,
+                        print_function as _py3_print,
+                        absolute_import as _py3_abs_import)
 
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+from . import board  # noqa

@@ -1,4 +1,18 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
+# ---------------------------------------------------------------------
+# board
+# ---------------------------------------------------------------------
+# Copyright (c) 2015 Merchise Autrement and Contributors
+# All rights reserved.
+#
+# This is free software; you can redistribute it and/or modify it under the
+# terms of the LICENCE attached (see LICENCE file) in the distribution
+# package.
+#
+
+# Original copyright notice:
+#
 ##############################################################################
 #
 #    OpenERP, Open Source Management Solution
@@ -20,11 +34,16 @@
 #
 ##############################################################################
 
+from __future__ import (division as _py3_division,
+                        print_function as _py3_print,
+                        absolute_import as _py3_abs_import)
+
 from datetime import date, timedelta
 from dateutil.relativedelta import relativedelta
 from openerp import api, fields, models, _
 from openerp.addons.xopgi_board.board import lineal_color_scaling, \
     get_query_from_domain, get_targets
+
 from xoeuf.tools import dt2str, date2str, normalize_datetime
 from xoutil import logger
 
@@ -363,5 +382,3 @@ class ResCompany(models.Model):
     target_sale_done = fields.Integer()
     target_sale_won = fields.Integer()
     target_sale_invoiced = fields.Integer()
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

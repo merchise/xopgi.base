@@ -124,5 +124,3 @@ class PurchaseBoard(models.AbstractModel):
                 color = 'rgb(%s, %s, %s)' % lineal_color_scaling(sector)
             res[indicator]['color'] = color
         return res
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

@@ -3,7 +3,7 @@
 # --------------------------------------------------------------------------
 # xopgi_object_merge
 # --------------------------------------------------------------------------
-# Copyright (c) 2014 Merchise Autrement and Contributors
+# Copyright (c) 2014, 2015 Merchise Autrement and Contributors
 # All rights reserved.
 #
 # Author: Merchise Autrement
@@ -13,7 +13,9 @@
 # terms of the LICENCE attached (see LICENCE file) in the distribution
 # package.
 
-import object_merger
-import res_config
+from __future__ import (division as _py3_division,
+                        print_function as _py3_print,
+                        absolute_import as _py3_abs_import)
 
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+from . import object_merger  # noqa
+from . import res_config  # noqa

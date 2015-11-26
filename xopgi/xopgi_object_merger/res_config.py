@@ -265,8 +265,6 @@ class object_merger_settings(osv.osv_memory):
             self.update_field(cr, uid, vals, context=context)
         return {'type': 'ir.actions.client', 'tag': 'reload', }
 
-    # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
-
 
 class FieldMergeWay(models.Model):
     _name = 'field.merge.way'
@@ -375,6 +373,3 @@ class FieldMergeWayRel(models.Model):
             if val is not None:
                 res[item.name.name] = val
         return res
-
-
-

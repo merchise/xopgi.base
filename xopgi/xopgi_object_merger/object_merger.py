@@ -3,7 +3,7 @@
 # --------------------------------------------------------------------------
 # xopgi_object_merge.object_merger
 # --------------------------------------------------------------------------
-# Copyright (c) 2014 Merchise Autrement and Contributors
+# Copyright (c) 2014, 2015 Merchise Autrement and Contributors
 # All rights reserved.
 #
 # Author: Merchise Autrement
@@ -501,6 +501,3 @@ class object_merger(orm.TransientModel):
                         defaults_dict[field] = res_val
                         _update_alias(alias_id, defaults_dict)
         return True
-
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

@@ -20,6 +20,7 @@ Create Sale Person board widget.
 
     """, "author": "Merchise Autrement",
     "website": "http://xhg.ca.merchise.org/addons/xopgi_board",
+    # FIXME:  Suspicious dependency on xopgi_operations_performance.
     'depends': ['xopgi_board', 'sale', 'xopgi_operations_performance'],
     'data': [
         'views/xopgi_board_view.xml',
@@ -30,4 +31,3 @@ Create Sale Person board widget.
     'installable': True,
     'auto_install': True,
 }
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

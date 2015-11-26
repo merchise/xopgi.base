@@ -22,6 +22,7 @@ Create Coordinator board widget.
     "website": "http://xhg.ca.merchise.org/addons/xopgi_coordination_board",
     'depends': [
         'xopgi_sale_board',
+        # FIXME:  xopgi is more general than xhg.  NEVER make it depend on xhg.
         'xhg_autrement_project_dossier',
         'xhg_autrement_purchase_business_adapter',
     ],
@@ -33,4 +34,3 @@ Create Coordinator board widget.
     'installable': True,
     'auto_install': True,
 }
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
