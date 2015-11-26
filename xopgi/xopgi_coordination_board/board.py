@@ -14,8 +14,14 @@
 from datetime import date, timedelta
 from dateutil.relativedelta import relativedelta
 from openerp import api, fields, models, _
-from openerp.addons.xopgi_board.board import lineal_color_scaling
-from xoeuf.tools import normalize_date as to_date, dt2str, date2str
+from openerp.addons.xopgi_board.board import lineal_color_scaling, \
+    get_query_from_domain, get_targets
+from xoeuf.tools import dt2str, date2str
+from xoutil import logger
+
+
+INDICATORS = ['planification_time', 'reserve_send_time',
+              'supplier_response_time', 'purchase_time']
 
 
 class CoordinationBoardUtil(models.AbstractModel):
@@ -44,85 +50,191 @@ class CoordinationBoardUtil(models.AbstractModel):
         next_30_days = today + timedelta(days=30)
         last_week = today + timedelta(days=-7)
         last2_week = today + timedelta(days=-15)
-        for quotation in self.env['sale.order'].search(
-                [('state', 'in', ('draft', 'sent'))] +
-                    ([] if mode else [('coordinator_id', '=', self._uid)])):
-            # Presupuestos de venta a confirmar
-            quotation_date = to_date(quotation.create_date)
-            if quotation_date <= last_week:
-                res['quotation']['overdue'] += 1
-            else:
-                res['quotation']['today'] += 1
-        for dossier in self.env['account.analytic.account'].search(
-                [('dossier', '=', True)] + (
-                    [] if mode else [('manager_id', '=', self._uid)])):
-            # Programas de compra
-            if dossier.open_requisitions:
-                dossier_date = to_date(dossier.create_date)
-                if dossier_date <= last_week:
-                    res['program']['overdue'] += 1
-                else:
-                    res['program']['today'] += 1
-            # Dossier a coordinar
-            elif dossier.project_ids and dossier.project_ids[0].arrival_date:
-                arrival_date = to_date(dossier.project_ids[0].arrival_date)
-                if arrival_date > today:
-                    if arrival_date <= next_21_days:
-                        res['coord_dossier']['overdue'] += 1
-                    else:
-                        res['coord_dossier']['next_7_days'] += 1
-                        if arrival_date <= next_30_days:
-                            res['coord_dossier']['today'] += 1
-            # Dossier a cerrar
-            elif dossier.date:
-                depart_date = to_date(dossier.date)
-                if depart_date <= last2_week:
-                    res['close_dossier']['overdue'] += 1
-                elif depart_date < today:
-                    res['close_dossier']['next_7_days'] += 1
-                    if depart_date <= last_week:
-                        res['close_dossier']['today'] += 1
+        # Quotations to confirm
+        logger.debug('Starting to search quotations to confirm')
+        res['quotation'].update(
+            self._get_quotations(mode == 'company', last_week))
+        # Purchase Programs
+        logger.debug('Starting to search programs purchase')
+        res['program'].update(
+            self._get_purchase_programs(mode == 'company', last_week))
+        # Dossier to coordinate
+        logger.debug('Starting to search dossier to coordinate')
+        res['coord_dossier'].update(
+            self._get_coord_dossiers(mode == 'company', today,
+                                     next_21_days, next_30_days))
+        # Dossier to close
+        logger.debug('Starting to search dossiers to close')
+        res['close_dossier'].update(self._get_close_dossier(
+            mode == 'company', today, last_week, last2_week))
         #indicadores
-        indicators = ['planification_time', 'reserve_send_time',
-                      'supplier_response_time', 'purchase_time']
-        operation_count = {'this_month': 0, 'last_month': 0}
-        indicator_sum = {indicator: dict(operation_count)
-                         for indicator in indicators}
-        for operation in self.env[
-                'xopgi_operations_performance.coordperf_report'].search(
-                [('account_analytic_id.create_date', '>=', dt2str(
-                    first_last_month_day))] +
-                    ([] if mode else [('user_id', '=', self._uid)])):
-            op_date = to_date(operation.account_analytic_id.create_date)
-            position = ('this_month'
-                        if today >= op_date >= first_month_day
-                        else 'last_month')
-            for indicator in indicators:
-                value = getattr(operation, indicator, 0)
-                if value:
-                    indicator_sum[indicator][position] += value
-            operation_count[position] += 1
-        for position in operation_count.keys():
-            for indicator in indicators:
-                res[indicator][position] = (float(
-                    indicator_sum[indicator][position] / operation_count[position])
-                    if operation_count[position] else 0.00)
-        target_obj = self.env.user.company_id if mode else self.env.user
+        logger.debug('Starting to search indicators')
+        temp = self._get_indicators(mode == 'company', first_month_day,
+                                    first_last_month_day, INDICATORS)
+        for indicator in INDICATORS:
+            res[indicator].update(temp.get(indicator, {}))
+        # targets
+        logger.debug('Getting targets')
+        get_targets(self, res, INDICATORS, mode == 'company')
+        return res
+
+    def _get_quotations(self, base_domain, last_week):
+        base_domain = ([] if base_domain else
+                       [('coordinator_id', '=', self._uid)])
+        last_week = dt2str(last_week)
+        query = """
+        SELECT
+          SUM(CASE WHEN create_date > %%s THEN 1 ELSE 0 END) AS today,
+          SUM(CASE WHEN create_date <= %%s THEN 1 ELSE 0 END) AS overdue
+        FROM
+          %s
+        %s
+        GROUP BY True
+        """
+        domain = base_domain + [('state', 'in', ('draft', 'sent'))]
+        from_clause, where_str, where_params = get_query_from_domain(
+            self.env['sale.order'], domain)
+        query_args = (last_week, last_week) + tuple(where_params)
+        self._cr.execute(query % (from_clause, where_str), query_args)
+        return self._cr.dictfetchone() or {}
+
+    def _get_purchase_programs(self, base_domain, last_week):
+        base_domain = ([] if base_domain else
+                       [('manager_id', '=', self._uid)])
+        last_week = dt2str(last_week)
+        query = """
+        SELECT
+          SUM(CASE WHEN create_date > %%s THEN 1 ELSE 0 END) AS today,
+          SUM(CASE WHEN create_date <= %%s THEN 1 ELSE 0 END) AS overdue
+        FROM
+          %s
+        %s
+        GROUP BY True
+        """
+        domain = base_domain + [('dossier', '=', True),
+                                ('open_requisitions', '!=', 0)]
+        from_clause, where_str, where_params = get_query_from_domain(
+            self.env['account.analytic.account'], domain)
+        query_args = (last_week, last_week) + tuple(where_params)
+        self._cr.execute(query % (from_clause, where_str), query_args)
+        return self._cr.dictfetchone() or {}
+
+    def _get_coord_dossiers(self, base_domain, today, next_21_days,
+                            next_30_days):
+        base_domain = ([] if base_domain else
+                       [('manager_id', '=', self._uid)])
+        today = dt2str(today)
+        next_21_days = dt2str(next_21_days)
+        next_30_days = dt2str(next_30_days)
+        query = """
+        SELECT
+            (SELECT
+              COUNT(id) count
+            FROM
+              %s
+            %s) as today,
+            (SELECT
+              COUNT(id) count
+            FROM
+              %s
+            %s) as next_7_days,
+            (SELECT
+              COUNT(id) count
+            FROM
+              %s
+            %s) as overdue
+        """
+        domain = base_domain + [
+            ('dossier', '=', True),
+            ('project_ids.arrival_date', '>', next_21_days),
+            ('project_ids.arrival_date', '<=', next_30_days)]
+        today_from, today_where, today_params = get_query_from_domain(
+            self.env['account.analytic.account'], domain)
+        domain = base_domain + [
+            ('dossier', '=', True),
+            ('project_ids.arrival_date', '>', next_30_days)]
+        week_from, week_where, week_params = get_query_from_domain(
+            self.env['account.analytic.account'], domain)
+        domain = base_domain + [
+            ('dossier', '=', True),
+            ('project_ids.arrival_date', '>', today),
+            ('project_ids.arrival_date', '<=', next_21_days)]
+        overdue_from, overdue_where, overdue_params = get_query_from_domain(
+            self.env['account.analytic.account'], domain)
+        query_args = (today_from, today_where, week_from, week_where,
+                      overdue_from, overdue_where)
+        where_args = tuple(today_params + week_params + overdue_params)
+        self._cr.execute(query % query_args, where_args)
+        return self._cr.dictfetchone() or {}
+
+    def _get_close_dossier(self, base_domain, today, last_week, last2_week):
+        base_domain = ([] if base_domain else
+                       [('manager_id', '=', self._uid)])
+        today = dt2str(today)
+        last_week = dt2str(last_week)
+        last2_week = dt2str(last2_week)
+        query = """
+        SELECT
+          SUM(CASE WHEN date <= %%s AND date > %%s THEN 1 ELSE 0 END) AS today,
+          count(id) AS next_7_days,
+          SUM(CASE WHEN date <= %%s THEN 1 ELSE 0 END) AS overdue
+        FROM
+          %s
+        %s
+        GROUP BY True
+        """
+        domain = base_domain + [('dossier', '=', True),
+                                ('open_requisitions', '=', 0),
+                                ('date', '!=', False),
+                                ('date', '<=', today)]
+        from_clause, where_str, where_params = get_query_from_domain(
+            self.env['account.analytic.account'], domain)
+        query_args = (last_week, last2_week, last2_week) + tuple(where_params)
+        self._cr.execute(query % (from_clause, where_str), query_args)
+        return self._cr.dictfetchone() or {}
+
+    def _get_indicators(self, base_domain, first_month_day,
+                         first_last_month_day, indicators):
+        first_month_day = dt2str(first_month_day)
+        first_last_month_day = dt2str(first_last_month_day)
+        base_domain = ([] if base_domain else
+                       [('user_id', '=', self._uid)])
+        query = """
+            SELECT
+              AVG(planification_time) as planification_time,
+              AVG(reserve_send_time) as reserve_send_time,
+              AVG(supplier_response_time) as supplier_response_time,
+              AVG(purchase_time) as purchase_time
+            FROM
+              %s
+            %s
+            """
+        domain = [
+            ('account_analytic_id', '!=', False),
+            ('account_analytic_id.create_date', '>=', first_last_month_day),
+            ('account_analytic_id.create_date', '<=', first_month_day)]
+        from_clause, where_str, where_params = get_query_from_domain(
+            self.env['xopgi_operations_performance.coordperf_report'],
+            base_domain + domain)
+        query_args = tuple(where_params)
+        self._cr.execute(query % (from_clause, where_str), query_args)
+        data = dict()
+        data['last_month'] = self._cr.dictfetchone() or {}
+        domain = [
+            ('account_analytic_id', '!=', False),
+            ('account_analytic_id.create_date', '>', first_month_day)]
+        from_clause, where_str, where_params = get_query_from_domain(
+            self.env['xopgi_operations_performance.coordperf_report'],
+            base_domain + domain)
+        query_args = tuple(where_params)
+        self._cr.execute(query % (from_clause, where_str), query_args)
+        data['this_month'] = self._cr.dictfetchone() or {}
+        res = {}
         for indicator in indicators:
-            sector = 11
-            res[indicator]['target'] = target = getattr(
-                target_obj, 'target_%s' % indicator, 0)
-            value = res[indicator]['this_month']
-            if target:
-                if target < value:
-                    sector = 1.0
-                else:
-                    sector = float(value) / target
-            if sector > 1.0:
-                color = '#e2e2e0'
-            else:
-                color = 'rgb(%s, %s, %s)' % lineal_color_scaling(sector)
-            res[indicator]['color'] = color
+            res[indicator] = {}
+            for month in ['this_month', 'last_month']:
+                res[indicator][month] = int(
+                    data[month].get(indicator, 0) or 0)
         return res
 
 
