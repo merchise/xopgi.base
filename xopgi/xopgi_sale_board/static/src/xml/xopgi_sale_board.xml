@@ -206,8 +206,7 @@
             <td class="o_text">Overdue</td>
             <!-- Hide overdue when there is none -->
             <td/>
-            <td t-if="show_demo or (values and values['lead'] and
-                                    values['lead']['overdue'] != 0)"
+            <td t-if="values and values['lead']['overdue'] != 0"
                 class="o_warning" title="Leads created before last 7 days">
               <a href="#" class="o_dashboard_action"
                  name="xopgi_sale_board.crm_leads_all"
@@ -225,8 +224,8 @@
                 <br/>
               </a>
             </td>
-            <td t-if="show_demo or (values and
-                                    values['opportunity']['overdue'] != 0)"
+            <td t-if="!(values and values['lead']['overdue'] != 0)"/>
+            <td t-if="values and values['opportunity']['overdue'] != 0"
                 class="o_warning"
                 title="Opportunities with next action before today">
               <a href="#" class="o_dashboard_action"
@@ -244,8 +243,8 @@
                 </t>
               </a>
             </td>
-            <td t-if="show_demo or (values and values['quotation'] and
-                                    values['quotation']['overdue'] != 0)"
+            <td t-if="!(values and values['opportunity']['overdue'] != 0)"/>
+            <td t-if="values and values['quotation']['overdue'] != 0"
                 class="o_warning"
                 title="Quotations created before last 7 days">
               <a href="#" class="o_dashboard_action"
@@ -263,6 +262,7 @@
                 <br/>
               </a>
             </td>
+            <td t-if="!(values and values['quotation']['overdue'] != 0)"/>
             <td t-if="show_demo or (values and values['sale'] and
                                     values['sale']['overdue'] != 0)"
                 class="o_warning" title="Overdue Sale Orders">
