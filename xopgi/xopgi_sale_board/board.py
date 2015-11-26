@@ -113,8 +113,9 @@ class CrmLead(models.Model):
         res['sale_pax_margin'].update(temp.get('sale_pax_margin', {}))
         # targets
         logger.debug('Getting targets')
-        get_targets(self, res, ['sale_margin', 'sale_pax_margin', 'sale_done',
-                                'sale_won', 'sale_invoiced'])
+        indicators = ['sale_margin', 'sale_pax_margin', 'sale_done',
+                      'sale_won', 'sale_invoiced']
+        get_targets(self, res, indicators, (not base_domain))
         res['currency_id'] = self.env.user.company_id.currency_id.id
         return res
 
@@ -252,26 +253,42 @@ class CrmLead(models.Model):
                        if base_domain else [])
         inv_query = """
             SELECT
-              SUM(CASE WHEN date >= %%s
-                  THEN balance ELSE 0 END) AS this_month_balance,
-              SUM(CASE WHEN date >= %%s
-                  THEN 1 ELSE 0 END) AS this_month_count,
-              SUM(CASE WHEN date < %%s
-                  THEN balance ELSE 0 END) AS last_month_balance,
-              SUM(CASE WHEN date < %%s
-                  THEN 1 ELSE 0 END) AS last_month_count,
-              SUM(CASE WHEN date >= %%s AND pax > 0
-                  THEN balance ELSE 0 END) AS this_month_pax_balance,
-              SUM(CASE WHEN date >= %%s AND pax > 0
-                  THEN pax ELSE 0 END) AS this_month_pax_count,
-              SUM(CASE WHEN date < %%s AND pax > 0
-                  THEN balance ELSE 0 END) AS last_month_pax_balance,
-              SUM(CASE WHEN date < %%s AND pax > 0
-                  THEN pax ELSE 0 END) AS last_month_pax_count
+              CASE WHEN this_month_count IS NOT NULL AND this_month_count > 0
+                   THEN this_month_balance / this_month_count
+                   ELSE 0 END AS this_month_margin,
+              CASE WHEN last_month_count IS NOT NULL AND last_month_count > 0
+                   THEN last_month_balance / last_month_count
+                   ELSE 0 END AS last_month_margin,
+
+              CASE WHEN this_month_pax_count IS NOT NULL AND
+                        this_month_pax_count > 0
+                   THEN this_month_pax_balance / this_month_pax_count
+                   ELSE 0 END AS this_month_margin_pax,
+              CASE WHEN last_month_pax_count IS NOT NULL AND
+                        last_month_pax_count > 0
+                   THEN last_month_pax_balance / last_month_pax_count
+                   ELSE 0 END AS last_month_margin_pax
             FROM
-              %s
-            %s
-            GROUP BY True
+                (SELECT
+                  SUM(CASE WHEN date >= %%s
+                      THEN balance ELSE 0 END) AS this_month_balance,
+                  SUM(CASE WHEN date >= %%s
+                      THEN 1 ELSE 0 END) AS this_month_count,
+                  SUM(CASE WHEN date < %%s
+                      THEN balance ELSE 0 END) AS last_month_balance,
+                  SUM(CASE WHEN date < %%s
+                      THEN 1 ELSE 0 END) AS last_month_count,
+                  SUM(CASE WHEN date >= %%s AND pax > 0
+                      THEN balance * pax ELSE 0 END) AS this_month_pax_balance,
+                  SUM(CASE WHEN date >= %%s AND pax > 0
+                      THEN pax ELSE 0 END) AS this_month_pax_count,
+                  SUM(CASE WHEN date < %%s AND pax > 0
+                      THEN balance * pax ELSE 0 END) AS last_month_pax_balance,
+                  SUM(CASE WHEN date < %%s AND pax > 0
+                      THEN pax ELSE 0 END) AS last_month_pax_count
+                FROM
+                  %s
+                %s) sub
             """
         account_invoice_domain = [
             ('date', '!=', False),
@@ -288,26 +305,12 @@ class CrmLead(models.Model):
             'sale_margin': {'this_month': 0, 'last_month': 0},
             'sale_pax_margin': {'this_month': 0, 'last_month': 0}
         }
-        res['sale_margin']['this_month'] = (
-            float(data.get('this_month_balance', 0) /
-                  data['this_month_count'])
-            if data.get('this_month_count')
-            else 0.00)
-        res['sale_margin']['last_month'] = (
-            float(data.get('last_month_balance', 0) /
-                  data['last_month_count'])
-            if data.get('last_month_count')
-            else 0.00)
-        res['sale_pax_margin']['this_month'] = (
-            float(data.get('this_month_pax_balance', 0) /
-                  data['this_month_pax_count'])
-            if data.get('this_month_pax_count')
-            else 0.00)
-        res['sale_pax_margin']['last_month'] = (
-            float(data.get('last_month_pax_balance', 0) /
-                  data['last_month_pax_count'])
-            if data.get('last_month_pax_count')
-            else 0.00)
+        res['sale_margin']['this_month'] = data.get('this_month_margin', 0.0)
+        res['sale_margin']['last_month'] = data.get('last_month_margin', 0.0)
+        res['sale_pax_margin']['this_month'] = data.get(
+            'this_month_margin_pax', 0.0)
+        res['sale_pax_margin']['last_month'] = data.get(
+            'last_month_margin_pax', 0.0)
         return res
 
     def _get_sale_invoiced(self, base_domain, today, first_month_day,
