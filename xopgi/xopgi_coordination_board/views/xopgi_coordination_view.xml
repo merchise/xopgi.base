@@ -28,17 +28,16 @@
           <filter string="This month " name="this_month"
                   domain="[
                     ('account_analytic_id.create_date', '&gt;=', datetime.datetime.combine(
-                      context_today().replace(day=1), datetime.time(0,0,0))
+                      context_today().replace(day=1), datetime.time(0,0,0)))
                   ]"/>
           <filter string="Last month " name="last_month"
                   domain="[
                     '&amp;',
                     ('account_analytic_id.create_date', '&lt;', datetime.datetime.combine(
-                      context_today().replace(day=1), datetime.time(0,0,0)),
+                      context_today().replace(day=1), datetime.time(0,0,0))),
                     ('account_analytic_id.create_date', '&gt;=', datetime.datetime.combine(
                       (context_today() - datetime.timedelta(
-                      days=30)).replace(day=1), datetime.time(0,0,0))
-                  ]"/>
+                      days=30)).replace(day=1), datetime.time(0,0,0)))                  ]"/>
         </xpath>
       </field>
     </record>
@@ -62,14 +61,14 @@
                   name="arrival_21_days"
                   domain="[
                     ('dossier', '=', True),
-                    ('project_ids.arrival_date', '&gt;=', datetime.datetime.combine(
+                    ('project_ids.arrival_date', '&gt;', datetime.datetime.combine(
                       context_today(), datetime.time(0,0,0))),
                     ('project_ids.arrival_date', '&lt;=', datetime.datetime.combine(
                       context_today() + datetime.timedelta(days=21),
-                      datetime.time(23,59,59)))
+                      datetime.time(0,0,0)))
                   ]"/>
-          <filter string="Arrivals next month "
-                  name="arrival_next_month"
+          <filter string="Arrivals in coming 3 or 4 weeks "
+                  name="arrival_21_30_days"
                   domain="[
                     ('dossier', '=', True),
                     ('project_ids.arrival_date', '&gt;', datetime.datetime.combine(
@@ -77,20 +76,30 @@
                       datetime.time(23,59,59))),
                     ('project_ids.arrival_date', '&lt;=', datetime.datetime.combine(
                       context_today() + datetime.timedelta(days=30),
-                      datetime.time(23,59,59)))
+                      datetime.time(0,0,0)))
                   ]"/>
-          <filter string="Closed before last week "
+          <filter string="Arrivals after this month "
+                  name="arrival_after_30_days"
+                  domain="[
+                    ('dossier', '=', True),
+                    ('project_ids.arrival_date', '&gt;', datetime.datetime.combine(
+                      context_today() + datetime.timedelta(days=30),
+                      datetime.time(0,0,0)))
+                  ]"/>
+          <filter string="Dossiers expired before last week"
                   name="closed_before_last_week"
                   domain="[
                     ('dossier', '=', True),
+                    ('open_requisitions', '=', 0),
                     ('date', '&lt;=', datetime.datetime.combine(
                       context_today() - datetime.timedelta(days=15),
                       datetime.time(0,0,0)))
                   ]"/>
-          <filter string="Closed last week "
+          <filter string="Dossiers expired on last week"
                   name="closed_last_week"
                   domain="[
                     ('dossier', '=', True),
+                    ('open_requisitions', '=', 0),
                     ('date', '&gt;', datetime.datetime.combine(
                       context_today() - datetime.timedelta(days=15),
                       datetime.time(0,0,0))),
@@ -98,10 +107,11 @@
                       context_today() - datetime.timedelta(days=7),
                       datetime.time(0,0,0)))
                   ]"/>
-          <filter string="Closed "
+          <filter string="Dossiers expired"
                   name="closed"
                   domain="[
                     ('dossier', '=', True),
+                    ('open_requisitions', '=', 0),
                     ('date', '&lt;=', datetime.datetime.combine(
                       context_today(), datetime.time(0,0,0)))
                   ]"/>
@@ -144,6 +154,15 @@
       </field>
     </record>
 
-
+    <!--Purchase Requisition action -->
+    <record model="ir.actions.act_window" id="action_purchase_requisition">
+        <field name="name">Calls for Bids</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">purchase.requisition</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id"
+               ref="purchase_requisition.view_purchase_requisition_filter"/>
+    </record>
   </data>
 </openerp>
