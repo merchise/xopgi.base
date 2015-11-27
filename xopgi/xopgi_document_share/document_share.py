@@ -44,7 +44,7 @@ class DocumentShare(models.Model):
     _name = 'ir.attachment.share'
 
     reference = fields.Reference(string='Model',
-        selection='_reference_models')
+        selection='')
 
     @api.model
     def _reference_models(self):
