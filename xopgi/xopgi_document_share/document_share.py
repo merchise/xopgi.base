@@ -18,6 +18,8 @@ from __future__ import (absolute_import as _py3_abs_imports,
 from openerp import api, models, fields, _
 from openerp.exceptions import except_orm
 from openerp import SUPERUSER_ID
+from openerp.addons.base.res.res_request import referencable_models
+from xoeuf.osv.orm import get_modelname
 
 class Document(models.Model):
     _inherit = 'ir.attachment'

@@ -59,9 +59,9 @@
             <field name="name">ir.attachment.share.form</field>
             <field name="model">ir.attachment.share</field>
             <field name="arch" type="xml">
-                <form string="Share" version="7.0">
+                <form string="Share">
                     <group>
-                        <field name="reference" />
+                        <field name="reference" class="oe_inline" readonly="0"/>
                     </group>
                     <footer>
                         <button name="action_share" string="Save"

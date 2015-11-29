@@ -25,6 +25,8 @@
     'depends': ['base', 'knowledge'],
     'data': [
         'view/document_share_view.xml',
+        'security/ir.model.access.csv',
+        'security/security.xml'
     ],
     'demo': [],
     'test': [],
