@@ -70,16 +70,14 @@
                         'search_default_next_7_days': 1
                   }">
                 Next week:
-                <span class="o_highlight">
-                  <t t-if="values and values['task'] and
-                       values['task']['next_7_days'] != 0">
-                    <t t-esc="values['task']['next_7_days']"/>
-                  </t>
-                  <t t-if="!(values and values['task'] and
-                         values['task']['next_7_days'] != 0)">
-                    0
-                  </t>
-                </span>
+                <t t-if="values and values['task'] and
+                     values['task']['next_7_days'] != 0">
+                  <t t-esc="values['task']['next_7_days']"/>
+                </t>
+                <t t-if="!(values and values['task'] and
+                       values['task']['next_7_days'] != 0)">
+                  0
+                </t>
               </a>
             </td>
           </tr>
@@ -93,16 +91,14 @@
                         'search_default_unassigned': 1
                   }">
                 Unassigned:
-                <span class="o_highlight">
-                  <t t-if="values and values['task'] and
-                       values['task']['unassigned'] != 0">
-                    <t t-esc="values['task']['unassigned']"/>
-                  </t>
-                  <t t-if="!(values and values['task'] and
-                         values['task']['unassigned'] != 0)">
-                    0
-                  </t>
-                </span>
+                <t t-if="values and values['task'] and
+                     values['task']['unassigned'] != 0">
+                  <t t-esc="values['task']['unassigned']"/>
+                </t>
+                <t t-if="!(values and values['task'] and
+                       values['task']['unassigned'] != 0)">
+                  0
+                </t>
               </a>
             </td></tr>
         </table>

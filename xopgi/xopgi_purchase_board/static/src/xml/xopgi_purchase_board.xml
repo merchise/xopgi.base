@@ -7,33 +7,39 @@
         <table class="table table-condensed">
           <tr>
             <td/>
-            <td class="o_text">
+            <td class="o_text" title="To Requisitions">
               <a href="#" class="o_dashboard_action"
-                 name="purchase_requisition.action_purchase_requisition">
-                Programas de compra
+                 name="xopgi_coordination_board.action_purchase_requisition"
+                 t-attf-data-context="{
+                      #{values['mode'] and values['mode'] == 'company' ?
+                        '\'search_default_group_by_dossier\': 1,' :
+                        '\'search_default_my_dossiers\': 1,'}
+                      'search_default_requisitions_open': 1
+                  }">
+                Purchase Programs
               </a>
             </td>
-            <td class="o_text">
+            <td class="o_text" title="To Dossiers">
               <a href="#" class="o_dashboard_action"
                  name="account.action_account_analytic_account_form"
                  t-attf-data-context="{
                       #{values['mode'] and values['mode'] == 'company' ?
                         '' : '\'search_default_assigned_to_me\': 1'}
                   }">
-                Dossiers a coordinar
+                Dossiers to coordinate
               </a>
             </td>
-            <td class="o_text">
+            <td class="o_text" title="To Purchase Orders">
               <a href="#" class="o_dashboard_action"
                  name="xopgi_purchase_board.purchase_form_action"
                  t-attf-data-context="{
                       #{values['mode'] and values['mode'] == 'company' ?
                         '' : '\'search_default_my_orders\': 1'}
                   }">
-                Presupuestos a confirmar
+                Quotations to confirm
               </a>
             </td>
-            <td class="o_text">
+            <td class="o_text" title="To Purchase Orders">
               <a href="#" class="o_dashboard_action"
                  name="xopgi_purchase_board.purchase_form_action"
                  t-attf-data-context="{
@@ -41,7 +47,7 @@
                         '' : '\'search_default_my_orders\': 1,'}
                         'search_default_not_invoiced': 1
                   }">
-                Presupuestos no facturados
+                Quotations not invoiced
               </a>
             </td>
           </tr>
@@ -49,9 +55,13 @@
             <td class="o_text">
               Today
             </td>
-            <td class="o_main" title="Programas de compra" rowspan="2">
+            <td class="o_main"
+                t-attf-title="#{widget.getTooltipText(
+                    values['program']['today'],
+                    'Purchase requisitions from open dossier created on last 7 days')}"
+                rowspan="2">
               <a href="#" class="o_dashboard_action"
-                 name="purchase_requisition.action_purchase_requisition"
+                 name="xopgi_coordination_board.action_purchase_requisition"
                  t-attf-data-context="{
                       #{values['mode'] and values['mode'] == 'company' ?
                         '\'search_default_group_by_dossier\': 1,' :
@@ -62,7 +72,8 @@
                 <span class="o_highlight">
                   <t t-if="values and values['program'] and
                        values['program']['today'] != 0">
-                    <t t-esc="values['program']['today']"/>
+                    <t t-esc="widget.humanFriendlyNumber(
+                        values['program']['today'])"/>
                   </t>
                   <t t-if="!(values and values['program'] and
                          values['program']['today'] != 0)">
@@ -71,18 +82,22 @@
                 </span>
               </a>
             </td>
-            <td class="o_main" title="Dossiers a coordinar">
+            <td class="o_main"
+                t-attf-title="#{widget.getTooltipText(
+                    values['coord_dossier']['today'],
+                    'Dossiers with arrival date on next 3 or 4 week')}">
               <a href="#" class="o_dashboard_action"
                  name="account.action_account_analytic_account_form"
                  t-attf-data-context="{
                       #{values['mode'] and values['mode'] == 'company' ?
                         '' : '\'search_default_assigned_to_me\': 1,'}
-                      'search_default_arrival_next_month': 1
+                      'search_default_arrival_21_30_days': 1
                   }">
                 <span class="o_highlight">
                   <t t-if="values and values['coord_dossier'] and
                            values['coord_dossier']['today'] != 0">
-                    <t t-esc="values['coord_dossier']['today']"/>
+                    <t t-esc="widget.humanFriendlyNumber(
+                        values['coord_dossier']['today'])"/>
                   </t>
                   <t t-if="!(values and values['coord_dossier'] and
                             values['coord_dossier']['today'] != 0)">
@@ -91,7 +106,10 @@
                 </span>
               </a>
             </td>
-            <td class="o_main" title="Presupuestos confirmar">
+            <td class="o_main"
+                t-attf-title="#{widget.getTooltipText(
+                    values['confirm_order']['today'],
+                    'Purchase Orders needed to get ready before next 21 days')}">
               <a href="#" class="o_dashboard_action"
                  name="xopgi_purchase_board.purchase_form_action"
                  t-attf-data-context="{
@@ -102,7 +120,8 @@
                 <span class="o_highlight">
                   <t t-if="values and values['confirm_order'] and
                        values['confirm_order']['today'] != 0">
-                    <t t-esc="values['confirm_order']['today']"/>
+                    <t t-esc="widget.humanFriendlyNumber(
+                        values['confirm_order']['today'])"/>
                   </t>
                   <t t-if="!(values and values['confirm_order'] and
                          values['confirm_order']['today'] != 0)">
@@ -111,7 +130,10 @@
                 </span>
               </a>
             </td>
-            <td class="o_main" title="Presupuestos no facturados">
+            <td class="o_main"
+                t-attf-title="#{widget.getTooltipText(
+                    values['not_invoiced']['today'],
+                    'Purchase Orders not invoiced needed to get ready before next 21 days')}">
               <a href="#" class="o_dashboard_action"
                  name="xopgi_purchase_board.purchase_form_action"
                  t-attf-data-context="{
@@ -123,7 +145,8 @@
                 <span class="o_highlight">
                   <t t-if="values and values['not_invoiced'] and
                        values['not_invoiced']['today'] != 0">
-                    <t t-esc="values['not_invoiced']['today']"/>
+                    <t t-esc="widget.humanFriendlyNumber(
+                        values['not_invoiced']['today'])"/>
                   </t>
                   <t t-if="!(values and values['not_invoiced'] and
                          values['not_invoiced']['today'] != 0)">
@@ -135,16 +158,21 @@
           </tr>
           <tr>
             <td class="o_text">Next 7 days</td>
-            <td class="o_main" title="Dossiers a coordinar">
+            <td class="o_main"
+                t-attf-title="#{widget.getTooltipText(
+                    values['coord_dossier']['next_7_days'],
+                    'Dossiers with arrival date after 30 days')}">
               <a href="#" class="o_dashboard_action"
                  name="account.action_account_analytic_account_form"
                  t-attf-data-context="{
                       #{values['mode'] and values['mode'] == 'company' ?
-                        '' : '\'search_default_assigned_to_me\': 1'}
+                        '' : '\'search_default_assigned_to_me\': 1,'}
+                        'search_default_arrival_after_30_days': 1
                   }">
                 <t t-if="values and values['coord_dossier'] and
                          values['coord_dossier']['next_7_days'] != 0">
-                  <t t-esc="values['coord_dossier']['next_7_days']"/>
+                  <t t-esc="widget.humanFriendlyNumber(
+                        values['coord_dossier']['next_7_days'])"/>
                 </t>
                 <t t-if="!(values and values['coord_dossier'] and
                           values['coord_dossier']['next_7_days'] != 0)">
@@ -152,7 +180,10 @@
                 </t>
               </a>
             </td>
-            <td class="o_main" title="Presupuestos a confirmar">
+            <td class="o_main"
+                t-attf-title="#{widget.getTooltipText(
+                    values['confirm_order']['next_7_days'],
+                    'Purchase Orders needed to get ready before next 30 days')}">
               <a href="#" class="o_dashboard_action"
                  name="xopgi_purchase_board.purchase_form_action"
                  t-attf-data-context="{
@@ -162,7 +193,8 @@
                   }">
                 <t t-if="values and values['confirm_order'] and
                          values['confirm_order']['next_7_days'] != 0">
-                  <t t-esc="values['confirm_order']['next_7_days']"/>
+                  <t t-esc="widget.humanFriendlyNumber(
+                        values['confirm_order']['next_7_days'])"/>
                 </t>
                 <t t-if="!(values and values['confirm_order'] and
                           values['confirm_order']['next_7_days'] != 0)">
@@ -170,7 +202,10 @@
                 </t>
               </a>
             </td>
-            <td class="o_main" title="Presupuestos no facturados">
+            <td class="o_main"
+                t-attf-title="#{widget.getTooltipText(
+                    values['not_invoiced']['next_7_days'],
+                    'Purchase Orders not invoiced needed to get ready before next 30 days')}">
               <a href="#" class="o_dashboard_action"
                  name="xopgi_purchase_board.purchase_form_action"
                  t-attf-data-context="{
@@ -181,7 +216,8 @@
                   }">
                 <t t-if="values and values['not_invoiced'] and
                          values['not_invoiced']['next_7_days'] != 0">
-                  <t t-esc="values['not_invoiced']['next_7_days']"/>
+                  <t t-esc="widget.humanFriendlyNumber(
+                        values['not_invoiced']['next_7_days'])"/>
                 </t>
                 <t t-if="!(values and values['not_invoiced'] and
                           values['not_invoiced']['next_7_days'] != 0)">
@@ -192,11 +228,14 @@
           </tr>
           <tr>
             <td class="o_text">Overdue</td>
-            <td class="o_warning" title="Programas de compra"
+            <td class="o_warning"
+                t-attf-title="#{widget.getTooltipText(
+                    values['program']['overdue'],
+                    'Purchase requisitions from open dossier created before last 7 days')}"
                 t-if="values and values['program'] and
                       values['program']['overdue'] != 0">
               <a href="#" class="o_dashboard_action"
-                 name="purchase_requisition.action_purchase_requisition"
+                 name="xopgi_coordination_board.action_purchase_requisition"
                  t-attf-data-context="{
                       #{values['mode'] and values['mode'] == 'company' ?
                         '\'search_default_group_by_dossier\': 1,' :
@@ -204,10 +243,16 @@
                       'search_default_before_last_week': 1,
                       'search_default_requisitions_open': 1
                   }">
-                <t t-esc="values['program']['overdue']"/>
+                <t t-esc="widget.humanFriendlyNumber(
+                        values['program']['overdue'])"/>
               </a>
             </td>
-            <td class="o_warning" title="Dossiers a coordinar"
+            <td t-if="!(values and values['program'] and
+                        values['program']['overdue'] != 0)"/>
+            <td class="o_warning"
+                t-attf-title="#{widget.getTooltipText(
+                    values['coord_dossier']['overdue'],
+                    'Dossiers with arrival date on next 21 days')}"
                 t-if="values and values['coord_dossier'] and
                       values['coord_dossier']['overdue'] != 0">
               <a href="#" class="o_dashboard_action"
@@ -217,12 +262,17 @@
                         '' : '\'search_default_assigned_to_me\': 1,'}
                       'search_default_arrival_21_days': 1
                   }">
-                <t t-esc="values['coord_dossier']['overdue']"/>
+                <t t-esc="widget.humanFriendlyNumber(
+                        values['coord_dossier']['overdue'])"/>
               </a>
             </td>
-            <td class="o_warning" title="Presupuestos confirmar"
-                t-if="values and values['confirm_order'] and
-                      values['confirm_order']['overdue'] != 0">
+            <td t-if="!(values and values['coord_dossier'] and
+                        values['coord_dossier']['overdue'] != 0)"/>
+            <td class="o_warning"
+                t-attf-title="#{widget.getTooltipText(
+                    values['confirm_order']['overdue'],
+                    'Purchase Orders needed to get ready before next 7 days')}"
+                t-if="values and values['confirm_order']['overdue'] != 0">
               <a href="#" class="o_dashboard_action"
                  name="xopgi_purchase_board.purchase_form_action"
                  t-attf-data-context="{
@@ -230,10 +280,15 @@
                         '' : '\'search_default_my_orders\': 1,'}
                         'search_default_next_week': 1
                   }">
-                <t t-esc="values['confirm_order']['overdue']"/>
+                <t t-esc="widget.humanFriendlyNumber(
+                        values['confirm_order']['overdue'])"/>
               </a>
             </td>
-            <td class="o_warning" title="Presupuestos no facturados"
+            <td t-if="!(values and values['confirm_order']['overdue'] != 0)"/>
+            <td class="o_warning"
+                t-attf-title="#{widget.getTooltipText(
+                    values['not_invoiced']['overdue'],
+                    'Purchase Orders not invoiced needed to get ready before next 7 days')}"
                 t-if="values and values['not_invoiced'] and
                       values['not_invoiced']['overdue'] != 0">
               <a href="#" class="o_dashboard_action"
@@ -244,174 +299,202 @@
                         'search_default_next_week': 1,
                         'search_default_not_invoiced': 1
                   }">
-                <t t-esc="values['not_invoiced']['overdue']"/>
+                <t t-esc="widget.humanFriendlyNumber(
+                        values['not_invoiced']['overdue'])"/>
               </a>
             </td>
           </tr>
         </table>
       </div><div style="width: 45%;">
         <div class="o_highlight">Performance</div>
-        <table class="hidden-xs table table-condensed">
-          <tr>
-            <td/>
-            <td class="o_text">
-              <a href="#" class="o_dashboard_action"
-                 name="xopgi_operations_performance.coordination_performance_report_action"
-                 t-attf-data-context="{
+      <table class="hidden-xs table table-condensed">
+        <tr>
+          <td/>
+          <td class="o_text" title="To Coordination Analysis Report">
+            <a href="#" class="o_dashboard_action"
+               name="xopgi_operations_performance.coordination_performance_report_action"
+               t-attf-data-context="{
                       #{values['mode'] and values['mode'] == 'company' ?
-                        '' : '\'search_default_my_orders\': 1'}
+                        '' : '\'search_default_my\': 1'}
                   }">
-                Tiempo envío de reserva
-              </a>
-            </td>
-            <td class="o_text">
-              <a href="#" class="o_dashboard_action"
-                 name="xopgi_operations_performance.coordination_performance_report_action"
-                 t-attf-data-context="{
+              Reserve Sending Time
+            </a>
+          </td>
+          <td class="o_text" title="To Coordination Analysis Report">
+            <a href="#" class="o_dashboard_action"
+               name="xopgi_operations_performance.coordination_performance_report_action"
+               t-attf-data-context="{
                       #{values['mode'] and values['mode'] == 'company' ?
-                        '' : '\'search_default_my_orders\': 1'}
+                        '' : '\'search_default_my\': 1'}
                   }">
-                Tiempo respuesta del proveedor
-              </a>
-            </td>
-            <td class="o_text">
-              <a href="#" class="o_dashboard_action"
-                 name="xopgi_operations_performance.coordination_performance_report_action"
-                 t-attf-data-context="{
+              Supplier Response Time
+            </a>
+          </td>
+          <td class="o_text" title="To Coordination Analysis Report">
+            <a href="#" class="o_dashboard_action"
+               name="xopgi_operations_performance.coordination_performance_report_action"
+               t-attf-data-context="{
                       #{values['mode'] and values['mode'] == 'company' ?
-                        '' : '\'search_default_my_orders\': 1'}
+                        '' : '\'search_default_my\': 1'}
                   }">
-                Tiempo de compra
-              </a>
-            </td>
-          </tr>
-          <tr>
-            <td class="o_text">This Month</td>
-            <td title="To Coordination Analysis" class="o_secondary"
-                t-attf-style="background-color: #{values['reserve_send_time']['color']};">
-              <a href="#" class="o_dashboard_action"
-                 name="xopgi_operations_performance.operations_result_report_action"
-                 t-attf-data-context="{
+              Purchase Time
+            </a>
+          </td>
+        </tr>
+        <tr>
+          <td class="o_text">
+            This Month
+          </td>
+          <td t-attf-title="#{widget.getTooltipText(
+                    values['reserve_send_time']['this_month'],
+                    'This month reserve sending time average')}"
+              class="o_secondary"
+              t-attf-style="background-color: #{values['reserve_send_time']['color']};">
+            <a href="#" class="o_dashboard_action"
+               name="xopgi_operations_performance.coordination_performance_report_action"
+               t-attf-data-context="{
                       #{values['mode'] and values['mode'] == 'company' ?
-                        '' : '\'search_default_my_orders\': 1,'}
+                        '' : '\'search_default_my\': 1,'}
                       'search_default_this_month': 1
                   }">
-                <span class="o_highlight">
-                  <t t-esc="values['reserve_send_time']['this_month']"/>
-                </span>
-              </a>
-            </td>
-            <td title="To Coordination Analysis" class="o_secondary"
-                t-attf-style="background-color: #{values['supplier_response_time']['color']};">
-              <a href="#" class="o_dashboard_action"
-                 name="xopgi_operations_performance.operations_result_report_action"
-                 t-attf-data-context="{
+              <span class="o_highlight">
+                <t t-esc="widget.humanFriendlyNumber(
+                        values['reserve_send_time']['this_month'])"/>
+              </span>
+            </a>
+          </td>
+          <td t-attf-title="#{widget.getTooltipText(
+                    values['supplier_response_time']['this_month'],
+                    'This month supplier response time average')}"
+              class="o_secondary"
+              t-attf-style="background-color: #{values['supplier_response_time']['color']};">
+            <a href="#" class="o_dashboard_action"
+               name="xopgi_operations_performance.coordination_performance_report_action"
+               t-attf-data-context="{
                       #{values['mode'] and values['mode'] == 'company' ?
-                        '' : '\'search_default_my_orders\': 1,'}
+                        '' : '\'search_default_my\': 1,'}
                       'search_default_this_month': 1
                   }">
-                <span class="o_highlight">
-                  <t t-esc="values['supplier_response_time']['this_month']"/>
-                </span>
-              </a>
-            </td>
-            <td title="To Coordination Analysis" class="o_secondary"
-                t-attf-style="background-color: #{values['purchase_time']['color']};">
-              <a href="#" class="o_dashboard_action"
-                 name="xopgi_operations_performance.operations_result_report_action"
-                 t-attf-data-context="{
+              <span class="o_highlight">
+                <t t-esc="widget.humanFriendlyNumber(
+                        values['supplier_response_time']['this_month'])"/>
+              </span>
+            </a>
+          </td>
+          <td t-attf-title="#{widget.getTooltipText(
+                    values['purchase_time']['this_month'],
+                    'This month purchase time average')}" class="o_secondary"
+              t-attf-style="background-color: #{values['purchase_time']['color']};">
+            <a href="#" class="o_dashboard_action"
+               name="xopgi_operations_performance.coordination_performance_report_action"
+               t-attf-data-context="{
                       #{values['mode'] and values['mode'] == 'company' ?
-                        '' : '\'search_default_my_orders\': 1,'}
+                        '' : '\'search_default_my\': 1,'}
                       'search_default_this_month': 1
                   }">
-                <span class="o_highlight">
-                  <t t-esc="values['purchase_time']['this_month']"/>
-                </span>
-              </a>
-            </td>
-          </tr>
-          <tr>
-            <td class="o_text">Target</td>
-            <td class="o_secondary">
-              <span class="o_target_to_set" name='reserve_send_time'
-                    t-att-data-mode="values['mode']"
-                    t-att-value="values['reserve_send_time']['target'] ?
+              <span class="o_highlight">
+                <t t-esc="widget.humanFriendlyNumber(
+                        values['purchase_time']['this_month'])"/>
+              </span>
+            </a>
+          </td>
+        </tr>
+        <tr>
+          <td class="o_text">Target</td>
+          <td class="o_secondary">
+            <span class="o_target_to_set" name='reserve_send_time'
+                  t-att-data-mode="values['mode']"
+                  t-att-value="values['reserve_send_time']['target'] ?
                                  values['reserve_send_time']['target'] : undefined"
-                    title="Click to set">
-                <t t-if="values['reserve_send_time']['target']">
-                  <t t-esc="values['reserve_send_time']['target']"/>
-                </t>
-                <t t-if="!values['reserve_send_time']['target']">
-                  Click to set
-                </t>
-              </span>
-            </td>
-            <td class="o_secondary">
-              <span class="o_target_to_set" name='supplier_response_time'
-                    t-att-data-mode="values['mode']"
-                    t-att-value="values['supplier_response_time']['target'] ?
+                  title="Click to set">
+              <t t-if="values['reserve_send_time']['target']">
+                <t t-esc="widget.humanFriendlyNumber(
+                        values['reserve_send_time']['target'])"/>
+              </t>
+              <t t-if="!values['reserve_send_time']['target']">
+                Click to set
+              </t>
+            </span>
+          </td>
+          <td class="o_secondary">
+            <span class="o_target_to_set" name='supplier_response_time'
+                  t-att-data-mode="values['mode']"
+                  t-att-value="values['supplier_response_time']['target'] ?
                                  values['supplier_response_time']['target'] : undefined"
-                    title="Click to set">
-                <t t-if="values['supplier_response_time']['target']">
-                  <t t-esc="values['supplier_response_time']['target']"/>
-                </t>
-                <t t-if="!values['supplier_response_time']['target']">
-                  Click to set
-                </t>
-              </span>
-            </td>
-            <td class="o_secondary">
-              <span class="o_target_to_set" name='purchase_time'
-                    t-att-data-mode="values['mode']"
-                    t-att-value="values['purchase_time']['target'] ?
+                  title="Click to set">
+              <t t-if="values['supplier_response_time']['target']">
+                <t t-esc="widget.humanFriendlyNumber(
+                        values['supplier_response_time']['target'])"/>
+              </t>
+              <t t-if="!values['supplier_response_time']['target']">
+                Click to set
+              </t>
+            </span>
+          </td>
+          <td class="o_secondary">
+            <span class="o_target_to_set" name='purchase_time'
+                  t-att-data-mode="values['mode']"
+                  t-att-value="values['purchase_time']['target'] ?
                                  values['purchase_time']['target'] : undefined"
-                    title="Click to set">
-                <t t-if="values['purchase_time']['target']">
-                  <t t-esc="values['purchase_time']['target']"/>
-                </t>
-                <t t-if="!values['purchase_time']['target']">
-                  Click to set
-                </t>
-              </span>
-            </td>
-          </tr>
-          <tr>
-            <td class="o_text">Last Month</td>
-            <td title="To Coordination Analysis" class="o_secondary">
-              <a href="#" class="o_dashboard_action"
-                 name="xopgi_operations_performance.operations_result_report_action"
-                 t-attf-data-context="{
+                  title="Click to set">
+              <t t-if="values['purchase_time']['target']">
+                <t t-esc="widget.humanFriendlyNumber(
+                        values['purchase_time']['target'])"/>
+              </t>
+              <t t-if="!values['purchase_time']['target']">
+                Click to set
+              </t>
+            </span>
+          </td>
+        </tr>
+        <tr>
+          <td class="o_text">Last Month</td>
+          <td t-attf-title="#{widget.getTooltipText(
+                    values['reserve_send_time']['last_month'],
+                    'Last month reserve sending time average')}"
+              class="o_secondary">
+            <a href="#" class="o_dashboard_action"
+               name="xopgi_operations_performance.coordination_performance_report_action"
+               t-attf-data-context="{
                       #{values['mode'] and values['mode'] == 'company' ?
-                        '' : '\'search_default_my_orders\': 1,'}
+                        '' : '\'search_default_my\': 1,'}
                       'search_default_last_month': 1
                   }">
-                  <t t-esc="values['reserve_send_time']['last_month']"/>
-              </a>
-            </td>
-            <td title="To Coordination Analysis" class="o_secondary">
-              <a href="#" class="o_dashboard_action"
-                 name="xopgi_operations_performance.operations_result_report_action"
-                 t-attf-data-context="{
+              <t t-esc="widget.humanFriendlyNumber(
+                        values['reserve_send_time']['last_month'])"/>
+            </a>
+          </td>
+          <td t-attf-title="#{widget.getTooltipText(
+                    values['supplier_response_time']['last_month'],
+                    'Last month supplier response time average')}"
+              class="o_secondary">
+            <a href="#" class="o_dashboard_action"
+               name="xopgi_operations_performance.coordination_performance_report_action"
+               t-attf-data-context="{
                       #{values['mode'] and values['mode'] == 'company' ?
-                        '' : '\'search_default_my_orders\': 1,'}
+                        '' : '\'search_default_my\': 1,'}
                       'search_default_last_month': 1
                   }">
-                <t t-esc="values['supplier_response_time']['last_month']"/>
-              </a>
-            </td>
-            <td title="To Coordination Analysis" class="o_secondary">
-              <a href="#" class="o_dashboard_action"
-                 name="xopgi_operations_performance.operations_result_report_action"
-                 t-attf-data-context="{
+              <t t-esc="widget.humanFriendlyNumber(
+                        values['supplier_response_time']['last_month'])"/>
+            </a>
+          </td>
+          <td t-attf-title="#{widget.getTooltipText(
+                    values['purchase_time']['last_month'],
+                    'Last month purchase time average')}" class="o_secondary">
+            <a href="#" class="o_dashboard_action"
+               name="xopgi_operations_performance.coordination_performance_report_action"
+               t-attf-data-context="{
                       #{values['mode'] and values['mode'] == 'company' ?
-                        '' : '\'search_default_my_orders\': 1,'}
+                        '' : '\'search_default_my\': 1,'}
                       'search_default_last_month': 1
                   }">
-                <t t-esc="values['purchase_time']['last_month']"/>
-              </a>
-            </td>
-          </tr>
-        </table>
+              <t t-esc="widget.humanFriendlyNumber(
+                        values['purchase_time']['last_month'])"/>
+            </a>
+          </td>
+        </tr>
+      </table>
       </div>
     </div>
   </t>
