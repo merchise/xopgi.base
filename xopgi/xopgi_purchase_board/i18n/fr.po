@@ -1,0 +1,126 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* xopgi_purchase_board
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 8.0.20151103.180513+8e15968\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-11-30 20:24+0000\n"
+"PO-Revision-Date: 2015-11-30 20:24+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: xopgi_purchase_board
+#: view:purchase.order:xopgi_purchase_board.view_purchase_order_filter_inh
+msgid "Next 21 days"
+msgstr "Next 21 days"
+
+#. module: xopgi_purchase_board
+#. openerp-web
+#: code:addons/xopgi_purchase_board/static/src/xml/xopgi_purchase_board.xml:160
+#, python-format
+msgid "Next 7 days"
+msgstr "Next 7 days"
+
+#. module: xopgi_purchase_board
+#: view:purchase.order:xopgi_purchase_board.view_purchase_order_filter_inh
+msgid "Next month"
+msgstr "Next month"
+
+#. module: xopgi_purchase_board
+#: model:xopgi.board.widget,name:xopgi_purchase_board.individual_purchase_widget
+msgid "Purchase"
+msgstr "Purchase"
+
+#. module: xopgi_purchase_board
+#: model:xopgi.board.widget,name:xopgi_purchase_board.company_purchase_widget
+msgid "Purchase (Company)"
+msgstr "Purchase (Company)"
+
+#. module: xopgi_purchase_board
+#: model:ir.actions.act_window,name:xopgi_purchase_board.purchase_form_action
+msgid "Purchase Orders"
+msgstr "Bons de commande"
+
+#. module: xopgi_purchase_board
+#. openerp-web
+#: code:addons/xopgi_purchase_board/static/src/xml/xopgi_purchase_board.xml:18
+#, python-format
+msgid "Purchase Programs"
+msgstr "Purchase Programs"
+
+#. module: xopgi_purchase_board
+#. openerp-web
+#: code:addons/xopgi_purchase_board/static/src/xml/xopgi_purchase_board.xml:49
+#, python-format
+msgid "Quotations not invoiced"
+msgstr "Quotations not invoiced"
+
+#. module: xopgi_purchase_board
+#. openerp-web
+#: code:addons/xopgi_purchase_board/static/src/xml/xopgi_purchase_board.xml:38
+#, python-format
+msgid "Quotations to confirm"
+msgstr "Quotations to confirm"
+
+#. module: xopgi_purchase_board
+#. openerp-web
+#: code:addons/xopgi_purchase_board/static/src/xml/xopgi_purchase_board.xml:32
+#: code:addons/xopgi_purchase_board/static/src/xml/xopgi_purchase_board.xml:42
+#, python-format
+msgid "To Purchase Orders"
+msgstr "To Purchase Orders"
+
+#. module: xopgi_purchase_board
+#. openerp-web
+#: code:addons/xopgi_purchase_board/static/src/xml/xopgi_purchase_board.xml:10
+#, python-format
+msgid "To Requisitions"
+msgstr "To Requisitions"
+
+#. module: xopgi_purchase_board
+#. openerp-web
+#: code:addons/xopgi_purchase_board/static/src/xml/xopgi_purchase_board.xml:0
+#, python-format
+msgid "Purchase Orders needed to get ready before next 7 days"
+msgstr "Purchase Orders needed to get ready before next 7 days"
+
+#. module: xopgi_purchase_board
+#. openerp-web
+#: code:addons/xopgi_purchase_board/static/src/xml/xopgi_purchase_board.xml:0
+#, python-format
+msgid "Purchase Orders not invoiced needed to get ready before next 7 days"
+msgstr "Purchase Orders not invoiced needed to get ready before next 7 days"
+
+#. module: xopgi_purchase_board
+#. openerp-web
+#: code:addons/xopgi_purchase_board/static/src/xml/xopgi_purchase_board.xml:0
+#, python-format
+msgid "Purchase Orders needed to get ready before next 21 days"
+msgstr "Purchase Orders needed to get ready before next 21 days"
+
+#. module: xopgi_purchase_board
+#. openerp-web
+#: code:addons/xopgi_purchase_board/static/src/xml/xopgi_purchase_board.xml:0
+#, python-format
+msgid "Purchase Orders not invoiced needed to get ready before next 21 days"
+msgstr "Purchase Orders not invoiced needed to get ready before next 21 days"
+
+#. module: xopgi_purchase_board
+#. openerp-web
+#: code:addons/xopgi_purchase_board/static/src/xml/xopgi_purchase_board.xml:0
+#, python-format
+msgid "Purchase Orders needed to get ready before next 30 days"
+msgstr "Purchase Orders needed to get ready before next 30 days"
+
+#. module: xopgi_purchase_board
+#. openerp-web
+#: code:addons/xopgi_purchase_board/static/src/xml/xopgi_purchase_board.xml:0
+#, python-format
+msgid "Purchase Orders not invoiced needed to get ready before next 30 days"
+msgstr "Purchase Orders not invoiced needed to get ready before next 30 days"
