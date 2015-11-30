@@ -28,7 +28,7 @@ class CoordinationBoardUtil(models.AbstractModel):
     _name = 'coordination.board.util'
 
     @api.model
-    def get_data(self, mode=None):
+    def get_data(self, today, mode=None):
         res = {
             'mode': mode or '',
             'quotation': {'today': 0, 'overdue': 0},
@@ -43,13 +43,15 @@ class CoordinationBoardUtil(models.AbstractModel):
             'purchase_time': {
                 'this_month': 0, 'last_month': 0, 'color': 0},
         }
-        today = date.today()
         first_month_day = today.replace(day=1)
-        first_last_month_day = first_month_day - relativedelta(months=+1)
-        next_21_days = today + timedelta(days=21)
-        next_30_days = today + timedelta(days=30)
-        last_week = today + timedelta(days=-7)
-        last2_week = today + timedelta(days=-15)
+        first_last_month_day = dt2str(
+            first_month_day - relativedelta(months=+1))
+        first_month_day = dt2str(first_month_day)
+        next_22_days = dt2str(today + timedelta(days=22))
+        next_31_days = dt2str(today + timedelta(days=31))
+        last_week = dt2str(today + timedelta(days=-7))
+        last2_week = dt2str(today + timedelta(days=-15))
+        today = dt2str(today)
         # Quotations to confirm
         logger.debug('Starting to search quotations to confirm')
         res['quotation'].update(
@@ -62,7 +64,7 @@ class CoordinationBoardUtil(models.AbstractModel):
         logger.debug('Starting to search dossier to coordinate')
         res['coord_dossier'].update(
             self._get_coord_dossiers(mode == 'company', today,
-                                     next_21_days, next_30_days))
+                                     next_22_days, next_31_days))
         # Dossier to close
         logger.debug('Starting to search dossiers to close')
         res['close_dossier'].update(self._get_close_dossier(
@@ -81,7 +83,6 @@ class CoordinationBoardUtil(models.AbstractModel):
     def _get_quotations(self, base_domain, last_week):
         base_domain = ([] if base_domain else
                        [('coordinator_id', '=', self._uid)])
-        last_week = dt2str(last_week)
         query = """
         SELECT
           SUM(CASE WHEN create_date > %%s THEN 1 ELSE 0 END) AS today,
@@ -101,7 +102,6 @@ class CoordinationBoardUtil(models.AbstractModel):
     def _get_purchase_programs(self, base_domain, last_week):
         base_domain = ([] if base_domain else
                        [('manager_id', '=', self._uid)])
-        last_week = dt2str(last_week)
         query = """
         SELECT
           SUM(CASE WHEN create_date > %%s THEN 1 ELSE 0 END) AS today,
@@ -119,13 +119,10 @@ class CoordinationBoardUtil(models.AbstractModel):
         self._cr.execute(query % (from_clause, where_str), query_args)
         return self._cr.dictfetchone() or {}
 
-    def _get_coord_dossiers(self, base_domain, today, next_21_days,
-                            next_30_days):
+    def _get_coord_dossiers(self, base_domain, today, next_22_days,
+                            next_31_days):
         base_domain = ([] if base_domain else
                        [('manager_id', '=', self._uid)])
-        today = dt2str(today)
-        next_21_days = dt2str(next_21_days)
-        next_30_days = dt2str(next_30_days)
         query = """
         SELECT
             (SELECT
@@ -146,19 +143,19 @@ class CoordinationBoardUtil(models.AbstractModel):
         """
         domain = base_domain + [
             ('dossier', '=', True),
-            ('project_ids.arrival_date', '>', next_21_days),
-            ('project_ids.arrival_date', '<=', next_30_days)]
+            ('project_ids.arrival_date', '>=', next_22_days),
+            ('project_ids.arrival_date', '<', next_31_days)]
         today_from, today_where, today_params = get_query_from_domain(
             self.env['account.analytic.account'], domain)
         domain = base_domain + [
             ('dossier', '=', True),
-            ('project_ids.arrival_date', '>', next_30_days)]
+            ('project_ids.arrival_date', '>=', next_31_days)]
         week_from, week_where, week_params = get_query_from_domain(
             self.env['account.analytic.account'], domain)
         domain = base_domain + [
             ('dossier', '=', True),
             ('project_ids.arrival_date', '>', today),
-            ('project_ids.arrival_date', '<=', next_21_days)]
+            ('project_ids.arrival_date', '<', next_22_days)]
         overdue_from, overdue_where, overdue_params = get_query_from_domain(
             self.env['account.analytic.account'], domain)
         query_args = (today_from, today_where, week_from, week_where,
@@ -170,9 +167,6 @@ class CoordinationBoardUtil(models.AbstractModel):
     def _get_close_dossier(self, base_domain, today, last_week, last2_week):
         base_domain = ([] if base_domain else
                        [('manager_id', '=', self._uid)])
-        today = dt2str(today)
-        last_week = dt2str(last_week)
-        last2_week = dt2str(last2_week)
         query = """
         SELECT
           SUM(CASE WHEN date <= %%s AND date > %%s THEN 1 ELSE 0 END) AS today,
@@ -195,8 +189,6 @@ class CoordinationBoardUtil(models.AbstractModel):
 
     def _get_indicators(self, base_domain, first_month_day,
                          first_last_month_day, indicators):
-        first_month_day = dt2str(first_month_day)
-        first_last_month_day = dt2str(first_last_month_day)
         base_domain = ([] if base_domain else
                        [('user_id', '=', self._uid)])
         query = """

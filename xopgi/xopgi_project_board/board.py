@@ -11,18 +11,20 @@
 #
 # @created: 2015-11-14
 
-from datetime import date, timedelta
+from datetime import timedelta
 from dateutil.relativedelta import relativedelta
-from openerp import api, fields, models, _
-from openerp.addons.xopgi_board.board import lineal_color_scaling
+from openerp import api, models
+from openerp.addons.xopgi_board.board import lineal_color_scaling, \
+    get_query_from_domain, get_targets
 from xoeuf.tools import normalize_date as to_date, dt2str, date2str
+from xoutil import logger
 
 
 class ProjectBoard(models.AbstractModel):
     _name = 'project.board'
 
     @api.model
-    def get_data(self, mode=None):
+    def get_data(self, today, mode=None):
         base_domain = ([]
                        if mode and mode == 'company'
                        else ['|', ('user_id', '=', False),
@@ -34,42 +36,93 @@ class ProjectBoard(models.AbstractModel):
             'issue': {'overdue': 0, 'no_activity': 0, 'new': 0,
                       'unassigned': 0, 'unread': 0},
         }
-        today = date.today()
-        next_week = today + timedelta(days=7)
+        tomorrow = dt2str(today + timedelta(days=1))
+        next_8_days = dt2str(today + timedelta(days=8))
         first_month_day = today.replace(day=1)
-        first_last_month_day = first_month_day - relativedelta(months=+1)
+        first_last_month_day = dt2str(
+            first_month_day - relativedelta(months=+1))
+        first_month_day = dt2str(first_month_day)
         # Task
-        for task in self.env['project.task'].search(
-                [('stage_id.closed', '=', False)] + base_domain):
-            if not task.user_id:
-                res['task']['unassigned'] += 1
-            if task.user_id or not base_domain:
-                if task.date_end:
-                    date_end = to_date(task.date_end)
-                    if date_end <= today:
-                        res['task']['overdue'] += 1
-                    elif date_end <= next_week:
-                        res['task']['next_7_days'] += 1
-                        if date_end == today:
-                            res['task']['today'] += 1
-                if task.stage_id.sequence <= 1:
-                    res['task']['new'] += 1
-                if task.message_unread:
-                    res['task']['unread'] += 1
+        logger.debug('Starting to search tasks')
+        res['task'].update(
+            self._get_tasks(base_domain, today, tomorrow, next_8_days))
         # Issue
-        for issue in self.env['project.issue'].search(
-                [('stage_id.closed', '=', False)] + base_domain):
-            if not issue.user_id:
-                res['issue']['unassigned'] += 1
-            if issue.user_id or not base_domain:
-                if to_date(issue.create_date) <= first_last_month_day:
-                    res['issue']['overdue'] += 1
-                if (issue.message_last_post and to_date(
-                        issue.message_last_post) <= first_month_day):
-                    res['issue']['no_activity'] += 1
-                if issue.stage_id.sequence <= 1:
-                    res['issue']['new'] += 1
-                if issue.message_unread:
-                    res['issue']['unread'] += 1
+        logger.debug('Starting to search tasks')
+        res['issue'].update(
+            self._get_issues(base_domain, first_last_month_day,
+                             first_month_day))
         return res
+
+    def _get_tasks(self, base_domain, today, tomorrow, next_8_days):
+        query = """
+        SELECT
+            SUM(CASE WHEN user_id IS NULL
+                THEN 1 ELSE 0 END) AS unassigned,
+            SUM(CASE WHEN user_id IS NOT NULL AND date_end IS NOT NULL AND
+                date_end < %%s THEN 1 ELSE 0 END) AS overdue,
+            SUM(CASE WHEN user_id IS NOT NULL AND date_end IS NOT NULL AND
+                date_end >= %%s AND date_end < %%s
+                THEN 1 ELSE 0 END) AS today,
+            SUM(CASE WHEN user_id IS NOT NULL AND date_end IS NOT NULL AND
+                date_end >= %%s AND date_end < %%s
+                THEN 1 ELSE 0 END) AS next_7_days
+        FROM
+            %s
+        %s
+        """
+        domain = base_domain + [('stage_id.closed', '=', False)]
+        from_clause, where_str, where_params = get_query_from_domain(
+            self.env['project.task'], domain)
+        query_args = (today, today, tomorrow, today, next_8_days
+                      ) + tuple(where_params)
+        self._cr.execute(query % (from_clause, where_str), query_args)
+        data = self._cr.dictfetchone() or {}
+        query = "SELECT COUNT(id) AS new FROM %s %s"
+        from_clause, where_str, where_params = get_query_from_domain(
+            self.env['project.task'], [('stage_id.sequence', '=', 1)])
+        self._cr.execute(query % (from_clause, where_str), where_params)
+        data.update(self._cr.dictfetchone() or {})
+        query = "SELECT COUNT(project_task.id) AS unread FROM %s %s"
+        unread_domain = domain + [('message_unread', '=', True)]
+        from_clause, where_str, where_params = get_query_from_domain(
+            self.env['project.task'], unread_domain)
+        self._cr.execute(query % (from_clause, where_str), where_params)
+        data.update(self._cr.dictfetchone() or {})
+        return data
+
+    def _get_issues(self, base_domain, first_last_month_day, first_month_day):
+        query = """
+        SELECT
+            SUM(CASE WHEN user_id IS NULL
+                THEN 1 ELSE 0 END) AS unassigned,
+            SUM(CASE WHEN user_id IS NOT NULL AND
+                create_date < %%s THEN 1 ELSE 0 END) AS overdue,
+            SUM(CASE WHEN user_id IS NOT NULL AND
+                message_last_post IS NOT NULL AND message_last_post < %%s
+                THEN 1 ELSE 0 END) AS no_activity
+        FROM
+            %s
+        %s
+        """
+        domain = base_domain + [('stage_id.closed', '=', False)]
+        from_clause, where_str, where_params = get_query_from_domain(
+            self.env['project.issue'], domain)
+        query_args = (first_last_month_day, first_month_day
+                     ) + tuple(where_params)
+        self._cr.execute(query % (from_clause, where_str), query_args)
+        data = self._cr.dictfetchone() or {}
+        query = "SELECT COUNT(id) AS new FROM %s %s"
+        new_domain = domain + [('stage_id.sequence', '<=', 1)]
+        from_clause, where_str, where_params = get_query_from_domain(
+            self.env['project.issue'], new_domain)
+        self._cr.execute(query % (from_clause, where_str), where_params)
+        data.update(self._cr.dictfetchone() or {})
+        query = "SELECT COUNT(project_issue.id) AS unread FROM %s %s"
+        unread_domain = domain + [('message_unread', '=', True)]
+        from_clause, where_str, where_params = get_query_from_domain(
+            self.env['project.issue'], unread_domain)
+        self._cr.execute(query % (from_clause, where_str), where_params)
+        data.update(self._cr.dictfetchone() or {})
+        return data
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

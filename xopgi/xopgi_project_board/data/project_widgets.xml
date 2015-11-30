@@ -12,7 +12,7 @@
         </templates>]]>
       </field>
       <field name="python_code">result = {
-          'values': env['project.board'].get_data()
+          'values': env['project.board'].get_data(today)
         }
       </field>
     </record>
@@ -28,7 +28,7 @@
         </templates>]]>
       </field>
       <field name="python_code">result = {
-        'values': env['project.board'].get_data(mode='company')
+        'values': env['project.board'].get_data(today, mode='company')
         }
       </field>
     </record>

@@ -12,7 +12,7 @@
         </templates>]]>
       </field>
       <field name="python_code">result = {
-          'values': env['coordination.board.util'].get_data()
+          'values': env['coordination.board.util'].get_data(today)
         }
       </field>
     </record>
@@ -28,7 +28,8 @@
         </templates>]]>
       </field>
       <field name="python_code">result = {
-        'values': env['coordination.board.util'].get_data(mode='company')
+        'values':
+          env['coordination.board.util'].get_data(today, mode='company')
         }
       </field>
     </record>

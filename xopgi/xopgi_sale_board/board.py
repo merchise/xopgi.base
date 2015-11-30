@@ -38,9 +38,9 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
-from datetime import date, timedelta
+from datetime import timedelta
 from dateutil.relativedelta import relativedelta
-from openerp import api, fields, models, _
+from openerp import api, fields, models
 from openerp.addons.xopgi_board.board import lineal_color_scaling, \
     get_query_from_domain, get_targets
 
@@ -52,7 +52,7 @@ class CrmLead(models.Model):
     _inherit = 'crm.lead'
 
     @api.model
-    def retrieve_sales_dashboard_data(self, mode=None):
+    def retrieve_sales_dashboard_data(self, today, mode=None):
         base_domain = ([]
                        if mode and mode == 'company'
                        else [('user_id', '=', self._uid)])
@@ -69,24 +69,21 @@ class CrmLead(models.Model):
             'sale_won': {'this_month': 0, 'last_month': 0, 'color': '', },
             'sale_invoiced': {'this_month': 0, 'last_month': 0, 'color': '', },
         }
-        today = date.today()
         first_month_day = today.replace(day=1)
-        first_last_month_day = date2str(
+        first_last_month_day = dt2str(
             first_month_day - relativedelta(months=+1))
-        first_month_day = date2str(first_month_day)
-        next_week = date2str(today + timedelta(days=7))
-        last_week = date2str(today + timedelta(days=-7))
-        today = date2str(today)
+        first_month_day = dt2str(first_month_day)
+        next_8_days = dt2str(today + timedelta(days=8))
+        last_week = dt2str(today + timedelta(days=-7))
+        today = dt2str(today)
         # Meetings
-        min_date = dt2str(today)
-        max_date = dt2str(date.today() + timedelta(days=8))
         # We need to add 'mymeetings' in the context for the search to
         # be correct.
         meetings = self.env['calendar.event']
         if base_domain:
             meetings = meetings.with_context(mymeetings=1)
         for meeting in meetings.search(
-                [('start', '>=', min_date), ('start', '<', max_date)]):
+                [('start', '>=', today), ('start', '<', next_8_days)]):
             if meeting.start:
                 start = meeting.start[:fields.DATE_LENGTH]
                 if start == today:
@@ -100,14 +97,15 @@ class CrmLead(models.Model):
         #  Opportunities
         logger.debug('Starting to search opportunities')
         res['opportunity'].update(
-            self._get_opportunities(base_domain, today, next_week))
+            self._get_opportunities(base_domain, today[:fields.DATE_LENGTH],
+                                    next_8_days[:fields.DATE_LENGTH]))
         # Quotations
         logger.debug('Starting to search quotations')
         res['quotation'].update(self._get_quotations(base_domain, last_week))
         #  Sales Orders
         logger.debug('Starting to search sales orders')
         res['sale'].update(
-            self._get_sale_orders(base_domain, today, next_week))
+            self._get_sale_orders(base_domain, today, next_8_days))
         #  Sales done
         logger.debug('Starting to search sales done')
         res['sale_done'].update(
@@ -126,8 +124,9 @@ class CrmLead(models.Model):
         logger.debug('Starting to search for operations results')
         # sale_margin
         logger.debug('Starting to search sales margin')
-        temp = self._get_sale_margin(base_domain, today, first_month_day,
-                                     first_last_month_day)
+        temp = self._get_sale_margin(base_domain, today[:fields.DATE_LENGTH],
+                                     first_month_day[:fields.DATE_LENGTH],
+                                     first_last_month_day[:fields.DATE_LENGTH])
         res['sale_margin'].update(temp.get('sale_margin', {}))
         res['sale_pax_margin'].update(temp.get('sale_pax_margin', {}))
         # targets
@@ -139,7 +138,6 @@ class CrmLead(models.Model):
         return res
 
     def _get_leads(self, base_domain, last_week):
-        last_week = dt2str(last_week)
         query = """
         SELECT
           SUM(CASE WHEN create_date > %%s THEN 1 ELSE 0 END) AS today,
@@ -156,7 +154,7 @@ class CrmLead(models.Model):
         self._cr.execute(query % (from_clause, where_str), query_args)
         return self._cr.dictfetchone() or {}
 
-    def _get_opportunities(self, base_domain, today, next_week):
+    def _get_opportunities(self, base_domain, today, next_8_days):
         query = """
         SELECT
           SUM(CASE WHEN date_action = %%s THEN 1 ELSE 0 END) AS today,
@@ -170,7 +168,7 @@ class CrmLead(models.Model):
         domain = base_domain + [
             ('type', '=', 'opportunity'),
             ('date_action', '!=', False),
-            ('date_action', '<=', next_week)]
+            ('date_action', '<', next_8_days)]
         from_clause, where_str, where_params = get_query_from_domain(
             self.env['crm.lead'], domain)
         query_args = (today, today, today) + tuple(where_params)
@@ -178,7 +176,6 @@ class CrmLead(models.Model):
         return self._cr.dictfetchone() or {}
 
     def _get_quotations(self, base_domain, last_week):
-        last_week = dt2str(last_week)
         query = """
         SELECT
           SUM(CASE WHEN create_date > %%s THEN 1 ELSE 0 END) AS today,
@@ -195,7 +192,7 @@ class CrmLead(models.Model):
         self._cr.execute(query % (from_clause, where_str), query_args)
         return self._cr.dictfetchone() or {}
 
-    def _get_sale_orders(self, base_domain, today, next_week):
+    def _get_sale_orders(self, base_domain, today, next_8_days):
         query = """
         SELECT
           SUM(CASE WHEN date_order = %%s THEN 1 ELSE 0 END) AS today,
@@ -209,7 +206,7 @@ class CrmLead(models.Model):
         domain = base_domain + [
             ('state', 'not in', ('cancel', 'sale_done', 'draft', 'sent')),
             ('date_order', '!=', False),
-            ('date_order', '<=', next_week)]
+            ('date_order', '<', next_8_days)]
         from_clause, where_str, where_params = get_query_from_domain(
             self.env['sale.order'], domain)
         query_args = (today, today, today) + tuple(where_params)
@@ -218,9 +215,6 @@ class CrmLead(models.Model):
 
     def _get_won_opp(self, base_domain, today, first_month_day,
                      first_last_month_day):
-        today = dt2str(today)
-        first_month_day = dt2str(first_month_day)
-        first_last_month_day = dt2str(first_last_month_day)
         query = """
         SELECT
           SUM(CASE WHEN date_closed >= %%s
@@ -245,8 +239,6 @@ class CrmLead(models.Model):
 
     def _get_sale_done(self, base_domain, first_month_day,
                        first_last_month_day):
-        first_month_day = dt2str(first_month_day)
-        first_last_month_day = dt2str(first_last_month_day)
         query = """
         SELECT
           SUM(CASE WHEN create_date >= %%s THEN 1 ELSE 0 END) AS this_month,
@@ -259,7 +251,7 @@ class CrmLead(models.Model):
         domain = base_domain + [
             ('type', '=', 'opportunity'),
             ('create_date', '!=', False),
-            ('create_date', '>=', dt2str(first_last_month_day))]
+            ('create_date', '>=', first_last_month_day)]
         from_clause, where_str, where_params = get_query_from_domain(
             self.env['crm.lead'], domain)
         query_args = (first_month_day, first_month_day) + tuple(where_params)

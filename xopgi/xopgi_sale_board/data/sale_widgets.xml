@@ -13,7 +13,7 @@
         </templates>]]>
       </field>
       <field name="python_code">result = {
-            'values': env['crm.lead'].retrieve_sales_dashboard_data()
+            'values': env['crm.lead'].retrieve_sales_dashboard_data(today)
         }
       </field>
     </record>
@@ -30,7 +30,8 @@
         </templates>]]>
       </field>
       <field name="python_code">result = {
-        'values': env['crm.lead'].retrieve_sales_dashboard_data(mode='company')
+        'values':
+        env['crm.lead'].retrieve_sales_dashboard_data(today, mode='company')
         }
       </field>
     </record>

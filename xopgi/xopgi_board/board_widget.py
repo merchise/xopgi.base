@@ -13,6 +13,7 @@
 
 from openerp import api, fields, models
 from openerp.tools.safe_eval import safe_eval
+from xoeuf.tools import localize_datetime
 from xoutil import logger
 
 
@@ -53,11 +54,12 @@ class XopgiBoardWidget(models.Model):
             'python_code'])
         logger.debug(
             'Widgets to show %r' % [w['name'] for w in widgets])
+        today = localize_datetime(self, from_tz=None)
         for widget in widgets:
-            self._eval_python_code(widget)
+            self._eval_python_code(widget, today)
         return widgets
 
-    def _eval_python_code(self, widget):
+    def _eval_python_code(self, widget, today):
         python_code = widget.get('python_code', '')
         if not python_code:
             return
