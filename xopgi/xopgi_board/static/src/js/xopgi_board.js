@@ -157,6 +157,30 @@ instance.web.form.XopgiBoard = instance.web.form.FormWidget.extend({
             action_manager = view_manager.getParent();
         this.view.destroy();
         action_manager.do_action(view_manager.action);
+    },
+
+    humanFriendlyNumber: function(n){
+        if (!!n && -1000 < n < 1000){
+            n = Math.round(n);
+        }
+        if (!!n && n < 0) {
+            return '-' + humanFriendlyNumber(n*-1, 1)
+        }
+        else{
+            return humanFriendlyNumber(n, 1)
+        }
+    },
+
+    getTooltipText: function (a, t, c) {
+        if (!!c) {
+            a = this.formatCurrency(a, c);
+        }
+        if (!!t){
+            return a + ': ' + _t(t)
+        }
+        else {
+            return a
+        }
     }
 });
 
