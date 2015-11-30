@@ -79,9 +79,9 @@ class PurchaseBoard(models.AbstractModel):
                              next_22_days, next_31_days):
         query = """
         SELECT
-          SUM(CASE WHEN minimum_planned_date > %%s and
+          SUM(CASE WHEN minimum_planned_date >= %%s and
               minimum_planned_date < %%s
-              THEN 1 ELSE 0 END) AS order_today,
+              THEN 1 ELSE 0 END) AS today,
           SUM(CASE WHEN %%s <= minimum_planned_date
               THEN 1 ELSE 0 END) AS next_7_days,
           SUM(CASE WHEN minimum_planned_date < %%s
@@ -97,7 +97,8 @@ class PurchaseBoard(models.AbstractModel):
             ('minimum_planned_date', '<', next_31_days)]
         from_clause, where_str, where_params = get_query_from_domain(
             self.env['purchase.order'], domain)
-        query_args = (next_8_days, next_22_days, next_8_days, next_8_days) + tuple(
+        query_args = (next_8_days, next_22_days, next_8_days,
+                      next_8_days) + tuple(
             where_params)
         self._cr.execute(query % (from_clause, where_str), query_args)
         data = {'confirm_order': self._cr.dictfetchone() or {}}

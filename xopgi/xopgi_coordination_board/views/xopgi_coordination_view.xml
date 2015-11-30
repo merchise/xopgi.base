@@ -63,27 +63,27 @@
                     ('dossier', '=', True),
                     ('project_ids.arrival_date', '&gt;', datetime.datetime.combine(
                       context_today(), datetime.time(0,0,0))),
-                    ('project_ids.arrival_date', '&lt;=', datetime.datetime.combine(
-                      context_today() + datetime.timedelta(days=21),
+                    ('project_ids.arrival_date', '&lt;', datetime.datetime.combine(
+                      context_today() + datetime.timedelta(days=22),
                       datetime.time(0,0,0)))
                   ]"/>
           <filter string="Arrivals in coming 3 or 4 weeks "
                   name="arrival_21_30_days"
                   domain="[
                     ('dossier', '=', True),
-                    ('project_ids.arrival_date', '&gt;', datetime.datetime.combine(
-                      context_today() + datetime.timedelta(days=21),
-                      datetime.time(23,59,59))),
-                    ('project_ids.arrival_date', '&lt;=', datetime.datetime.combine(
-                      context_today() + datetime.timedelta(days=30),
+                    ('project_ids.arrival_date', '&gt;=', datetime.datetime.combine(
+                      context_today() + datetime.timedelta(days=22),
+                      datetime.time(0,0,0))),
+                    ('project_ids.arrival_date', '&lt;', datetime.datetime.combine(
+                      context_today() + datetime.timedelta(days=31),
                       datetime.time(0,0,0)))
                   ]"/>
           <filter string="Arrivals after this month "
                   name="arrival_after_30_days"
                   domain="[
                     ('dossier', '=', True),
-                    ('project_ids.arrival_date', '&gt;', datetime.datetime.combine(
-                      context_today() + datetime.timedelta(days=30),
+                    ('project_ids.arrival_date', '&gt;=', datetime.datetime.combine(
+                      context_today() + datetime.timedelta(days=31),
                       datetime.time(0,0,0)))
                   ]"/>
           <filter string="Dossiers expired before last week"

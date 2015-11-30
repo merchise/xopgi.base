@@ -25,22 +25,22 @@
                   domain="[
                   ('minimum_planned_date', '!=', False),
                   ('state', 'not in', ['cancel']),
-                  ('minimum_planned_date', '&gt;', datetime.datetime.combine(
-                    context_today() + datetime.timedelta(7),
-                    datetime.time(23,59,59))),
-                  ('minimum_planned_date', '&lt;=', datetime.datetime.combine(
-                    context_today() + datetime.timedelta(21),
+                  ('minimum_planned_date', '&gt;=', datetime.datetime.combine(
+                    context_today() + datetime.timedelta(8),
+                    datetime.time(0,0,0))),
+                  ('minimum_planned_date', '&lt;', datetime.datetime.combine(
+                    context_today() + datetime.timedelta(22),
                     datetime.time(0,0,0)))]"/>
           <filter string="Next month "
                   name="next_month"
                   domain="[
                   ('minimum_planned_date', '!=', False),
                   ('state', 'not in', ['cancel']),
-                  ('minimum_planned_date', '&gt;', datetime.datetime.combine(
-                    context_today() + datetime.timedelta(7),
-                    datetime.time(23,59,59))),
-                  ('minimum_planned_date', '&lt;=', datetime.datetime.combine(
-                    context_today() + datetime.timedelta(30),
+                  ('minimum_planned_date', '&gt;=', datetime.datetime.combine(
+                    context_today() + datetime.timedelta(8),
+                    datetime.time(0,0,0))),
+                  ('minimum_planned_date', '&lt;', datetime.datetime.combine(
+                    context_today() + datetime.timedelta(31),
                     datetime.time(0,0,0)))]"/>
           <separator/>
           <filter string="My" name="my_orders"

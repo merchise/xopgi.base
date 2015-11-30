@@ -347,11 +347,11 @@
             </td>
             <td class="o_text" title="To Opportunities Analysis Report">
               <a href="#" class="o_dashboard_action"
-                 name="crm.action_report_crm_opportunity">Opportunities</a>
+                 name="xopgi_sale_board.action_report_crm_opportunity">Opportunities</a>
             </td>
             <td class="o_text" title="To Opportunities Analysis Report">
               <a href="#" class="o_dashboard_action"
-                 name="crm.action_report_crm_opportunity"
+                 name="xopgi_sale_board.action_report_crm_opportunity"
                  data-context="{'search_default_won': 1}">Won in
               Opportunities</a>
             </td>
@@ -416,7 +416,7 @@
                 class="o_secondary"
                 t-attf-style="background-color: #{values['sale_done']['color']};">
               <a href="#" class="o_dashboard_action"
-                 name="crm.action_report_crm_opportunity"
+                 name="xopgi_sale_board.action_report_crm_opportunity"
                  t-attf-data-context="{
                       #{values['mode'] and values['mode'] == 'company' ?
                         '' : '\'search_default_my\': 1,'}
@@ -439,11 +439,10 @@
                 class="o_secondary"
                 t-attf-style="background-color: #{values['sale_won']['color']};">
               <a href="#" class="o_dashboard_action"
-                 name="crm.action_report_crm_opportunity"
+                 name="xopgi_sale_board.action_report_crm_opportunity"
                  t-attf-data-context="{
                       #{values['mode'] and values['mode'] == 'company' ?
-                        '' : '\'search_default_my\': 1,'}
-                        'search_default_won': 1,
+                        '': '\'search_default_my\': 1, \'search_default_won\': 1,'}
                         'search_default_won_this_month': 1}">
                 <span class="o_highlight">
                   <t t-if="!show_demo">
@@ -617,7 +616,7 @@
                     values['sale_done']['last_month'],
                     'Opportunities started on last month')}">
               <a href="#" class="o_dashboard_action"
-                 name="crm.action_report_crm_opportunity"
+                 name="xopgi_sale_board.action_report_crm_opportunity"
                  t-attf-data-context="{
                       #{values['mode'] and values['mode'] == 'company' ?
                         '' : '\'search_default_my\': 1,'}
@@ -629,14 +628,14 @@
             </td>
             <td class="o_secondary" t-attf-title="#{
                     widget.getTooltipText(
-                    values['sale_won']['last_month'], values['currency_id'],
-                    'Won in opportunities on last month')}">
+                    values['sale_won']['last_month'],
+                    'Won in opportunities on last month',
+                    values['currency_id'])}">
               <a href="#" class="o_dashboard_action"
-                 name="crm.action_report_crm_opportunity"
+                 name="xopgi_sale_board.action_report_crm_opportunity"
                  t-attf-data-context="{
                       #{values['mode'] and values['mode'] == 'company' ?
-                        '' : '\'search_default_my\': 1,'}
-                        'search_default_won': 1,
+                        '' : '\'search_default_my\': 1, \'search_default_won\': 1,'}
                         'search_default_won_last_month': 1}">
                 <t t-if="!show_demo"
                    t-esc="widget.humanFriendlyNumber(
@@ -647,8 +646,8 @@
             <td class="o_secondary" t-attf-title="#{
                     widget.getTooltipText(
                     values['sale_invoiced']['last_month'],
-                        values['currency_id'],
-                    'Amount invoiced on last month')}">
+                    'Amount invoiced on last month',
+                    values['currency_id'])}">
               <a href="#" class="o_dashboard_action"
                  name="account.action_account_invoice_report_all"
                  t-attf-data-context="{

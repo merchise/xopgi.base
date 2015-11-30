@@ -81,7 +81,7 @@
           <filter string="This Week" name="this_week"
                   domain="['&amp;',
                            ('date_order', '&gt;=', context_today().strftime('%Y-%m-%d') + ' 00:00:00'),
-                           ('date_order', '&lt;=', (context_today()+datetime.timedelta(days=7)).strftime('%Y-%m-%d') + ' 00:00:00'),
+                           ('date_order', '&lt;', (context_today()+datetime.timedelta(days=8)).strftime('%Y-%m-%d') + ' 00:00:00'),
                            ('state', 'not in', ('cancel', 'done'))
                           ]"/>
           <filter string="Overdue" name="overdue"
@@ -155,6 +155,14 @@
                            ('date', '&gt;=', (context_today()-datetime.timedelta(days=30)).replace(day=1).strftime('%Y-%m-%d'))]"/>
         </filter>
       </field>
+    </record>
+
+    <!-- Invoice Report action -->
+    <record id="action_report_crm_opportunity" model="ir.actions.act_window">
+      <field name="name">Opportunities Analysis</field>
+      <field name="res_model">crm.opportunity.report</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">graph</field>
     </record>
 
     <!-- Results Report Search View -->
