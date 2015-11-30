@@ -50,7 +50,9 @@
             <td class="o_text">
               Today
             </td>
-            <td class="o_main" title="Quotations create last week"
+            <td class="o_main" t-attf-title="#{widget.getTooltipText(
+                    values['quotation']['today'],
+                    'Quotations create last week')}"
                 rowspan="2">
               <a href="#" class="o_dashboard_action"
                  name="xopgi_sale_board.action_quotations_inh"
@@ -62,7 +64,8 @@
                 <span class="o_highlight">
                   <t t-if="values and values['quotation'] and
                        values['quotation']['today'] != 0">
-                    <t t-esc="values['quotation']['today']"/>
+                    <t t-esc="widget.humanFriendlyNumber(
+                        values['quotation']['today'])"/>
                   </t>
                   <t t-if="!(values and values['quotation'] and
                          values['quotation']['today'] != 0)">
@@ -72,7 +75,9 @@
               </a>
             </td>
             <td class="o_main"
-                title="Purchase requisitions from open dossier created on last 7 days"
+                t-attf-title="#{widget.getTooltipText(
+                    values['program']['today'],
+                    'Purchase requisitions from open dossier created on last 7 days')}"
                 rowspan="2">
               <a href="#" class="o_dashboard_action"
                  name="xopgi_coordination_board.action_purchase_requisition"
@@ -86,7 +91,8 @@
                 <span class="o_highlight">
                   <t t-if="values and values['program'] and
                        values['program']['today'] != 0">
-                    <t t-esc="values['program']['today']"/>
+                    <t t-esc="widget.humanFriendlyNumber(
+                        values['program']['today'])"/>
                   </t>
                   <t t-if="!(values and values['program'] and
                          values['program']['today'] != 0)">
@@ -96,7 +102,9 @@
               </a>
             </td>
             <td class="o_main"
-                title="Dossiers with arrival date on next 3 or 4 week">
+                t-attf-title="#{widget.getTooltipText(
+                    values['coord_dossier']['today'],
+                    'Dossiers with arrival date on next 3 or 4 week')}">
               <a href="#" class="o_dashboard_action"
                  name="account.action_account_analytic_account_form"
                  t-attf-data-context="{
@@ -107,7 +115,8 @@
                 <span class="o_highlight">
                   <t t-if="values and values['coord_dossier'] and
                            values['coord_dossier']['today'] != 0">
-                    <t t-esc="values['coord_dossier']['today']"/>
+                    <t t-esc="widget.humanFriendlyNumber(
+                        values['coord_dossier']['today'])"/>
                   </t>
                   <t t-if="!(values and values['coord_dossier'] and
                             values['coord_dossier']['today'] != 0)">
@@ -116,7 +125,9 @@
                 </span>
               </a>
             </td>
-            <td class="o_main" title="Dossiers expired on last week">
+            <td class="o_main" t-attf-title="#{widget.getTooltipText(
+                    values['close_dossier']['today'],
+                    'Dossiers expired on last week')}">
               <a href="#" class="o_dashboard_action"
                  name="account.action_account_analytic_account_form"
                  t-attf-data-context="{
@@ -127,7 +138,8 @@
                 <span class="o_highlight">
                   <t t-if="values and values['close_dossier'] and
                            values['close_dossier']['today'] != 0">
-                    <t t-esc="values['close_dossier']['today']"/>
+                    <t t-esc="widget.humanFriendlyNumber(
+                        values['close_dossier']['today'])"/>
                   </t>
                   <t t-if="!(values and values['close_dossier'] and
                             values['close_dossier']['today'] != 0)">
@@ -140,7 +152,9 @@
           <tr>
             <td class="o_text">Next 7 days</td>
             <td class="o_main"
-                title="Dossiers with arrival date after 30 days">
+                t-attf-title="#{widget.getTooltipText(
+                    values['coord_dossier']['next_7_days'],
+                    'Dossiers with arrival date after 30 days')}">
               <a href="#" class="o_dashboard_action"
                  name="account.action_account_analytic_account_form"
                  t-attf-data-context="{
@@ -150,7 +164,8 @@
                   }">
                 <t t-if="values and values['coord_dossier'] and
                          values['coord_dossier']['next_7_days'] != 0">
-                  <t t-esc="values['coord_dossier']['next_7_days']"/>
+                  <t t-esc="widget.humanFriendlyNumber(
+                        values['coord_dossier']['next_7_days'])"/>
                 </t>
                 <t t-if="!(values and values['coord_dossier'] and
                           values['coord_dossier']['next_7_days'] != 0)">
@@ -158,7 +173,9 @@
                 </t>
               </a>
             </td>
-            <td class="o_main" title="Dossiers expired">
+            <td class="o_main" t-attf-title="#{widget.getTooltipText(
+                    values['close_dossier']['next_7_days'],
+                    'Dossiers expired')}">
               <a href="#" class="o_dashboard_action"
                  name="account.action_account_analytic_account_form"
                  t-attf-data-context="{
@@ -168,7 +185,8 @@
                   }">
                 <t t-if="values and values['close_dossier'] and
                          values['close_dossier']['next_7_days'] != 0">
-                  <t t-esc="values['close_dossier']['next_7_days']"/>
+                  <t t-esc="widget.humanFriendlyNumber(
+                        values['close_dossier']['next_7_days'])"/>
                 </t>
                 <t t-if="!(values and values['close_dossier'] and
                           values['close_dossier']['next_7_days'] != 0)">
@@ -180,7 +198,9 @@
           <tr>
             <td class="o_text">Overdue</td>
             <td class="o_warning"
-                title="Quotations create before last week"
+                t-attf-title="#{widget.getTooltipText(
+                    values['quotation']['overdue'],
+                    'Quotations create before last week')}"
                 t-if="values and values['quotation'] and
                       values['quotation']['overdue'] != 0">
               <a href="#" class="o_dashboard_action"
@@ -190,13 +210,16 @@
                         '' : '\'search_default_coordinate_by_me\': 1,'}
                       'search_default_create_before_this_week': 1
                   }">
-                <t t-esc="values['quotation']['overdue']"/>
+                <t t-esc="widget.humanFriendlyNumber(
+                        values['quotation']['overdue'])"/>
               </a>
             </td>
             <td t-if="!(values and values['quotation'] and
                         values['quotation']['overdue'] != 0)"/>
             <td class="o_warning"
-                title="Purchase requisitions from open dossier created before last 7 days"
+                t-attf-title="#{widget.getTooltipText(
+                    values['program']['overdue'],
+                    'Purchase requisitions from open dossier created before last 7 days')}"
                 t-if="values and values['program'] and
                       values['program']['overdue'] != 0">
               <a href="#" class="o_dashboard_action"
@@ -208,13 +231,16 @@
                       'search_default_before_last_week': 1,
                       'search_default_requisitions_open': 1
                   }">
-                <t t-esc="values['program']['overdue']"/>
+                <t t-esc="widget.humanFriendlyNumber(
+                        values['program']['overdue'])"/>
               </a>
             </td>
             <td t-if="!(values and values['program'] and
                         values['program']['overdue'] != 0)"/>
             <td class="o_warning"
-                title="Dossiers with arrival date on next 21 days"
+                t-attf-title="#{widget.getTooltipText(
+                    values['coord_dossier']['overdue'],
+                    'Dossiers with arrival date on next 21 days')}"
                 t-if="values and values['coord_dossier'] and
                       values['coord_dossier']['overdue'] != 0">
               <a href="#" class="o_dashboard_action"
@@ -224,12 +250,15 @@
                         '' : '\'search_default_assigned_to_me\': 1,'}
                       'search_default_arrival_21_days': 1
                   }">
-                <t t-esc="values['coord_dossier']['overdue']"/>
+                <t t-esc="widget.humanFriendlyNumber(
+                        values['coord_dossier']['overdue'])"/>
               </a>
             </td>
             <td t-if="!(values and values['coord_dossier'] and
                         values['coord_dossier']['overdue'] != 0)"/>
-            <td class="o_warning" title="Dossiers expired before last week"
+            <td class="o_warning" t-attf-title="#{widget.getTooltipText(
+                    values['close_dossier']['overdue'],
+                    'Dossiers expired before last week')}"
                 t-if="values and values['close_dossier'] and
                       values['close_dossier']['overdue'] != 0">
               <a href="#" class="o_dashboard_action"
@@ -239,7 +268,8 @@
                         '' : '\'search_default_assigned_to_me\': 1,'}
                       'search_default_closed_before_last_week': 1
                   }">
-                <t t-esc="values['close_dossier']['overdue']"/>
+                <t t-esc="widget.humanFriendlyNumber(
+                        values['close_dossier']['overdue'])"/>
               </a>
             </td>
           </tr>
@@ -294,7 +324,9 @@
             <td class="o_text">
               This Month
             </td>
-            <td title="This month planning time average" class="o_secondary"
+            <td class="o_secondary" t-attf-title="#{widget.getTooltipText(
+                    values['planification_time']['this_month'],
+                    'This month planning time average')}"
                 t-attf-style="background-color: #{values['planification_time']['color']};">
               <a href="#" class="o_dashboard_action"
                  name="xopgi_operations_performance.coordination_performance_report_action"
@@ -304,11 +336,14 @@
                       'search_default_this_month': 1
                   }">
                 <span class="o_highlight">
-                  <t t-esc="values['planification_time']['this_month']"/>
+                  <t t-esc="widget.humanFriendlyNumber(
+                        values['planification_time']['this_month'])"/>
                 </span>
               </a>
             </td>
-            <td title="This month reserve sending time average"
+            <td t-attf-title="#{widget.getTooltipText(
+                    values['reserve_send_time']['this_month'],
+                    'This month reserve sending time average')}"
                 class="o_secondary"
                 t-attf-style="background-color: #{values['reserve_send_time']['color']};">
               <a href="#" class="o_dashboard_action"
@@ -319,11 +354,14 @@
                       'search_default_this_month': 1
                   }">
                 <span class="o_highlight">
-                  <t t-esc="values['reserve_send_time']['this_month']"/>
+                  <t t-esc="widget.humanFriendlyNumber(
+                        values['reserve_send_time']['this_month'])"/>
                 </span>
               </a>
             </td>
-            <td title="This month supplier response time average"
+            <td t-attf-title="#{widget.getTooltipText(
+                    values['supplier_response_time']['this_month'],
+                    'This month supplier response time average')}"
                 class="o_secondary"
                 t-attf-style="background-color: #{values['supplier_response_time']['color']};">
               <a href="#" class="o_dashboard_action"
@@ -334,11 +372,14 @@
                       'search_default_this_month': 1
                   }">
                 <span class="o_highlight">
-                  <t t-esc="values['supplier_response_time']['this_month']"/>
+                  <t t-esc="widget.humanFriendlyNumber(
+                        values['supplier_response_time']['this_month'])"/>
                 </span>
               </a>
             </td>
-            <td title="This month purchase time average" class="o_secondary"
+            <td t-attf-title="#{widget.getTooltipText(
+                    values['purchase_time']['this_month'],
+                    'This month purchase time average')}" class="o_secondary"
                 t-attf-style="background-color: #{values['purchase_time']['color']};">
               <a href="#" class="o_dashboard_action"
                  name="xopgi_operations_performance.coordination_performance_report_action"
@@ -348,7 +389,8 @@
                       'search_default_this_month': 1
                   }">
                 <span class="o_highlight">
-                  <t t-esc="values['purchase_time']['this_month']"/>
+                  <t t-esc="widget.humanFriendlyNumber(
+                        values['purchase_time']['this_month'])"/>
                 </span>
               </a>
             </td>
@@ -362,7 +404,8 @@
                                  values['planification_time']['target'] : undefined"
                     title="Click to set">
                 <t t-if="values['planification_time']['target']">
-                  <t t-esc="values['planification_time']['target']"/>
+                  <t t-esc="widget.humanFriendlyNumber(
+                        values['planification_time']['target'])"/>
                 </t>
                 <t t-if="!values['planification_time']['target']">
                   Click to set
@@ -376,7 +419,8 @@
                                  values['reserve_send_time']['target'] : undefined"
                     title="Click to set">
                 <t t-if="values['reserve_send_time']['target']">
-                  <t t-esc="values['reserve_send_time']['target']"/>
+                  <t t-esc="widget.humanFriendlyNumber(
+                        values['reserve_send_time']['target'])"/>
                 </t>
                 <t t-if="!values['reserve_send_time']['target']">
                   Click to set
@@ -390,7 +434,8 @@
                                  values['supplier_response_time']['target'] : undefined"
                     title="Click to set">
                 <t t-if="values['supplier_response_time']['target']">
-                  <t t-esc="values['supplier_response_time']['target']"/>
+                  <t t-esc="widget.humanFriendlyNumber(
+                        values['supplier_response_time']['target'])"/>
                 </t>
                 <t t-if="!values['supplier_response_time']['target']">
                   Click to set
@@ -404,7 +449,8 @@
                                  values['purchase_time']['target'] : undefined"
                     title="Click to set">
                 <t t-if="values['purchase_time']['target']">
-                  <t t-esc="values['purchase_time']['target']"/>
+                  <t t-esc="widget.humanFriendlyNumber(
+                        values['purchase_time']['target'])"/>
                 </t>
                 <t t-if="!values['purchase_time']['target']">
                   Click to set
@@ -414,7 +460,9 @@
           </tr>
           <tr>
             <td class="o_text">Last Month</td>
-            <td title="Last month planning time average" class="o_secondary">
+            <td t-attf-title="#{widget.getTooltipText(
+                    values['planification_time']['last_month'],
+                    'Last month planning time average')}" class="o_secondary">
               <a href="#" class="o_dashboard_action"
                  name="xopgi_operations_performance.coordination_performance_report_action"
                  t-attf-data-context="{
@@ -422,10 +470,13 @@
                         '' : '\'search_default_my\': 1,'}
                       'search_default_last_month': 1
                   }">
-                <t t-esc="values['planification_time']['last_month']"/>
+                <t t-esc="widget.humanFriendlyNumber(
+                        values['planification_time']['last_month'])"/>
               </a>
             </td>
-            <td title="Last month reserve sending time average"
+            <td t-attf-title="#{widget.getTooltipText(
+                    values['reserve_send_time']['last_month'],
+                    'Last month reserve sending time average')}"
                 class="o_secondary">
               <a href="#" class="o_dashboard_action"
                  name="xopgi_operations_performance.coordination_performance_report_action"
@@ -434,10 +485,13 @@
                         '' : '\'search_default_my\': 1,'}
                       'search_default_last_month': 1
                   }">
-                  <t t-esc="values['reserve_send_time']['last_month']"/>
+                  <t t-esc="widget.humanFriendlyNumber(
+                        values['reserve_send_time']['last_month'])"/>
               </a>
             </td>
-            <td title="Last month supplier response time average"
+            <td t-attf-title="#{widget.getTooltipText(
+                    values['supplier_response_time']['last_month'],
+                    'Last month supplier response time average')}"
                 class="o_secondary">
               <a href="#" class="o_dashboard_action"
                  name="xopgi_operations_performance.coordination_performance_report_action"
@@ -446,10 +500,13 @@
                         '' : '\'search_default_my\': 1,'}
                       'search_default_last_month': 1
                   }">
-                <t t-esc="values['supplier_response_time']['last_month']"/>
+                <t t-esc="widget.humanFriendlyNumber(
+                        values['supplier_response_time']['last_month'])"/>
               </a>
             </td>
-            <td title="Last month purchase time average" class="o_secondary">
+            <td t-attf-title="#{widget.getTooltipText(
+                    values['purchase_time']['last_month'],
+                    'Last month purchase time average')}" class="o_secondary">
               <a href="#" class="o_dashboard_action"
                  name="xopgi_operations_performance.coordination_performance_report_action"
                  t-attf-data-context="{
@@ -457,7 +514,8 @@
                         '' : '\'search_default_my\': 1,'}
                       'search_default_last_month': 1
                   }">
-                <t t-esc="values['purchase_time']['last_month']"/>
+                <t t-esc="widget.humanFriendlyNumber(
+                        values['purchase_time']['last_month'])"/>
               </a>
             </td>
           </tr>
