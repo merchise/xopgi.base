@@ -1,0 +1,131 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* xopgi_purchase_board
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 8.0.20151103.180513+8e15968\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-11-30 18:35+0000\n"
+"PO-Revision-Date: 2015-11-30 18:35+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: xopgi_purchase_board
+#: view:purchase.order:xopgi_purchase_board.view_purchase_order_filter_inh
+msgid "Next 21 days"
+msgstr "Próximos 21 días"
+
+#. module: xopgi_purchase_board
+#. openerp-web
+#: code:addons/xopgi_purchase_board/static/src/xml/xopgi_purchase_board.xml:160
+#, python-format
+msgid "Next 7 days"
+msgstr "Próximos 7 días"
+
+#. module: xopgi_purchase_board
+#: view:purchase.order:xopgi_purchase_board.view_purchase_order_filter_inh
+msgid "Next month"
+msgstr "Próximo mes"
+
+#. module: xopgi_purchase_board
+#. openerp-web
+#: code:addons/xopgi_purchase_board/static/src/xml/xopgi_purchase_board.xml:38
+#, python-format
+msgid "Quotations to confirm"
+msgstr "Presupuestos a confirmar"
+
+#. module: xopgi_purchase_board
+#. openerp-web
+#: code:addons/xopgi_purchase_board/static/src/xml/xopgi_purchase_board.xml:49
+#, python-format
+msgid "Quotations not invoiced"
+msgstr "Presupuestos no facturados"
+
+#. module: xopgi_purchase_board
+#: model:xopgi.board.widget,name:xopgi_purchase_board.individual_purchase_widget
+msgid "Purchase"
+msgstr "Compra"
+
+#. module: xopgi_purchase_board
+#: model:xopgi.board.widget,name:xopgi_purchase_board.company_purchase_widget
+msgid "Purchase (Company)"
+msgstr "Compra (Compañía)"
+
+#. module: xopgi_purchase_board
+#: model:ir.actions.act_window,name:xopgi_purchase_board.purchase_form_action
+msgid "Purchase Orders"
+msgstr "Pedidos de compra"
+
+#. module: xopgi_purchase_board
+#. openerp-web
+#: code:addons/xopgi_purchase_board/static/src/xml/xopgi_purchase_board.xml:22
+#, python-format
+msgid "Ir a Dossiers"
+msgstr "To Dossiers"
+
+#. module: xopgi_purchase_board
+#. openerp-web
+#: code:addons/xopgi_purchase_board/static/src/xml/xopgi_purchase_board.xml:32
+#: code:addons/xopgi_purchase_board/static/src/xml/xopgi_purchase_board.xml:42
+#, python-format
+msgid "To Purchase Orders"
+msgstr "Ir a Pedidos de compra"
+
+#. module: xopgi_purchase_board
+#. openerp-web
+#: code:addons/xopgi_purchase_board/static/src/xml/xopgi_purchase_board.xml:10
+#, python-format
+msgid "To Requisitions"
+msgstr "Ir a Licitaciones"
+
+#. module: xopgi_purchase_board
+#. openerp-web
+#: code:addons/xopgi_purchase_board/static/src/xml/xopgi_purchase_board.xml:0
+#, python-format
+msgid "Purchase Orders needed to get ready before next 7 days"
+msgstr "Pedidos de compra que deben estar listos en los próximos 7 días"
+
+#. module: xopgi_purchase_board
+#. openerp-web
+#: code:addons/xopgi_purchase_board/static/src/xml/xopgi_purchase_board.xml:0
+#, python-format
+msgid "Purchase Orders not invoiced needed to get ready before next 7 days"
+msgstr "Pedidos de compra sin facturar que deben estar listos en los próximos"
+" 7 días"
+
+#. module: xopgi_purchase_board
+#. openerp-web
+#: code:addons/xopgi_purchase_board/static/src/xml/xopgi_purchase_board.xml:0
+#, python-format
+msgid "Purchase Orders needed to get ready before next 21 days"
+msgstr "Pedidos de compra que deben estar listos en los próximos 21 días"
+
+#. module: xopgi_purchase_board
+#. openerp-web
+#: code:addons/xopgi_purchase_board/static/src/xml/xopgi_purchase_board.xml:0
+#, python-format
+msgid "Purchase Orders not invoiced needed to get ready before next 21 days"
+msgstr "Pedidos de compra sin facturar que deben estar listos en los próximos"
+" 21 días"
+
+#. module: xopgi_purchase_board
+#. openerp-web
+#: code:addons/xopgi_purchase_board/static/src/xml/xopgi_purchase_board.xml:0
+#, python-format
+msgid "Purchase Orders needed to get ready before next 30 days"
+msgstr "Pedidos de compra que deben estar listos en los próximos 30 días"
+
+#. module: xopgi_purchase_board
+#. openerp-web
+#: code:addons/xopgi_purchase_board/static/src/xml/xopgi_purchase_board.xml:0
+#, python-format
+msgid "Purchase Orders not invoiced needed to get ready before next 30 days"
+msgstr "Pedidos de compra sin facturar que deben estar listos en los próximos"
+" 30 días"
+
+
