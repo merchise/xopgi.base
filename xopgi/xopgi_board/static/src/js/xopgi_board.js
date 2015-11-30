@@ -15,9 +15,7 @@ instance.web.form.XopgiBoard = instance.web.form.FormWidget.extend({
     start: function() {
         this._super.apply(this, arguments);
 
-        var self = this;
-
-        this.render();
+        var res = this.render();
         // Events
         this.$el.delegate('.oe_board_container .oe_fold',
                           'click', this.on_fold_action);
@@ -25,12 +23,7 @@ instance.web.form.XopgiBoard = instance.web.form.FormWidget.extend({
                           this.on_dashboard_action_clicked);
         this.$el.delegate('.o_target_to_set', 'click',
                           this.on_dashboard_target_clicked);
-        // Get the function to format currencies
-        new instance.web.Model("res.currency")
-            .call("get_format_currencies_js_function")
-            .then(function (data) {
-                self.formatCurrency = new Function("amount, currency_id", data);
-            });
+        return res;
     },
 
     fetch_data: function () {
@@ -40,32 +33,41 @@ instance.web.form.XopgiBoard = instance.web.form.FormWidget.extend({
     },
 
     render: function () {
-        var self = this;
-
-        return this.fetch_data().then(function (result) {
-            var dashboard = QWeb.render('xopgi.board', {
-                widget: self,
-                values: result,
-            });
-            $(dashboard).prependTo(self.$el);
-            _.each(result, function(category){
-                _.each(category, function (values) {
-                    var template_name = '';
-                    if (!!values.template_name) {
-                        template_name = values.template_name
-                    } else {
-                        template_name = 'no_content'
-                    }
-                    if (!!values.xml_template) {
-                        QWeb.add_template(values.xml_template);
-                    }
-                    var args = values;
-                    args.widget = self;
-                    var template = QWeb.render(template_name, args);
-                    var selector = '.oe_' + template_name.replace('.', '_');
-                    self.$el.find(selector).append(template);
-                })
-            });
+        var self = this,
+            res = $.Deferred();
+        // Get the function to format currencies
+        new instance.web.Model("res.currency")
+            .call("get_format_currencies_js_function")
+            .then(function (data) {
+                self.formatCurrency = new Function("amount, currency_id", data);
+            }).then(function () {
+                self.fetch_data().then(function (result) {
+                    var dashboard = QWeb.render('xopgi.board', {
+                        widget: self,
+                        values: result,
+                    });
+                    $(dashboard).prependTo(self.$el);
+                    _.each(result, function (category) {
+                        _.each(category, function (values) {
+                            var template_name = '';
+                            if (!!values.template_name) {
+                                template_name = values.template_name
+                            } else {
+                                template_name = 'no_content'
+                            }
+                            if (!!values.xml_template) {
+                                QWeb.add_template(values.xml_template);
+                            }
+                            var args = values;
+                            args.widget = self;
+                            var template = QWeb.render(template_name, args);
+                            var selector = '.oe_' + template_name.replace('.', '_');
+                            self.$el.find(selector).append(template);
+                        })
+                    });
+                    res.resolve();
+            }, function() {res.reject();});
+        return res.promise();
         });
     },
 
