@@ -23,17 +23,17 @@ msgstr "Cuenta analítica"
 #. module: xopgi_coordination_board
 #: view:account.analytic.account:xopgi_coordination_board.view_account_analytic_account_search_inh
 msgid "Arrivals after this month"
-msgstr "Arrivos posteriores a este mes"
+msgstr "Arribos posteriores a este mes"
 
 #. module: xopgi_coordination_board
 #: view:account.analytic.account:xopgi_coordination_board.view_account_analytic_account_search_inh
 msgid "Arrivals in coming 3 or 4 weeks"
-msgstr "Arrivos dentro de 3 o 4 semanas"
+msgstr "Arribos dentro de 3 o 4 semanas"
 
 #. module: xopgi_coordination_board
 #: view:account.analytic.account:xopgi_coordination_board.view_account_analytic_account_search_inh
 msgid "Arrivals next 21 days"
-msgstr "Arrivos de los próximos 21 días"
+msgstr "Arribos de los próximos 21 días"
 
 #. module: xopgi_coordination_board
 #: view:account.analytic.account:xopgi_coordination_board.view_account_analytic_account_search_inh
@@ -132,21 +132,21 @@ msgstr "Dossiers para coordinar"
 #: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:143
 #, python-format
 msgid "Dossiers with arrival date after 30 days"
-msgstr "Dossiers con fecha de arrivo despúes de 30 días"
+msgstr "Dossiers con fecha de arribo después de 30 días"
 
 #. module: xopgi_coordination_board
 #. openerp-web
 #: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:219
 #, python-format
 msgid "Dossiers with arrival date on next 21 days"
-msgstr "Dossiers con fecha de arrivo en los próximos 21 días"
+msgstr "Dossiers con fecha de arribo en los próximos 21 días"
 
 #. module: xopgi_coordination_board
 #. openerp-web
 #: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:99
 #, python-format
 msgid "Dossiers with arrival date on next 3 or 4 week"
-msgstr "Dossiers con fecha de arrivo en las próximas 3 o 4 semanas"
+msgstr "Dossiers con fecha de arribo en las próximas 3 o 4 semanas"
 
 #. module: xopgi_coordination_board
 #. openerp-web
@@ -270,7 +270,7 @@ msgstr "Presupuestos por confirmar"
 #: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:268
 #, python-format
 msgid "Reserve Sending Time"
-msgstr "Tiempo de Envio de Reserva"
+msgstr "Tiempo de Envío de Reserva"
 
 #. module: xopgi_coordination_board
 #. openerp-web
@@ -302,7 +302,7 @@ msgstr "Objetivo para el tiempo de compra"
 #: field:res.company,target_reserve_send_time:0
 #: field:res.users,target_reserve_send_time:0
 msgid "Target reserve send time"
-msgstr "Objetivo para el tiempo de envio de reserva"
+msgstr "Objetivo para el tiempo de envío de reserva"
 
 #. module: xopgi_coordination_board
 #: field:res.company,target_supplier_response_time:0
@@ -341,7 +341,7 @@ msgstr "Tiempo de compra promedio este mes"
 #: code:addons/xopgi_coordination_board/static/src/xml/xopgi_coordination_board.xml:313
 #, python-format
 msgid "This month reserve sending time average"
-msgstr "Tiempo de envio de reserva promedio este mes"
+msgstr "Tiempo de envío de reserva promedio este mes"
 
 #. module: xopgi_coordination_board
 #. openerp-web
