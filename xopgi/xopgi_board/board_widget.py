@@ -30,28 +30,17 @@ class XopgiBoardWidget(models.Model):
     xml_template = fields.Text(translate=True)
     python_code = fields.Text()
     job_positions = fields.Many2many('hr.job')
-    users = fields.Many2many('res.users', compute=lambda *a: False,
-                             search='_search_by_user')
 
     @api.multi
     def name_get(self):
         return [(item.id, item.name or item.template_name) for item in self]
 
-    def _search_by_user(self, operator, operand):
-        """ This is made to allow create an ir.rule based on logged user jobs.
-
-        """
-        if not self._context.get('show_all', False):
-            jobs = self.env['hr.job'].search(
-                [('employee_ids.user_id', operator, operand)])
-            return [('job_positions', 'in', jobs.ids)]
-        else:
-            return []
-
     def get_widgets_dict(self):
-        widgets = self.search_read(fields=[
-            'name', 'category', 'template_name', 'xml_template',
-            'python_code'])
+        jobs = self.env['hr.job'].search(
+            [('employee_ids.user_id', '=', self._uid)])
+        widgets = self.search_read(domain=[('job_positions', 'in', jobs.ids)],
+                                   fields=['name', 'category', 'template_name',
+                                           'xml_template', 'python_code'])
         logger.debug(
             'Widgets to show %r' % [w['name'] for w in widgets])
         today = localize_datetime(self, from_tz=None)
@@ -78,3 +67,4 @@ class XopgiBoardWidget(models.Model):
                              'code for \'%s\' board widget, python code: %s'
                              % (name, python_code))
         widget.update(local_dict.get('result', {}))
+

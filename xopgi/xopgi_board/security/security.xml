@@ -44,15 +44,5 @@
       <field name="perm_write" eval="1"/>
       <field name="perm_unlink" eval="1"/>
     </record>
-
-    <record id="board_widget_rule" model="ir.rule">
-      <field name="name">Board Widgets Rule</field>
-      <field name="model_id" ref="xopgi_board.model_xopgi_board_widget"/>
-      <field name="global" eval="True"/>
-      <field name="domain_force">[('users', 'in', [user.id])]</field>
-      <field name="perm_create" eval="0"/>
-      <field name="perm_write" eval="0"/>
-      <field name="perm_unlink" eval="0"/>
-    </record>
   </data>
 </openerp>
