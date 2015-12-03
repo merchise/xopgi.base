@@ -18,6 +18,8 @@ from __future__ import (absolute_import as _py3_abs_imports,
 from openerp import api, models, fields, _
 from openerp.exceptions import except_orm
 from openerp import SUPERUSER_ID
+from openerp.addons.base.res.res_request import referencable_models
+from xoeuf.osv.orm import get_modelname
 
 class Document(models.Model):
     _inherit = 'ir.attachment'
@@ -43,17 +45,12 @@ class Document(models.Model):
 class DocumentShare(models.Model):
     _name = 'ir.attachment.share'
 
-    reference = fields.Reference(string='Model',
-        selection='_reference_models')
-
-    @api.model
-    def _reference_models(self):
-        models = self.env['ir.model'].search([('osv_memory', '=', False)])
-        return [(model.model, model.name)
-                for model in models
-                if not model.model.startswith('base.') and not
-                model.model.startswith('base_')and
-                not model.model.startswith('ir.')]
+    reference = fields.Reference(
+        lambda self: [
+            (m.model, m.name)
+            for m in self.env['ir.model'].search([])
+        ],
+        string='Model')
 
     @api.multi
     def action_share(self):
