@@ -159,15 +159,20 @@ instance.web.form.XopgiBoard = instance.web.form.FormWidget.extend({
         action_manager.do_action(view_manager.action);
     },
 
-    humanFriendlyNumber: function(n){
-        if (!!n && -1000 < n < 1000){
-            n = Math.round(n);
+    humanFriendlyNumber: function(a, c){
+        if (!!a && -1000 < a < 1000){
+            if (!!c){
+                return this.formatCurrency(a, c);
+            }
+            else{
+                return Math.round(a);
+            }
         }
-        if (!!n && n < 0) {
-            return '-' + humanFriendlyNumber(n*-1, 1)
+        if (!!a && a < 0) {
+            return '-' + humanFriendlyNumber(a*-1, 1)
         }
         else{
-            return humanFriendlyNumber(n, 1)
+            return humanFriendlyNumber(a, 1)
         }
     },
 
@@ -176,7 +181,12 @@ instance.web.form.XopgiBoard = instance.web.form.FormWidget.extend({
             a = this.formatCurrency(a, c);
         }
         if (!!t){
-            return a + ': ' + _t(t)
+            if (!!a && -1000 < a < 1000) {
+                return _t(t)
+            }
+            else{
+                return a + ': ' + _t(t)
+            }
         }
         else {
             return a
