@@ -21,10 +21,9 @@ class XopgiBoardWidget(models.Model):
     _name = 'xopgi.board.widget'
     _description = "Board Widget"
 
-    _order = 'category, priority, name'
+    _order = 'category, name'
 
     name = fields.Char(translate=True)
-    priority = fields.Integer(default=1000)
     category = fields.Many2one('ir.module.category')
     template_name = fields.Char(required=True)
     xml_template = fields.Text(translate=True)
@@ -36,11 +35,7 @@ class XopgiBoardWidget(models.Model):
         return [(item.id, item.name or item.template_name) for item in self]
 
     def get_widgets_dict(self):
-        jobs = self.env['hr.job'].search(
-            [('employee_ids.user_id', '=', self._uid)])
-        widgets = self.search_read(domain=[('job_positions', 'in', jobs.ids)],
-                                   fields=['name', 'category', 'template_name',
-                                           'xml_template', 'python_code'])
+        widgets = self.env['hr.job.widget'].get_user_widgets()
         logger.debug(
             'Widgets to show %r' % [w['name'] for w in widgets])
         today = localize_datetime(self, from_tz=None)
