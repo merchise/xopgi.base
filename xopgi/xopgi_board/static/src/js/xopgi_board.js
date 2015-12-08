@@ -160,7 +160,7 @@ openerp.xopgi_board = function(instance) {
         },
 
         humanFriendlyNumber: function(a, c){
-            if (!!a && -1000 < a < 1000){
+            if (-1000 < a && a < 1000){
                 if (!!c){
                     return this.formatCurrency(a, c);
                 }
@@ -181,7 +181,7 @@ openerp.xopgi_board = function(instance) {
                 a = this.formatCurrency(a, c);
             }
             if (!!t){
-                if (!!a && -1000 < a < 1000) {
+                if (-1000 < a && a < 1000) {
                     return _t(t)
                 }
                 else{
