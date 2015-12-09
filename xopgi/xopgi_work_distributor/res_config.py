@@ -100,6 +100,3 @@ def fields_view_get(self, cr, uid, view_id=None, view_type='form',
 
 
 models.Model.fields_view_get = fields_view_get
-
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
