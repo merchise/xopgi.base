@@ -8,7 +8,13 @@
       <field name="arch" type="xml">
         <page string="Security" position="after">
             <page string="Widgets">
-              <field name="widgets" nolabel="1" context="{'show_all': True}"/>
+              <field name="widgets" nolabel="1"
+                     context="{'default_hr_job': active_id}">
+                <tree editable="top">
+                  <field name="widget"/>
+                  <field name="priority"/>
+                </tree>
+              </field>
             </page>
         </page>
       </field>
