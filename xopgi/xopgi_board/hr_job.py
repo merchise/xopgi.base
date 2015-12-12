@@ -25,7 +25,7 @@ class HrJobWidget(models.Model):
 
     job_position = fields.Many2one('hr.job', required=True)
     widget = fields.Many2one('xopgi.board.widget', delegate=True,
-                             required=True)
+                             required=True, ondelete='cascade')
     priority = fields.Integer(default=1000)
 
     def get_user_widgets(self):
