@@ -28,7 +28,7 @@ class Document(models.Model):
 class DocumentShare(TransientModel):
     _name = 'purchase.order.share'
 
-    @api.one
+    @api.model
     def _get_attachment(self):
         for active_id in self.env.context.get('active_ids', []):
            domain=[('res_model', '=', 'purchase.order'),('res_id', '=', active_id)]
@@ -41,7 +41,7 @@ class DocumentShare(TransientModel):
         comodel_name='ir.attachment', string='Attachments',relation='ir_attachment_rel',
                             column1='order_id',
                             column2='document_id',
-        domain=[('res_model', '=', 'purchase.order')])
+        domain=[('res_model', '=', 'purchase.order')], default=_get_attachment)
     _defaults={
         'attachments': _get_attachment,
     }
