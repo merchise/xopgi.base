@@ -17,6 +17,7 @@ from __future__ import (absolute_import as _py3_abs_imports,
 
 from openerp import api, models, fields, _
 from openerp.exceptions import except_orm
+import openerp
 from openerp import SUPERUSER_ID
 from openerp.addons.base.res.res_request import referencable_models
 from xoeuf.osv.orm import get_modelname
@@ -45,12 +46,29 @@ class Document(models.Model):
 class DocumentShare(models.Model):
     _name = 'ir.attachment.share'
 
+    def _get_model_selection(self, cr, uid, context=None):
+        thread_obj = self.pool['mail.thread']
+
+        def check(model):
+            try:
+                return self.pool[model].search(
+                    cr, uid, [], limit=1, context=context, count=True)
+            except:
+                return False
+        translate = lambda source: (
+            self.pool['ir.translation']._get_source(
+                cr, SUPERUSER_ID, None, ('model',),
+                (context or {}).get('lang', False), source) or source)
+        models = [(n, translate(d))
+                  for n, d in thread_obj.message_capable_models(
+                      cr, uid, context=context).items()
+                  if (n != 'mail.thread' and check(n))]
+        return models
+
     reference = fields.Reference(
-        lambda self: [
-            (m.model, m.name)
-            for m in self.env['ir.model'].search([])
-        ],
-        string='Model')
+        string ='Model',
+        selection='_get_model_selection'
+    )
 
     @api.multi
     def action_share(self):
