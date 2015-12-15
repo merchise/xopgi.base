@@ -16,7 +16,6 @@ from openerp import fields, models
 
 class HrJob(models.Model):
     _inherit = 'hr.job'
-
     widgets = fields.One2many('hr.job.widget', 'job_position')
 
 
@@ -24,8 +23,12 @@ class HrJobWidget(models.Model):
     _name = 'hr.job.widget'
 
     job_position = fields.Many2one('hr.job', required=True)
-    widget = fields.Many2one('xopgi.board.widget', delegate=True,
-                             required=True)
+    widget = fields.Many2one(
+        'xopgi.board.widget',
+        delegate=True,
+        required=True,
+        # TODO: Solve issue http://sentry.dev.lahavane.com/caraibes/mercurio/issues/478/
+    )
     priority = fields.Integer(default=1000)
 
     def get_user_widgets(self):
