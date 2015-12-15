@@ -12,6 +12,11 @@
 # This is free software; you can redistribute it and/or modify it under the
 # terms of the LICENCE attached (see LICENCE file) in the distribution
 # package.
+
+from __future__ import (division as _py3_division,
+                        print_function as _py3_print,
+                        absolute_import as _py3_abs_import)
+
 from openerp import api, models, fields
 from xoeuf.ui import RELOAD_UI
 from xoutil import logger
@@ -44,7 +49,8 @@ def create(self, vals):
     res = super(models.Model, self).create(vals)
     return res
 
-
+# NOTICE: We can do this cause models.Model does not have a `create` method
+# directly, but inherited from BaseModel.
 models.Model.create = create
 
 
@@ -88,7 +94,7 @@ def fields_view_get(self, cr, uid, view_id=None, view_type='form',
             view_part += xpath
 
         temp['arch'] = arch.replace(
-                xpath, view_part % '\t'.join(fields_to_add.values()))
+            xpath, view_part % '\t'.join(fields_to_add.values()))
         temp['fields'].update(self.fields_get(fields_to_add.keys()))
         result = temp
     except:
@@ -99,4 +105,6 @@ def fields_view_get(self, cr, uid, view_id=None, view_type='form',
     return result
 
 
+# NOTICE: We can do this cause models.Model does not have a `fields_view_get`
+# method directly, but inherited from BaseModel.
 models.Model.fields_view_get = fields_view_get
