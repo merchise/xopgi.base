@@ -94,5 +94,6 @@ class XopgiBoard(models.Model):
                       if mode == 'company'
                       else self.env.user.sudo())
         target_value = int(target_value) if target_value else 0
+        target_name = target_name.split('-', 1)[-1]
         if hasattr(target_obj, 'target_' + target_name):
             return setattr(target_obj, 'target_' + target_name, target_value)
