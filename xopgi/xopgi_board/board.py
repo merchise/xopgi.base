@@ -48,7 +48,7 @@ def get_query_from_domain(self, domain):
 
 
 def get_targets(self, values, indicators=(), from_company=False):
-    target_obj = self.env.user if from_company else self.env.user.company_id
+    target_obj = self.env.user.company_id if from_company else self.env.user
     for indicator in indicators:
         target = getattr(target_obj, 'target_%s' % indicator, 0)
         values[indicator].update(
