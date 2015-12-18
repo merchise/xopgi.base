@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<openerp>
+  <data>
+    <!-- CRM Claim Stage Form View -->
+    <record model="ir.ui.view" id="crm_claim_stage_form_inh">
+      <field name="name">crm.claim.stage.form.inh</field>
+      <field name="model">crm.claim.stage</field>
+      <field name="inherit_id" ref="crm_claim.crm_claim_stage_form"/>
+      <field name="arch" type="xml">
+        <xpath expr="//field[@name='sequence']" position="after">
+          <newline/>
+          <field name="flow_start"/>
+          <field name="flow_stop"/>
+        </xpath>
+      </field>
+    </record>
+  </data>
+</openerp>
