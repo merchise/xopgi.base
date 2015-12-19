@@ -37,11 +37,12 @@ class WorkDistributionSettings(models.TransientModel):
         return RELOAD_UI
 
 
+# TODO: The name of the function should not mimic that of the receiver, but
+# provide a clue at what is going to happen post fields_view_get
 @signals.receiver(signals.post_fields_view_get)
 def post_fields_view_get(self, **kwargs):
     result = kwargs['result']
-    if ('work.distribution.model' not in self.pool or
-                kwargs['view_type'] != 'form'):
+    if ('work.distribution.model' not in self.pool or kwargs['view_type'] != 'form'):
         return kwargs['result']
     if not self.user_has_groups(
             'xopgi_work_distributor.group_distributor_manager,'
