@@ -52,8 +52,11 @@ def _evaluate_domain(dist_model, values):
     return self.with_context(context).search(domain)
 
 
+WORKDIST_MODELNAME = 'work.distribution.model'
+
+
 class WorkDistributionModel(models.Model):
-    _name = 'work.distribution.model'
+    _name = WORKDIST_MODELNAME
 
     def _get_models(self):
         return [
@@ -159,7 +162,7 @@ class WorkDistributionModel(models.Model):
         ''' Get all distribution configurations for model and apply each one.
 
         '''
-        dist_model = self.env['work.distribution.model']
+        dist_model = self.env[WORKDIST_MODELNAME]
         for item in dist_model.search([('model.model', '=', self._name)]):
             if item.applicable(values):
                 strategy = False
@@ -528,7 +531,7 @@ class WorkDistributorWizard(models.TransientModel):
                 'strategy_id', False):
             return result
         active_model = self.env.context.get('active_model', False)
-        model = self.env['work.distribution.model'].search(
+        model = self.env[WORKDIST_MODELNAME].search(
             [('group_field.relation', '=', active_model)])
         result['fields']['strategy_id']['domain'] = [
             ('id', 'in', model.strategy_ids.ids)]
