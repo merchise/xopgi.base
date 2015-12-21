@@ -63,10 +63,10 @@ def get_indicator_color(target, value, inverted=False):
     sector = 11
     if target:
         if inverted:
-            if target < value:
+            if target >= value:
                 sector = 1.0
             else:
-                sector = 1.0 - float(value) / target
+                sector = 0.0
         else:
             if target > value:
                 sector = 0.0
