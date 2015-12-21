@@ -1,0 +1,117 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* xopgi_board
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 8.0.20151103.180513+8e15968\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-11-21 23:45+0000\n"
+"PO-Revision-Date: 2015-11-21 23:45+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: xopgi_board
+#: model:ir.model,name:xopgi_board.model_xopgi_board
+msgid "Board"
+msgstr "Tablero"
+
+#. module: xopgi_board
+#: model:ir.model,name:xopgi_board.model_xopgi_board_widget
+#: view:xopgi.board.widget:xopgi_board.view_board_widget_form
+msgid "Board Widget"
+msgstr "Componente de tablero"
+
+#. module: xopgi_board
+#: view:xopgi.board.widget:xopgi_board.view_board_widget_search
+#: view:xopgi.board.widget:xopgi_board.view_board_widget_tree
+msgid "Board Widgets"
+msgstr "Componentes de tablero"
+
+#. module: xopgi_board
+#: field:xopgi.board.widget,category:0
+msgid "Category"
+msgstr "Categoría"
+
+#. module: xopgi_board
+#: view:xopgi.board.widget:xopgi_board.view_board_widget_search
+msgid "Group By"
+msgstr "Agrupar por"
+
+#. module: xopgi_board
+#: model:ir.model,name:xopgi_board.model_hr_job
+msgid "Job Description"
+msgstr "Descripción del trabajo"
+
+#. module: xopgi_board
+#: field:xopgi.board.widget,job_positions:0
+msgid "Job positions"
+msgstr "Puestos de trabajo"
+
+#. module: xopgi_board
+#: field:xopgi.board.widget,name:0
+msgid "Name"
+msgstr "Nombre"
+
+#. module: xopgi_board
+#. openerp-web
+#: code:addons/xopgi_board/static/src/xml/xopgi_board.xml:0
+#, python-format
+msgid "No content to show."
+msgstr "No hay contenido para mostrar."
+
+#. module: xopgi_board
+#. openerp-web
+#: code:addons/xopgi_board/static/src/js/xopgi_board.js:0
+#, python-format
+msgid "Only Integer Value should be valid."
+msgstr "Sólo valores enteros son validos."
+
+#. module: xopgi_board
+#: model:ir.actions.act_window,name:xopgi_board.open_my_board_action
+#: model:ir.ui.menu,name:xopgi_board.menu_board_my_dash
+msgid "Preview"
+msgstr "Vistazo"
+
+#. module: xopgi_board
+#: field:xopgi.board.widget,priority:0
+#: view:xopgi.board.widget:xopgi_board.view_board_widget_search
+msgid "Priority"
+msgstr "Prioridad"
+
+#. module: xopgi_board
+#: field:xopgi.board.widget,python_code:0
+msgid "Python code"
+msgstr "Código python"
+
+#. module: xopgi_board
+#: view:hr.job:xopgi_board.assets_view_hr_job_form
+msgid "Security"
+msgstr "Seguridad"
+
+#. module: xopgi_board
+#: field:xopgi.board.widget,template_name:0
+msgid "Template name"
+msgstr "Nombre de la plantilla"
+
+#. module: xopgi_board
+#: view:hr.job:xopgi_board.assets_view_hr_job_form
+#: field:hr.job,widgets:0
+msgid "Widgets"
+msgstr "Componentes de tablero"
+
+#. module: xopgi_board
+#. openerp-web
+#: code:addons/xopgi_board/static/src/js/xopgi_board.js:0
+#, python-format
+msgid "Wrong value entered!"
+msgstr "Valor incorrecto!"
+
+#. module: xopgi_board
+#: field:xopgi.board.widget,xml_template:0
+msgid "Xml template"
+msgstr "Plantilla Xml"

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 # --------------------------------------------------------------------------
-# xopgi_documents_share.__openerp__
+# xopgi_knowledge_config.__openerp__
 # --------------------------------------------------------------------------
 # Copyright (c) 2014, 2015 Merchise Autrement and Contributors
 # All rights reserved.
@@ -14,24 +14,22 @@
 
 
 {
-    'name': 'Document Share',
+    'name': 'Knowledge Config',
     'version': '1.0',
     'category': 'Knowledge Management',
     'description': """
-    Module that allows to share documents
+    Module that allows to config documents
 """,
     'author': 'Merchise Autrement',
     'website': '',
     'depends': ['base', 'knowledge'],
     'data': [
-        'view/document_share_view.xml',
-        'security/ir.model.access.csv',
-        'security/security.xml'
+        'view/res_config_view.xml',
     ],
     'demo': [],
     'test': [],
     'installable': True,
-    'auto_install': False,
+    'auto_install': True,
 }
 
 

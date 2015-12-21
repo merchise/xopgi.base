@@ -3,7 +3,7 @@
 # --------------------------------------------------------------------------
 # xopgi_work_distributor.work_distributor
 # --------------------------------------------------------------------------
-# Copyright (c) 2014 Merchise Autrement and Contributors
+# Copyright (c) 2014, 2015 Merchise Autrement and Contributors
 # All rights reserved.
 #
 # Author: Merchise Autrement
@@ -574,6 +574,3 @@ class WorkDistributorWizard(models.TransientModel):
         self.env[active_model].browse(active_ids).write(
             {field.name: res.strategy_id.id})
         return res
-
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+  <t t-name="xopgi.board">
+    <div t-if="values" class="oe_board">
+      <table t-foreach="values" t-as="category" t-att-data-layout="1"
+             class="oe_board" cellspacing="0" cellpadding="0" border="0">
+        <tr>
+          <td t-att-id="x_column_0" t-foreach="category" t-as="action"
+              class="oe_board_container">
+            <t t-call="xopgi.board.action"/>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <div t-if="!values" class="o_welcome_message">
+      <div class="o_welcome_image">
+        <i class="fa fa-smile-o fa-5x"/>
+      </div>
+      <div class="o_welcome_content">
+        <h2>Hi there!</h2>
+      </div>
+    </div>
+  </t>
+  <t t-name="xopgi.board.action">
+    <div class="oe_board_widget">
+      <h2 t-attf-class="oe_header {{action.name ? '' : 'oe_header_empty'}}">
+        <span class="oe_header_txt">
+          <t t-esc="action.name"/>
+        </span>
+        <input class="oe_header_text" type="text"/>
+        <t t-if="!action.name">&amp;nbsp;</t>
+        <span class='oe_icon oe_minimize oe_fold'/>
+      </h2>
+      <div class="oe_board_widget_content">
+        <div
+            t-attf-class="oe_{{action.template_name ?
+                          action.template_name.replace('.', '_') :
+                          'no_content'}}"/>
+      </div>
+    </div>
+  </t>
+  <t t-name="no_content">
+    <div class="o_welcome_message">
+      <div class="o_welcome_content">
+        <h2 t-if="!msg">No content to show.</h2>
+        <h2 t-if="msg" t-esc="msg"/>
+      </div>
+    </div>
+  </t>
+</templates>
