@@ -16,7 +16,6 @@ from openerp import fields, models
 
 class HrJob(models.Model):
     _inherit = 'hr.job'
-
     widgets = fields.One2many('hr.job.widget', 'job_position')
 
 
