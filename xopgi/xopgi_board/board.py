@@ -47,23 +47,31 @@ def get_query_from_domain(self, domain):
     return from_clause, where_str, where_params
 
 
-def get_targets(self, values, indicators=(), from_company=False):
-    target_obj = self.env.user if from_company else self.env.user.company_id
+def get_targets(self, values, indicators=(), from_company=False,
+                inverte=False):
+    target_obj = self.env.user.company_id if from_company else self.env.user
     for indicator in indicators:
         target = getattr(target_obj, 'target_%s' % indicator, 0)
         values[indicator].update(
             target=target,
-            color=get_indicator_color(target, values[indicator]['this_month'])
+            color=get_indicator_color(target, values[indicator]['this_month'],
+                                      inverte)
         )
 
 
-def get_indicator_color(target, value):
+def get_indicator_color(target, value, inverte=False):
     sector = 11
     if target:
-        if target < value:
-            sector = 1.0
+        if inverte:
+            if target < value:
+                sector = 1.0
+            else:
+                sector = 1.0 - float(value) / target
         else:
-            sector = float(value) / target
+            if target > value:
+                sector = 0.0
+            else:
+                sector = float(value) / target
     if sector > 1.0:
         color = '#e2e2e0'
     else:
@@ -94,5 +102,6 @@ class XopgiBoard(models.Model):
                       if mode == 'company'
                       else self.env.user.sudo())
         target_value = int(target_value) if target_value else 0
+        target_name = target_name.split('-', 1)[-1]
         if hasattr(target_obj, 'target_' + target_name):
             return setattr(target_obj, 'target_' + target_name, target_value)
