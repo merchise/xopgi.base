@@ -155,10 +155,7 @@ openerp.xopgi_board = function(instance) {
         },
 
         do_reload: function () {
-            var view_manager = this.view.getParent(),
-                action_manager = view_manager.getParent();
-            this.view.destroy();
-            action_manager.do_action(view_manager.action);
+            this.do_action('xopgi_board.open_my_board_action');
         },
 
         humanFriendlyNumber: function(a, c){
