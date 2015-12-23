@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data>
+    <record id="contact_reference_model_acl_public" model="ir.model.access">
+      <field name="name">contact.reference.model.public</field>
+      <field name="model_id"
+             ref="xopgi_directory.model_contact_reference_model"/>
+      <field name="group_id" ref="base.group_user"/>
+      <field name="perm_read" eval="1"/>
+      <field name="perm_create" eval="0"/>
+      <field name="perm_write" eval="0"/>
+      <field name="perm_unlink" eval="0"/>
+    </record>
+
+    <record id="contact_reference_field_acl_public" model="ir.model.access">
+      <field name="name">contact.reference.field.public</field>
+      <field name="model_id"
+             ref="xopgi_directory.model_contact_reference_field"/>
+      <field name="group_id" ref="base.group_user"/>
+      <field name="perm_read" eval="1"/>
+      <field name="perm_create" eval="0"/>
+      <field name="perm_write" eval="0"/>
+      <field name="perm_unlink" eval="0"/>
+    </record>
+  </data>
+</openerp>
