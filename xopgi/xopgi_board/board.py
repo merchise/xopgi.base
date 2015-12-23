@@ -62,16 +62,10 @@ def get_targets(self, values, indicators=(), from_company=False,
 def get_indicator_color(target, value, inverted=False):
     sector = 11
     if target:
-        if inverted:
-            if target >= value:
-                sector = 1.0
-            else:
-                sector = 0.0
+        if target >= value:
+            sector = 1.0 if inverted else float(value) / target
         else:
-            if target > value:
-                sector = 0.0
-            else:
-                sector = float(value) / target
+            sector = 0.0 if inverted else 0.0
     if sector > 1.0:
         color = '#e2e2e0'
     else:
