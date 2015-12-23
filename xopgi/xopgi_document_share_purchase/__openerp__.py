@@ -16,21 +16,15 @@
 {
     'name': 'Document Share in Purchases',
     'version': '1.0',
-    'category': 'Purchases',
-    'description': """
-    Module that allows to share documents
-    of a purchase order to an invoice
-""",
+    'category': 'Knowledge',
+    'description': ("Allows to share documents from a purchase order "
+                    "to an invoice"),
     'author': 'Merchise Autrement',
     'website': '',
     'depends': ['base', 'purchase'],
     'data': [
         'view/document_share_view.xml',
     ],
-    'demo': [],
-    'test': [],
     'installable': True,
     'auto_install': False,
 }
-
-
