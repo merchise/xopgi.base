@@ -27,7 +27,9 @@
         'views/contact_reference_view.xml',
         'views/directory_config_view.xml',
         'data/res_partner_classification.xml',
-        'wizards/make_fake_view.xml'
+        'wizards/make_fake_view.xml',
+        'security/security.xml'
+
     ],
     "demo_xml": [],
     "application": False,
