@@ -48,30 +48,24 @@ def get_query_from_domain(self, domain):
 
 
 def get_targets(self, values, indicators=(), from_company=False,
-                inverte=False):
+                inverted=False):
     target_obj = self.env.user.company_id if from_company else self.env.user
     for indicator in indicators:
         target = getattr(target_obj, 'target_%s' % indicator, 0)
         values[indicator].update(
             target=target,
             color=get_indicator_color(target, values[indicator]['this_month'],
-                                      inverte)
+                                      inverted=inverted)
         )
 
 
-def get_indicator_color(target, value, inverte=False):
+def get_indicator_color(target, value, inverted=False):
     sector = 11
     if target:
-        if inverte:
-            if target < value:
-                sector = 1.0
-            else:
-                sector = 1.0 - float(value) / target
+        if target >= value:
+            sector = 1.0 if inverted else float(value) / target
         else:
-            if target > value:
-                sector = 0.0
-            else:
-                sector = float(value) / target
+            sector = 0.0 if inverted else 0.0
     if sector > 1.0:
         color = '#e2e2e0'
     else:

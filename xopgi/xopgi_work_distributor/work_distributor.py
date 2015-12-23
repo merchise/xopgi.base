@@ -17,10 +17,10 @@ from datetime import timedelta
 from openerp import models, _, api, fields
 from openerp.exceptions import ValidationError, Warning
 from openerp.tools.safe_eval import safe_eval
+from xoeuf import signals
 from xoeuf.osv.orm import LINK_RELATED
 from xoeuf.tools import date2str, dt2str, normalize_datetime
 from xoutil import logger
-
 
 FIELD_NAME_TO_SHOW_ON_WIZARD = \
     lambda model: 'x_%s_ids' % model.replace('.', '_')
@@ -52,8 +52,11 @@ def _evaluate_domain(dist_model, values):
     return self.with_context(context).search(domain)
 
 
+WORKDIST_MODELNAME = 'work.distribution.model'
+
+
 class WorkDistributionModel(models.Model):
-    _name = 'work.distribution.model'
+    _name = WORKDIST_MODELNAME
 
     def _get_models(self):
         return [
@@ -154,12 +157,13 @@ class WorkDistributionModel(models.Model):
         self.other_fields = str(other_fields)
         return {'warning': warning} if warning else None
 
-    @api.model
-    def distribute(self, model, values):
+    @signals.receiver(signals.pre_create)
+    def distribute(self, signal, values):
         ''' Get all distribution configurations for model and apply each one.
 
         '''
-        for item in self.search([('model.model', '=', model)]):
+        dist_model = self.env[WORKDIST_MODELNAME]
+        for item in dist_model.search([('model.model', '=', self._name)]):
             if item.applicable(values):
                 strategy = False
                 if item.group_field:
@@ -527,7 +531,7 @@ class WorkDistributorWizard(models.TransientModel):
                 'strategy_id', False):
             return result
         active_model = self.env.context.get('active_model', False)
-        model = self.env['work.distribution.model'].search(
+        model = self.env[WORKDIST_MODELNAME].search(
             [('group_field.relation', '=', active_model)])
         result['fields']['strategy_id']['domain'] = [
             ('id', 'in', model.strategy_ids.ids)]

@@ -24,6 +24,8 @@
     "depends": ['base'],
     "data": [
         'views/res_partner_view.xml',
+        'views/contact_reference_view.xml',
+        'views/directory_config_view.xml',
         'data/res_partner_classification.xml',
         'wizards/make_fake_view.xml'
     ],
