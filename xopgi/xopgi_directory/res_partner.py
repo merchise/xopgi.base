@@ -39,7 +39,8 @@ class ResPartner(models.Model):
     def _get_owner_identity(self):
         if self.owner:
             _, name = self.owner.name_get()[0]
-            self.owner_identity = '%s: %s' % (self.owner._name, name)
+            self.owner_identity = '%s: %s' % (
+                self.owner._description or self.owner._name, name)
         else:
             self.owner_identity = ''
 
@@ -57,7 +58,7 @@ class ResPartner(models.Model):
 
     fake = fields.Boolean()
     owner = fields.Reference(selection=[])
-    owner_identity = fields.Char(compute='_get_owner_identity')
+    owner_identity = fields.Char(compute='_get_owner_identity', store=True)
     contact_information = fields.One2many('res.partner',
                                           compute='_get_fake_partners')
     classifications = fields.Many2many('res.partner.classification',
@@ -94,7 +95,14 @@ class ResPartner(models.Model):
     @api.model
     def _where_calc(self, domain, active_test=True):
         domain = domain if domain else []
-        if self._context.get('only_fake', False):
+        #  Next condition exclude fake args when domain is completely based
+        #  on id field.
+        if domain and all(arg[0] == 'id' and (
+                len(arg) < 2 or arg[1] in ['in', '=', 'child_of'])
+                for arg in domain):
+            return super(ResPartner, self)._where_calc(
+                domain, active_test=active_test)
+        elif self._context.get('only_fake', False):
             if not any(item[0] == 'fake' for item in domain):
                 domain.insert(0, ('fake', '=', True))
         elif not self._context.get('include_fake', False):
@@ -119,17 +127,28 @@ class ResPartner(models.Model):
 
     @api.model
     def name_search(self, name='', args=None, operator='ilike', limit=100):
-        """Get name_search result plus fakes related with its.
+        """Search too by owner_identity for fake partners.
 
         """
         res = super(ResPartner, self).name_search(
             name=name, args=args, operator=operator, limit=limit)
-        if self.env.context.get('include_fake'):
-            res = {_id for _id, name in res}
-            for item in self.browse(list(res)):
-                if item.contact_information:
-                    res |= set(item.contact_information.ids)
-            res = self.browse(list(res)).name_get()
+        if self.env.context.get('include_fake') or self.env.context.get(
+                'only_fake') and name:
+            res = list(set(res) | set(self.search(
+                args + [('owner_identity', operator, name)]).name_get()))
+        return res
+
+    @api.model
+    def create(self, vals):
+        """ Put name as owner_identity when fake res.partner with no
+        name create.
+
+        """
+        if not vals.get('name', False):
+            vals['name'] = 'No name'
+        res = super(ResPartner, self).create(vals)
+        if res.fake and res.owner and vals.get('name', '') == 'No name':
+            res.name = res.owner_identity
         return res
 
 

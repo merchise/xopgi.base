@@ -11,9 +11,14 @@
 #
 # Created on 2015-10-29
 
-from openerp import api, models
+from __future__ import (division as _py3_division,
+                        print_function as _py3_print,
+                        absolute_import as _py3_abs_import)
+
 from itertools import groupby
 from xoutil import logger
+
+from openerp import api, models
 
 
 def lineal_color_scaling(value,  # 0-1 float
@@ -47,23 +52,25 @@ def get_query_from_domain(self, domain):
     return from_clause, where_str, where_params
 
 
-def get_targets(self, values, indicators=(), from_company=False):
-    target_obj = self.env.user if from_company else self.env.user.company_id
+def get_targets(self, values, indicators=(), from_company=False,
+                inverted=False):
+    target_obj = self.env.user.company_id if from_company else self.env.user
     for indicator in indicators:
         target = getattr(target_obj, 'target_%s' % indicator, 0)
         values[indicator].update(
             target=target,
-            color=get_indicator_color(target, values[indicator]['this_month'])
+            color=get_indicator_color(target, values[indicator]['this_month'],
+                                      inverted=inverted)
         )
 
 
-def get_indicator_color(target, value):
+def get_indicator_color(target, value, inverted=False):
     sector = 11
     if target:
-        if target < value:
-            sector = 1.0
+        if target >= value:
+            sector = 1.0 if inverted else float(value) / target
         else:
-            sector = float(value) / target
+            sector = 0.0 if inverted else 0.0
     if sector > 1.0:
         color = '#e2e2e0'
     else:
@@ -94,5 +101,6 @@ class XopgiBoard(models.Model):
                       if mode == 'company'
                       else self.env.user.sudo())
         target_value = int(target_value) if target_value else 0
+        target_name = target_name.split('-', 1)[-1]
         if hasattr(target_obj, 'target_' + target_name):
             return setattr(target_obj, 'target_' + target_name, target_value)

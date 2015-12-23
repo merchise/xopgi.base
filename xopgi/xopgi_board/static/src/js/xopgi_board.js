@@ -49,20 +49,22 @@ openerp.xopgi_board = function(instance) {
                         $(dashboard).prependTo(self.$el);
                         _.each(result, function (category) {
                             _.each(category, function (values) {
-                                var template_name = '';
-                                if (!!values.template_name) {
-                                    template_name = values.template_name
-                                } else {
-                                    template_name = 'no_content'
+                                if (!!values){
+                                    var template_name = '';
+                                    if (!!values.template_name) {
+                                        template_name = values.template_name
+                                    } else {
+                                        template_name = 'no_content'
+                                    }
+                                    if (!!values.xml_template) {
+                                        QWeb.add_template(values.xml_template);
+                                    }
+                                    var args = values;
+                                    args.widget = self;
+                                    var template = QWeb.render(template_name, args);
+                                    var selector = '.oe_' + template_name.replace('.', '_');
+                                    self.$el.find(selector).append(template);
                                 }
-                                if (!!values.xml_template) {
-                                    QWeb.add_template(values.xml_template);
-                                }
-                                var args = values;
-                                args.widget = self;
-                                var template = QWeb.render(template_name, args);
-                                var selector = '.oe_' + template_name.replace('.', '_');
-                                self.$el.find(selector).append(template);
                             })
                         });
                         res.resolve();

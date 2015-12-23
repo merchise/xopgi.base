@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # ---------------------------------------------------------------------
-# xopgi_directory
+# xopgi_stage_ext
 # ---------------------------------------------------------------------
 # Copyright (c) 2013-2015 Merchise Autrement
 # All rights reserved.
@@ -9,10 +9,15 @@
 # terms of the LICENCE attached (see LICENCE file) in the distribution
 # package.
 #
-# @created: 2015-09-15
+# @created: 2015-12-12
+
+from __future__ import absolute_import as _py3_abs_imports
+
+from openerp import fields, models
 
 
-import res_partner  # noqa
-import wizards  # noqa
-import contact_reference  # noqa
-import res_config  # noqa
+class BaseStage(models.AbstractModel):
+    _name = 'base.stage'
+
+    flow_start = fields.Boolean()
+    flow_stop = fields.Boolean()
