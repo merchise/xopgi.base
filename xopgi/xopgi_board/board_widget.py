@@ -65,6 +65,6 @@ class XopgiBoardWidget(models.Model):
                          name)
         except:
             logger.exception('An error happen trying to execute the Python '
-                             'code for \'%s\' board widget, python code: %s'
-                             % (name, python_code))
+                             'code for \'%s\' board widget, python code: %s',
+                             name, python_code)
         widget.update(local_dict.get('result', {}))
