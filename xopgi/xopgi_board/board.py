@@ -70,7 +70,7 @@ def get_indicator_color(target, value, inverted=False):
         if target >= value:
             sector = 1.0 if inverted else float(value) / target
         else:
-            sector = 0.0 if inverted else 0.0
+            sector = 0.0 if inverted else 1.0
     if sector > 1.0:
         color = '#e2e2e0'
     else:
