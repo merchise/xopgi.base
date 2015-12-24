@@ -12,8 +12,7 @@
 # @created: 2015-12-12
 
 from __future__ import absolute_import as _py3_abs_imports
-
-from openerp import fields, models
+from openerp import models
 
 
 class CrmClaimStage(models.Model):

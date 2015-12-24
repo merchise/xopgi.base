@@ -11,9 +11,14 @@
 #
 # Created on 2015-10-29
 
-from openerp import api, models
+from __future__ import (division as _py3_division,
+                        print_function as _py3_print,
+                        absolute_import as _py3_abs_import)
+
 from itertools import groupby
 from xoutil import logger
+
+from openerp import api, models
 
 
 def lineal_color_scaling(value,  # 0-1 float

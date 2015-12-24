@@ -13,7 +13,7 @@
 
 from __future__ import absolute_import as _py3_abs_imports
 
-from openerp import fields, models
+from openerp import models
 
 
 class CrmCaseStage(models.Model):

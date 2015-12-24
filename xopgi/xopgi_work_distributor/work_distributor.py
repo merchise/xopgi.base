@@ -13,14 +13,21 @@
 # terms of the LICENCE attached (see LICENCE file) in the distribution
 # package.
 
+from __future__ import (division as _py3_division,
+                        print_function as _py3_print,
+                        absolute_import as _py3_abs_import)
+
 from datetime import timedelta
+from xoutil import logger
+
 from openerp import models, _, api, fields
 from openerp.exceptions import ValidationError, Warning
 from openerp.tools.safe_eval import safe_eval
+
 from xoeuf import signals
 from xoeuf.osv.orm import LINK_RELATED
 from xoeuf.tools import date2str, dt2str, normalize_datetime
-from xoutil import logger
+
 
 FIELD_NAME_TO_SHOW_ON_WIZARD = \
     lambda model: 'x_%s_ids' % model.replace('.', '_')
@@ -461,15 +468,19 @@ class WorkDistributionStrategy(models.Model):
         upp_date = low_date + timedelta(TOTAL_DAYS)
         strlow_date = to_str(low_date)
         strupp_date = to_str(upp_date)
-        return self._effort(dist_model, candidates, values,
+        return self._effort(
+            dist_model, candidates, values,
             date_field=date_field.name, date_start=strlow_date,
-            date_end=strupp_date)
+            date_end=strupp_date
+        )
 
     def future_effort(self, dist_model, candidates, values, **kwargs):
         model, today, date_field, to_str = self._effort_commons(dist_model,
                                                                 **kwargs)
-        return self._effort(dist_model, candidates, values,
-            date_field=date_field.name, date_start=to_str(today))
+        return self._effort(
+            dist_model, candidates, values,
+            date_field=date_field.name, date_start=to_str(today)
+        )
 
     def _effort(self, dist_model, candidates, values, date_field=False,
                 date_start=False, date_end=False):
