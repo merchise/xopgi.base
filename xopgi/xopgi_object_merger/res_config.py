@@ -13,15 +13,19 @@
 # terms of the LICENCE attached (see LICENCE file) in the distribution
 # package.
 
+from __future__ import (division as _py3_division,
+                        print_function as _py3_print,
+                        absolute_import as _py3_abs_import)
+
+from xoutil import logger
 
 from openerp.osv import fields, osv, orm
 from openerp.tools.safe_eval import safe_eval
 from openerp.tools.translate import _
 from operator import gt, lt
 from openerp import api, fields as new_api_fields, models, SUPERUSER_ID
-from xoeuf.osv.orm import LINK_RELATED
-from xoutil import logger
 
+from xoeuf.osv.orm import LINK_RELATED
 
 IS_MODEL_ID = '1'
 MODEL_FIELD_VALUE_SELECTION = [('0', 'Model Name'), (IS_MODEL_ID, 'Model Id')]
@@ -175,7 +179,6 @@ class object_merger_settings(osv.osv_memory):
     }
 
     def update_field(self, cr, uid, vals, context=None):
-        ## Init ##
         if context is None:
             context = {}
         model_ids = []
@@ -186,7 +189,6 @@ class object_merger_settings(osv.osv_memory):
         rol = self.pool['ir.model.data'].xmlid_to_res_id(
             cr, SUPERUSER_ID, 'xopgi_object_merger.group_merger_manager',
             raise_if_not_found=False)
-        ## Process ##
         if not vals or not vals.get('models_ids', False):
             return False
         elif vals.get('models_ids') or model_ids[0][2]:
@@ -199,15 +201,17 @@ class object_merger_settings(osv.osv_memory):
                                        context=context)
         for unlink_id in unlink_ids:
             action_obj.unlink(cr, uid, unlink_id)
-            un_val_ids = value_obj.search(cr, uid, [
-                ('value', '=', "ir.actions.act_window," + str(unlink_id)), ],
-                                          context=context)
+            un_val_ids = value_obj.search(
+                cr, uid,
+                [('value', '=', "ir.actions.act_window," + str(unlink_id))],
+                context=context
+            )
             value_obj.unlink(cr, uid, un_val_ids, context=context)
         # Put all models which were selected before back to not an object_merger
         model_not_merge_ids = model_obj.search(
             cr,
             uid,
-            [('id', 'not in', model_ids), ('object_merger_model', '=',True)],
+            [('id', 'not in', model_ids), ('object_merger_model', '=', True)],
             context=context
         )
         model_obj.write(cr, uid, model_not_merge_ids,
@@ -215,7 +219,6 @@ class object_merger_settings(osv.osv_memory):
         # Put all models which are selected to be an object_merger
         model_obj.write(cr, uid, model_ids, {'object_merger_model': True},
                         context=context)
-        ### Create New Fields ###
         object_merger_ids = model_obj.search(cr, uid,
                                              [('model', '=', 'object.merger')],
                                              context=context)
@@ -236,7 +239,7 @@ class object_merger_settings(osv.osv_memory):
                 uid,
                 {'name': "%s " % model['name'] + _("Merger"),
                  'model': model['model'], 'key2': 'client_action_multi',
-                 'value': "ir.actions.act_window," + str(act_id),},
+                 'value': "ir.actions.act_window," + str(act_id), },
                 context=context
             )
             field_name = 'x_' + model['model'].replace('.', '_') + '_id'
