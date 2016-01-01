@@ -107,10 +107,22 @@ openerp.xopgi_board = function(instance) {
             var target_name = $input.attr('name');
             var target_value = $input.val();
             var target_mode = $input.data('mode');
-
+            var old_value = $input.data('value');
             if (!!target_value && isNaN(target_value)) {
                 this.do_warn(_t("Wrong value entered!"),
                              _t("Only Integer Value should be valid."));
+            } else if (old_value == target_value){
+                var target_text = target_value ?
+                    self.humanFriendlyNumber(target_value) : 'Click to' +
+                ' set';
+                var $span = $('<span>' + target_text + '</span>');
+                $span.attr('name', target_name);
+                $span.attr('class', 'o_target_to_set');
+                $span.attr('title', 'Click to set');
+                $span.attr('value', target_value);
+                $.when(self._updated).then(function () {
+                    $span.replaceAll(self.$('.oe_changing[name=' + target_name + ']'));
+                });
             } else {
                 this._updated = new Model('xopgi.board')
                     .call('modify_target_dashboard',
@@ -130,11 +142,13 @@ openerp.xopgi_board = function(instance) {
             var $target = $(ev.currentTarget);
             var target_name = $target.attr('name');
             var target_value = $target.attr('value');
+            var old_value = $target.attr('value');
             var target_mode = $target.data('mode');
             var $input = $('<input/>', {type: "text"});
             $input.attr('class', 'oe_changing');
             $input.attr('name', target_name);
             $input.data('mode', target_mode);
+            $input.data('value', old_value);
             if (target_value) {
                 $input.attr('value', target_value);
             }
@@ -155,7 +169,7 @@ openerp.xopgi_board = function(instance) {
         },
 
         do_reload: function () {
-            this.do_action('xopgi_board.open_my_board_action');
+            this.do_action({type: 'ir.actions.client', tag: 'reload'});
         },
 
         humanFriendlyNumber: function(a, c){
