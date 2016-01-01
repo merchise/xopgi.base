@@ -21,6 +21,7 @@ from openerp import fields, models
 class HrJob(models.Model):
     _inherit = 'hr.job'
     widgets = fields.One2many('hr.job.widget', 'job_position')
+    contracts_ids = fields.One2many('hr.contract', 'job_id')
 
 
 class HrJobWidget(models.Model):
@@ -33,11 +34,13 @@ class HrJobWidget(models.Model):
 
     def get_user_widgets(self):
         job_widgets = self.env['hr.job.widget'].search_read(
-            domain=[('job_position.employee_ids.user_id', '=', self._uid)],
+            domain=[('job_position.contracts_ids.employee_id.user_id', '=',
+                    self._uid)],
             fields=['name', 'category', 'template_name', 'xml_template',
                     'python_code'], order='priority')
         widgets = []
         for job_widget in job_widgets:
+            job_widget.pop('id', None)
             if job_widget not in widgets:
                 widgets.append(job_widget)
         return widgets
