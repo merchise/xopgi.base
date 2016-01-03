@@ -113,12 +113,12 @@ openerp.xopgi_board = function(instance) {
                              _t("Only Integer Value should be valid."));
             } else if (old_value == target_value){
                 var target_text = target_value ?
-                    self.humanFriendlyNumber(target_value) : 'Click to' +
-                ' set';
+                    self.humanFriendlyNumber(target_value) :
+                    _t('Click to set');
                 var $span = $('<span>' + target_text + '</span>');
                 $span.attr('name', target_name);
                 $span.attr('class', 'o_target_to_set');
-                $span.attr('title', 'Click to set');
+                $span.attr('title', _t('Click to set'));
                 $span.attr('value', target_value);
                 $.when(self._updated).then(function () {
                     $span.replaceAll(self.$('.oe_changing[name=' + target_name + ']'));
@@ -142,7 +142,7 @@ openerp.xopgi_board = function(instance) {
             var $target = $(ev.currentTarget);
             var target_name = $target.attr('name');
             var target_value = $target.attr('value');
-            var old_value = $target.attr('value');
+            var old_value = $target.attr('value') || '';
             var target_mode = $target.data('mode');
             var $input = $('<input/>', {type: "text"});
             $input.attr('class', 'oe_changing');
