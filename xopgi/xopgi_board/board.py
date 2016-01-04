@@ -65,6 +65,7 @@ def get_targets(self, values, indicators=(), from_company=False,
 
 
 def get_indicator_color(target, value, inverted=False):
+    value = value or 0.0
     sector = 11
     if target:
         if target >= value:
