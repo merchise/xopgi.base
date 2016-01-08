@@ -173,6 +173,7 @@ openerp.xopgi_board = function(instance) {
         },
 
         humanFriendlyNumber: function(a, c){
+            a = a || 0;
             if (-1000 < a && a < 1000){
                 if (!!c){
                     return this.formatCurrency(a, c);
@@ -190,6 +191,7 @@ openerp.xopgi_board = function(instance) {
         },
 
         getTooltipText: function (a, t, c) {
+            a = a || 0;
             if (!!c) {
                 a = this.formatCurrency(a, c);
             }
