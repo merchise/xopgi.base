@@ -37,12 +37,28 @@ class DocumentShare(TransientModel):
            attachments = self.env['ir.attachment'].search(domain)
            return attachments
 
+    def _get_model_selection(self, cr, uid, context=None):
+        thread_obj = self.pool['mail.thread']
+
+        def check(model):
+            try:
+                return self.pool[model].search(
+                    cr, uid, [], limit=1, context=context, count=True)
+            except:
+                return False
+        translate = lambda source: (
+            self.pool['ir.translation']._get_source(
+                cr, SUPERUSER_ID, None, ('model',),
+                (context or {}).get('lang', False), source) or source)
+        models = [(n, translate(d))
+                  for n, d in thread_obj.message_capable_models(
+                      cr, uid, context=context).items()
+                  if (n != 'mail.thread' and check(n))]
+        return models
+
     reference = fields.Reference(
-        lambda self: [
-            (m.model, m.name)
-            for m in self.env['ir.model'].search([])
-        ],
         string ='Model',
+        selection='_get_model_selection'
     )
 
     attachments = fields.Many2many(
@@ -59,9 +75,12 @@ class DocumentShare(TransientModel):
               model = value.reference._name
               res_id = value.reference.id
               attachment_obj = self.env['ir.attachment']
+              active_model = self.env.context.get('active_model')
+              active_id = self.env.context.get('active_id')
               if model and res_id:
                   for att in value.attachments:
-                     attachment_obj = att.copy({
+                      if att.model == active_model and att.res_id == active_id:
+                         attachment_obj = att.copy({
                                'name': att.name,
                                'user_id': att.env.uid,
                                'res_id': res_id,
