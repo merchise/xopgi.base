@@ -21,7 +21,7 @@
                     "to any model",
     'author': 'Merchise Autrement',
     'website': '',
-    'depends': ['base'],
+    'depends': ['base','mail'],
     'data': [
         'view/document_share_view.xml',
     ],
