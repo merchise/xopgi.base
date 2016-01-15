@@ -75,11 +75,8 @@ class DocumentShare(TransientModel):
               model = value.reference._name
               res_id = value.reference.id
               attachment_obj = self.env['ir.attachment']
-              active_model = self.env.context.get('active_model')
-              active_id = self.env.context.get('active_id')
               if model and res_id:
                   for att in value.attachments:
-                      if att.model == active_model and att.res_id == active_id:
                          attachment_obj = att.copy({
                                'name': att.name,
                                'user_id': att.env.uid,
