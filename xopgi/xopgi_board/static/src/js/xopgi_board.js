@@ -13,17 +13,17 @@ openerp.xopgi_board = function(instance) {
         },
 
         start: function() {
-            this._super.apply(this, arguments);
-
-            var res = this.render();
-            // Events
-            this.$el.delegate('.oe_board_container .oe_fold',
-                              'click', this.on_fold_action);
-            this.$el.delegate('.o_dashboard_action', 'click',
-                              this.on_dashboard_action_clicked);
-            this.$el.delegate('.o_target_to_set', 'click',
-                              this.on_dashboard_target_clicked);
-            return res;
+            var self = this;
+            return $.when(this._super.apply(this, arguments)).then(function(){
+                self.render();
+                // Events
+                self.$el.delegate('.oe_board_container .oe_fold', 'click',
+                    self.on_fold_action);
+                self.$el.delegate('.o_dashboard_action', 'click',
+                    self.on_dashboard_action_clicked);
+                self.$el.delegate('.o_target_to_set', 'click',
+                    self.on_dashboard_target_clicked);
+            });
         },
 
         fetch_data: function () {
@@ -69,8 +69,8 @@ openerp.xopgi_board = function(instance) {
                         });
                         res.resolve();
                 }, function() {res.reject();});
-            return res.promise();
             });
+            return res.promise();
         },
 
         on_fold_action: function(e) {
