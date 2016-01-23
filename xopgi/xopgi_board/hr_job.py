@@ -26,6 +26,7 @@ class HrJob(models.Model):
 
 class HrJobWidget(models.Model):
     _name = 'hr.job.widget'
+    _order = 'job_position, priority'
 
     job_position = fields.Many2one('hr.job', required=True)
     widget = fields.Many2one('xopgi.board.widget', delegate=True,
