@@ -16,3 +16,4 @@ from __future__ import absolute_import as _py3_abs_imports
 from . import board  # noqa
 from . import board_widget  # noqa
 from . import hr_job  # noqa
+from . import res_config  # noqa

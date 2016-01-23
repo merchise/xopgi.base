@@ -25,6 +25,7 @@ Create dashboard employee functions oriented.
         'views/xopgi_board_view.xml',
         'views/hr_job_view.xml',
         'views/xopgi_board_widget_view.xml',
+        'views/res_config_view.xml',
         'security/security.xml',
     ],
     'qweb': ['static/src/xml/xopgi_board.xml'],
