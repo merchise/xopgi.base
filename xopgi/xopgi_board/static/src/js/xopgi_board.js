@@ -13,17 +13,17 @@ openerp.xopgi_board = function(instance) {
         },
 
         start: function() {
-            this._super.apply(this, arguments);
-
-            var res = this.render();
-            // Events
-            this.$el.delegate('.oe_board_container .oe_fold',
-                              'click', this.on_fold_action);
-            this.$el.delegate('.o_dashboard_action', 'click',
-                              this.on_dashboard_action_clicked);
-            this.$el.delegate('.o_target_to_set', 'click',
-                              this.on_dashboard_target_clicked);
-            return res;
+            var self = this;
+            return $.when(this._super.apply(this, arguments)).then(function(){
+                self.render();
+                // Events
+                self.$el.delegate('.oe_board_container .oe_fold', 'click',
+                    self.on_fold_action);
+                self.$el.delegate('.o_dashboard_action', 'click',
+                    self.on_dashboard_action_clicked);
+                self.$el.delegate('.o_target_to_set', 'click',
+                    self.on_dashboard_target_clicked);
+            });
         },
 
         fetch_data: function () {
@@ -67,10 +67,102 @@ openerp.xopgi_board = function(instance) {
                                 }
                             })
                         });
+                        self.addGraphs();
                         res.resolve();
                 }, function() {res.reject();});
-            return res.promise();
             });
+            return res.promise();
+        },
+
+        addGraphs: function () {
+            var self = this,
+                svgs = self.$el.find('svg');
+            _.each(svgs, function (svg) {
+                nv.addGraph(function () {
+                    return self.get_chart(svg);
+                });
+            });
+        },
+
+        get_chart: function (svg) {
+            var self = this,
+                $svg = $(svg),
+                type = $svg.attr('type'),
+                values = $svg.attr('values') || false,
+                obj = $svg.attr('obj') || false,
+                method = $svg.attr('method') || false,
+                tmp = $.Deferred();
+            if (values) {
+                values = json.parse(values);
+                tmp.resolve();
+            }
+            else if (!!obj && !!method) {
+                new instance.web.Model(obj)
+                    .call(method)
+                    .then(function (data) {
+                        values = data;
+                        tmp.resolve();
+                    }, function () {tmp.reject();});
+            }
+            else {
+                tmp.reject();
+            }
+            return $.when(tmp).done( function () {
+                var chart = self.format_graph(type, values);
+                d3.select(svg)
+                    .datum(values)
+                    .transition().duration(500).call(chart);
+                nv.utils.windowResize(chart.update);
+                return chart;
+            });
+        },
+
+        format_graph: function(type, values) {
+            var self = this;
+            var chart;
+            switch (type) {
+                case 'line':
+                    chart = nv.models.lineChart();
+                    chart.yAxis.tickFormat(d3.format(',f'));
+                    break;
+                //TODO: manage other graph type.
+                default :
+                    chart = nv.models.pieChart();
+            }
+            chart.xAxis.tickFormat(function (d) {
+                return values[0].values[d].label;
+            });
+            chart.yAxis.tickFormat(function (d) {
+                return self.humanFriendlyNumber(d);
+            });
+            chart.options({
+                margin: {'left': 30, 'right': 30, 'top': 0, 'bottom': 0},
+                showYAxis: true,
+                showXAxis: true,
+                showLegend: true,
+                tooltips: true,
+                tooltipContent: function (key, x, y, e, graph) {
+                    return self.create_tooltip(x, y, e);
+                },
+            });
+            return chart
+        },
+
+        create_tooltip: function (x, y, e) {
+            var title = e.series.key,
+                $tooltip = $('<div>').addClass('o_tooltip'),
+                value = e.series.currency_id ?
+                        this.formatCurrency(e.point.y, e.series.currency_id) :
+                        e.point.y;
+            $('<b>')
+                .addClass('o_tooltip_title')
+                .html(title)
+                .appendTo($tooltip);
+            $('<div>')
+                .addClass('o_tooltip_content')
+                .html(value)
+                .appendTo($tooltip);
+            return $tooltip[0].outerHTML;
         },
 
         on_fold_action: function(e) {
@@ -83,22 +175,23 @@ openerp.xopgi_board = function(instance) {
 
         on_dashboard_action_clicked: function (ev) {
             ev.preventDefault();
-
             var self = this;
             var $action = $(ev.currentTarget);
             var action_name = $action.attr('name');
-            var options = {
-                action_menu_id: $action.data('menu_id') || null,
-                additional_context: instance.web.pyeval.eval(
-                    'context', $action.data('context'), {}) || {},
-            };
-            new Model("ir.model.data")
-                .call("xmlid_to_res_id", [action_name])
-                .then(function (data) {
-                    if (data) {
-                        self.do_action(data, options);
-                    }
-                });
+            if (action_name) {
+                var options = {
+                    action_menu_id: $action.data('menu_id') || null,
+                    additional_context: instance.web.pyeval.eval(
+                        'context', $action.data('context'), {}) || {},
+                };
+                new Model("ir.model.data")
+                    .call("xmlid_to_res_id", [action_name])
+                    .then(function (data) {
+                        if (data) {
+                            self.do_action(data, options);
+                        }
+                    });
+            }
         },
 
         on_change_input_target: function (e) {

@@ -2,7 +2,7 @@
 # ---------------------------------------------------------------------
 # xopgi_board.__openerp__.py
 # ---------------------------------------------------------------------
-# Copyright (c) 2013-2015 Merchise Autrement
+# Copyright (c) 2013-2016 Merchise Autrement
 # All rights reserved.
 #
 # This is free software; you can redistribute it and/or modify it under the
@@ -25,6 +25,7 @@ Create dashboard employee functions oriented.
         'views/xopgi_board_view.xml',
         'views/hr_job_view.xml',
         'views/xopgi_board_widget_view.xml',
+        'views/res_config_view.xml',
         'security/security.xml',
     ],
     'qweb': ['static/src/xml/xopgi_board.xml'],

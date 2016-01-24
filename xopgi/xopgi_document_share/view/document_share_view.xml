@@ -3,15 +3,6 @@
   <data>
 
 
-    <record model="ir.actions.act_window"
-    id="act_open_documents_view">
-      <field name="name">View All Documents</field>
-      <field name="type">ir.actions.act_window</field>
-      <field name="res_model">ir.attachment</field>
-      <field name="view_type">form</field>
-      <field name="view_mode">kanban,tree,form,graph</field>
-    </record>
-
     <record id="view_attachment_form_inh" model="ir.ui.view">
       <field name="name">view.attachment.form.inh</field>
       <field name="model">ir.attachment</field>
@@ -44,17 +35,16 @@
       </field>
 
     </record>
-     <record model='ir.actions.act_window'
-      id='action_ir_attachment_share'>
-            <field name='name'>Share</field>
-            <field name='res_model'>ir.attachment.share</field>
-            <field name='type'>ir.actions.act_window</field>
-            <field name='target'>new</field>
-            <field name='view_type'>form</field>
-            <field name='view_mode'>form</field>
-        </record>
 
-        <record model="ir.ui.view"
+     <record model="ir.actions.act_window"
+    id="act_open_documents_view">
+      <field name="name">View All Documents</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">ir.attachment</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">kanban,tree,form,graph</field>
+    </record>
+    <record model="ir.ui.view"
         id="view_ir_attachment_share_form">
             <field name="name">ir.attachment.share.form</field>
             <field name="model">ir.attachment.share</field>
@@ -72,6 +62,15 @@
                     </footer>
                 </form>
             </field>
+        </record>
+      <record model='ir.actions.act_window'
+      id='action_ir_attachment_share'>
+            <field name='name'>Share</field>
+            <field name='res_model'>ir.attachment.share</field>
+            <field name='type'>ir.actions.act_window</field>
+            <field name='target'>new</field>
+            <field name='view_type'>form</field>
+            <field name='view_mode'>form</field>
         </record>
   </data>
 </openerp>

@@ -80,5 +80,5 @@ class res_users(Model):
         res = self.write(cr, uid, ids, vals, context=context)
         pids = [u.partner_id.id for u in self.browse(cr, uid, ids, context=context)]
         partner_obj = self.pool['res.partner']
-        _res = partner_obj.write(cr, uid, pids, vals, context=context)
+        partner_obj.write(cr, uid, pids, vals, context=context)
         return res

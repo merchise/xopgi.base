@@ -13,6 +13,11 @@
 # terms of the LICENCE attached (see LICENCE file) in the distribution
 # package.
 
+from __future__ import (division as _py3_division,
+                        print_function as _py3_print,
+                        absolute_import as _py3_abs_import)
+
+
 from openerp import SUPERUSER_ID
 from openerp.exceptions import AccessError
 
@@ -178,7 +183,7 @@ class object_merger(orm.TransientModel):
         '''
         model_pool = self.pool.get(active_model)
         src_ids = model_pool.exists(cr, SUPERUSER_ID, src_ids,
-                                       context=context)
+                                    context=context)
         if src_ids and len(src_ids) >= 1:
             self._check_fks(cr, active_model, dst_id, src_ids)
             self._check_references(cr, active_model, dst_id, src_ids)
@@ -227,7 +232,7 @@ class object_merger(orm.TransientModel):
         return constraints.values()
 
     def _check_constraints(self, cr, table, field, dst_id, filters,
-                          constraints, model='', subquery='{field} = {id}'):
+                           constraints, model='', subquery='{field} = {id}'):
         '''
         Revisar si hay alguna fila que contenga los mismos valores que
         la que se está intentando actualizar de forma que se viole
@@ -247,7 +252,7 @@ class object_merger(orm.TransientModel):
         return True
 
     def _upd_del(self, action_update, cr, table, field, dst_id, filters,
-                src_id, model='', subquery='{field}={id}'):
+                 src_id, model='', subquery='{field}={id}'):
         '''
         Update or Delete rows matching with filters passed.
         :param action_update: if True Update query are executed else

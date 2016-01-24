@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #----------------------------------------------------------------------
-# xopgi_document_share.document_share
+# xopgi_documents_share_all.document_share_all
 #----------------------------------------------------------------------
 # Copyright (c) 2014, 2015 Merchise Autrement and Contributors
 # All rights reserved.
@@ -17,11 +17,8 @@ from __future__ import (absolute_import as _py3_abs_imports,
 
 from openerp import api, models, fields, _
 from openerp.exceptions import except_orm
-import openerp
+from openerp.osv.orm import TransientModel
 from openerp import SUPERUSER_ID
-from openerp.addons.base.res.res_request import referencable_models
-from xoeuf.osv.orm import get_modelname
-
 class Document(models.Model):
     _inherit = 'ir.attachment'
 
@@ -29,22 +26,16 @@ class Document(models.Model):
         comodel_name='ir.attachment', string='Owner', required=False,
         ondelete='cascade')
 
-    @api.multi
-    def button_share(self):
-        self.ensure_one()
-        new_document = self.env['ir.attachment']
-        return {
-            'type': 'ir.actions.act_window',
-            'view_type': 'form',
-            'view_mode': 'form',
-            'res_model': 'ir.attachment.share',
-            'res_id': new_document.id,
-            'target': 'new',
-        }
+class DocumentShare(TransientModel):
+    _name = 'ir.attachment.share.all'
 
-
-class DocumentShare(models.Model):
-    _name = 'ir.attachment.share'
+    @api.model
+    def _get_attachment(self):
+        for active_id in self.env.context.get('active_ids', []):
+           active_model = self.env.context.get('active_model')
+           domain=[('res_model', '=', active_model),('res_id', '=', active_id)]
+           attachments = self.env['ir.attachment'].search(domain)
+           return attachments
 
     def _get_model_selection(self, cr, uid, context=None):
         thread_obj = self.pool['mail.thread']
@@ -70,28 +61,32 @@ class DocumentShare(models.Model):
         selection='_get_model_selection'
     )
 
+    attachments = fields.Many2many(
+        comodel_name='ir.attachment', string='Attachments',
+                            relation='ir_attachment_rel',
+                            column1='order_id',
+                            column2='document_id',
+        default=_get_attachment)
+
     @api.multi
     def action_share(self):
         try:
-           for value in self:
+            for value in self:
               model = value.reference._name
               res_id = value.reference.id
               attachment_obj = self.env['ir.attachment']
               if model and res_id:
-                 for active_id in self.env.context.get('active_ids', []):
-                    parent_document = self.env['ir.attachment'].browse(
-                        [ active_id])
-                    attachment_obj = parent_document.copy({
-                               'name': parent_document.name,
-                               'user_id': parent_document.env.uid,
+                  for att in value.attachments:
+                         attachment_obj = att.copy({
+                               'name': att.name,
+                               'user_id': att.env.uid,
                                'res_id': res_id,
                                'res_model': model,
-                               'owner': parent_document.id,
+                               'owner': att.id,
                    })
               else:
                    raise except_orm(_('Error!'),
                        _('Check Model and Resourse Name'))
-
         except:
             raise except_orm(_('Error!'),
                 _('Check Model and Resourse Name'))

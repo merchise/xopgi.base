@@ -11,10 +11,16 @@
 #
 # Created on 2015-11-12
 
+from __future__ import (division as _py3_division,
+                        print_function as _py3_print,
+                        absolute_import as _py3_abs_import)
+
+from xoutil import logger
+
 from openerp import api, fields, models
 from openerp.tools.safe_eval import safe_eval
+
 from xoeuf.tools import localize_datetime
-from xoutil import logger
 
 
 class XopgiBoardWidget(models.Model):
@@ -59,6 +65,6 @@ class XopgiBoardWidget(models.Model):
                          name)
         except:
             logger.exception('An error happen trying to execute the Python '
-                             'code for \'%s\' board widget, python code: %s'
-                             % (name, python_code))
+                             'code for \'%s\' board widget, python code: %s',
+                             name, python_code)
         widget.update(local_dict.get('result', {}))
