@@ -140,6 +140,7 @@ openerp.xopgi_board = function(instance) {
                 showYAxis: true,
                 showXAxis: true,
                 showLegend: true,
+                useInteractiveGuideline: true,
                 tooltips: true,
                 tooltipContent: function (key, x, y, e, graph) {
                     return self.create_tooltip(x, y, e);
