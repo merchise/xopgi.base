@@ -5,13 +5,6 @@ openerp.xopgi_board = function(instance) {
     instance.xopgi_board = instance.xopgi_board || {};
 
     instance.web.form.XopgiBoard = instance.web.form.FormWidget.extend({
-        init: function(view, node) {
-            view.ViewManager.$('.oe_view_manager_buttons').hide();
-            var $webclient = view.$el.parents('.oe_webclient');
-            $webclient.find('.oe_leftbar').hide();
-            this._super(view, node);
-        },
-
         start: function() {
             var self = this;
             return $.when(this._super.apply(this, arguments)).then(function(){
@@ -176,23 +169,46 @@ openerp.xopgi_board = function(instance) {
 
         on_dashboard_action_clicked: function (ev) {
             ev.preventDefault();
-            var self = this;
-            var $action = $(ev.currentTarget);
-            var action_name = $action.attr('name');
-            if (action_name) {
-                var options = {
-                    action_menu_id: $action.data('menu_id') || null,
-                    additional_context: instance.web.pyeval.eval(
-                        'context', $action.data('context'), {}) || {},
-                };
+            var self = this,
+                $action = $(ev.currentTarget),
+                action_name = $action.attr('name'),
+                action_menu_id = $action.data('menu_id') || null,
+                def = $.Deferred();
+            if (action_menu_id) {
                 new Model("ir.model.data")
-                    .call("xmlid_to_res_id", [action_name])
+                    .call("xmlid_to_res_id", [action_menu_id])
                     .then(function (data) {
                         if (data) {
-                            self.do_action(data, options);
+                            action_menu_id = data;
+                            var menu = new instance.web.Menu(self);
+                            menu.setElement(self.$el.parents().find('.oe_application_menu_placeholder'));
+                            menu.start();
+                            $.when(menu.open_menu(action_menu_id)).then(function(){
+                                def.resolve();
+                            });
                         }
                     });
             }
+            else {
+                def.resolve();
+            }
+            return $.when(def)
+                .then(function () {
+                    if (action_name) {
+                        var options = {
+                            action_menu_id: action_menu_id,
+                            additional_context: instance.web.pyeval.eval(
+                                'context', $action.data('context'), {}) || {},
+                        };
+                        new Model("ir.model.data")
+                            .call("xmlid_to_res_id", [action_name])
+                            .then(function (data) {
+                                if (data) {
+                                    self.do_action(data, options);
+                                }
+                            });
+                    }
+                });
         },
 
         on_change_input_target: function (e) {
@@ -315,6 +331,34 @@ openerp.xopgi_board = function(instance) {
                 r.arch.attrs.mode = context_mode;
             }
             return this._super(r);
+        }
+    });
+
+    instance.web.FormView.include({
+
+        do_show: function () {
+            var $left_bar = this.$el.parents('.oe_webclient').find('.oe_leftbar'),
+                $main_manu = this.$el.parents('body').find('div#oe_main_menu_placeholder');
+            if (this.model == 'xopgi.board') {
+                this.ViewManager.$('.oe_view_manager_buttons').hide();
+                $left_bar.hide();
+                // Activate current main menu
+                new Model("ir.model.data")
+                    .call("xmlid_to_res_id", ['xopgi_board.menu_board_my_dash'])
+                    .then(function (menu_id) {
+                        if (menu_id) {
+                            $main_manu.find('li.active').removeClass('active');
+                            $main_manu
+                                .find('a[data-menu=' + menu_id + ']')
+                                .parent().addClass('active');
+                        }
+                    });
+            }
+            else{
+                this.ViewManager.$('.oe_view_manager_buttons').show();
+                $left_bar.show();
+            }
+            return this._super();
         }
     });
 };
