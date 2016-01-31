@@ -18,7 +18,7 @@ from __future__ import (division as _py3_division,
 from itertools import groupby
 from xoutil import logger
 
-from openerp import api, models
+from openerp import api, models, _
 
 
 def lineal_color_scaling(value,  # 0-1 float
@@ -105,3 +105,8 @@ class XopgiBoard(models.Model):
         target_name = target_name.split('-', 1)[-1]
         if hasattr(target_obj, 'target_' + target_name):
             return setattr(target_obj, 'target_' + target_name, target_value)
+
+    @api.multi
+    def name_get(self):
+        return [(i.id, _('Preview')) for i in self]
+
