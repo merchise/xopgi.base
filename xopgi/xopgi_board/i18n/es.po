@@ -74,6 +74,8 @@ msgstr "Sólo valores enteros son validos."
 #. module: xopgi_board
 #: model:ir.actions.act_window,name:xopgi_board.open_my_board_action
 #: model:ir.ui.menu,name:xopgi_board.menu_board_my_dash
+#: code:addons/xopgi_board/xopgi_board.py:0
+#, python-format
 msgid "Preview"
 msgstr "Vistazo"
 

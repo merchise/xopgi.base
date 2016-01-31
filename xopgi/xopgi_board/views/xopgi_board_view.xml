@@ -11,6 +11,8 @@
       </xpath>
     </template>
 
+    <record id="xopgi_board_base" model="xopgi.board"/>
+
     <!--My Dashboard-->
     <record model="ir.ui.view" id="hr_job_xopgi_board_view">
       <field name="name">My Dashboard</field>
@@ -26,6 +28,7 @@
     <record model="ir.actions.act_window" id="open_my_board_action">
       <field name="name">Preview</field>
       <field name="res_model">xopgi.board</field>
+      <field name="res_id" ref="xopgi_board_base"/>
       <field name="view_type">form</field>
       <field name="view_mode">form</field>
       <field name="view_id" ref="hr_job_xopgi_board_view"/>
