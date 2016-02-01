@@ -358,7 +358,7 @@ openerp.xopgi_board = function(instance) {
                 this.ViewManager.$('.oe_view_manager_buttons').show();
                 $left_bar.show();
             }
-            return this._super();
+            return this._super.apply(this, arguments);
         }
     });
 };
