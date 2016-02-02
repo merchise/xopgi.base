@@ -3,7 +3,7 @@
 # ---------------------------------------------------------------------
 # xopgi_knowledge_config
 # ---------------------------------------------------------------------
-# Copyright (c) 2015 Merchise Autrement and Contributors
+# Copyright (c) 2015, 2016 Merchise Autrement and Contributors
 # All rights reserved.
 #
 # This is free software; you can redistribute it and/or modify it under the
@@ -11,6 +11,8 @@
 # package.
 #
 
+from __future__ import (division as _py3_division,
+                        print_function as _py3_print,
+                        absolute_import as _py3_abs_import)
 
-import res_config
-
+from . import res_config  # noqa

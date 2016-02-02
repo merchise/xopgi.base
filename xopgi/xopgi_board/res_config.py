@@ -21,7 +21,3 @@ from openerp import models
 class XopgiBoardConfig(models.TransientModel):
     _name = 'xopgi.board.config'
     _inherit = 'res.config.settings'
-
-
-
-
