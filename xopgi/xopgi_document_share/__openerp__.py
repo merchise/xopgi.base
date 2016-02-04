@@ -3,7 +3,7 @@
 # --------------------------------------------------------------------------
 # xopgi_documents_share.__openerp__
 # --------------------------------------------------------------------------
-# Copyright (c) 2014, 2015 Merchise Autrement and Contributors
+# Copyright (c) 2014, 2015, 2016 Merchise Autrement and Contributors
 # All rights reserved.
 #
 # Contributors: see CONTRIBUTORS and HISTORY file
@@ -17,9 +17,7 @@
     'name': 'Document Share',
     'version': '1.0',
     'category': 'Knowledge Management',
-    'description': """
-    Module that allows to share documents
-""",
+    'description': "Allows to share documents",
     'author': 'Merchise Autrement',
     'website': '',
     'depends': ['base', 'knowledge'],
@@ -33,5 +31,3 @@
     'installable': True,
     'auto_install': False,
 }
-
-

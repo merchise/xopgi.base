@@ -3,7 +3,7 @@
 # --------------------------------------------------------------------------
 # xopgi_knowledge_config.__openerp__
 # --------------------------------------------------------------------------
-# Copyright (c) 2014, 2015 Merchise Autrement and Contributors
+# Copyright (c) 2014, 2015, 2016 Merchise Autrement and Contributors
 # All rights reserved.
 #
 # Contributors: see CONTRIBUTORS and HISTORY file
@@ -17,9 +17,7 @@
     'name': 'Knowledge Config',
     'version': '1.0',
     'category': 'Knowledge Management',
-    'description': """
-    Module that allows to config documents
-""",
+    'description': "Allows to config documents",
     'author': 'Merchise Autrement',
     'website': '',
     'depends': ['base', 'knowledge'],
@@ -31,5 +29,3 @@
     'installable': True,
     'auto_install': True,
 }
-
-
