@@ -30,7 +30,7 @@ openerp.xopgi_board = function(instance) {
                 res = $.Deferred();
             // Get the function to format currencies
             new instance.web.Model("res.currency")
-                .call("get_format_currencies_js_function")
+                .call("get_format_currencies_js_function", ['false'])
                 .then(function (data) {
                     self.formatCurrency = new Function("amount, currency_id", data);
                 }).then(function () {
@@ -293,10 +293,10 @@ openerp.xopgi_board = function(instance) {
                 }
             }
             if (!!a && a < 0) {
-                return '-' + humanFriendlyNumber(a*-1, 1)
+                return '-' + humanFriendlyNumber(a*-1, 0);
             }
             else{
-                return humanFriendlyNumber(a, 1)
+                return humanFriendlyNumber(a, 0);
             }
         },
 
