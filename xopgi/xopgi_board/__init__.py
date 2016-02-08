@@ -17,3 +17,4 @@ from . import board  # noqa
 from . import board_widget  # noqa
 from . import hr_job  # noqa
 from . import res_config  # noqa
+from . import res_currency  # noqa
