@@ -49,17 +49,29 @@
                      domain="[('ttype', '=', 'many2one'),
                               ('model_id','=', model)]"/>
               <field name="when_apply"/>
-              <field name="strategy_by_group"/>
-              <field name="group_field"
-                     attrs="{'invisible': [('strategy_by_group','!=', True)],
-                             'required': [('strategy_by_group','=', True)]}"
-                     domain="[('ttype', '=', 'many2one'),
-                              ('model_id','=', model)]"/>
             </group>
+            <notebook colspan="4">
+              <page string="Candidates">
+                <group colspan="4" col="4">
+                  <field name="strategy_by_group"/>
+                  <field name="group_field"
+                         attrs="{'invisible': [('strategy_by_group','!=', True)],
+                             'required': [('strategy_by_group','=', True)]}"
+                         domain="[('ttype', '=', 'many2one'),
+                              ('model_id','=', model)]"/>
+                  <label for="domain" colspan="4"/>
+                  <field name="domain" required="1" colspan="4" nolabel="1"/>
+                </group>
+              </page>
+              <page string="Strategies">
+                <group colspan="4" col="4">
+                  <field name="strategy_ids" nolabel="1" colspan="4"/>
+                  <field name="other_fields"/>
+                  <field name="effort_domain"/>
+                </group>
+              </page>
+            </notebook>
             <group>
-              <field name="domain" required="1"/>
-              <field name="strategy_ids"/>
-              <field name="other_fields"/>
             </group>
           </sheet>
         </form>
