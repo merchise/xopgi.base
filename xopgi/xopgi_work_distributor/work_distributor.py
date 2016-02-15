@@ -117,6 +117,10 @@ class WorkDistributionModel(models.Model):
     strategy_field = fields.Many2one('ir.model.fields', 'Setting Field')
     when_apply = fields.Selection(
         [('all', 'Always'), ('no_set', 'When no value set')], default='all')
+    effort_domain = fields.Text(help="Odoo domain to use on effort "
+                                     "based strategies. \nEg: "
+                                     "[('state','not in',('done','cancel')]",
+                                default='[]')
 
     @api.constrains('other_fields')
     def _check_other_fields(self):
@@ -491,6 +495,8 @@ class WorkDistributionStrategy(models.Model):
                             if dist_model.group_field else False)
         args = ([(group_field_name, '=', values[group_field_name])]
                 if group_field_name else [])
+        args.extend(safe_eval(dist_model.effort_domain)
+                    if dist_model.effort_domain else [])
         if date_field:
             if date_start:
                 args.append((date_field, '>=', date_start))
