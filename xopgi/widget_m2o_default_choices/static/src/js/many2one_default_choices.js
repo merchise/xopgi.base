@@ -8,7 +8,8 @@ openerp.widget_m2o_default_choices = function (instance) {
             this._super(field_manager, node);
         },
         get_search_result: function (search_val) {
-            if (this.node.attrs.priority_domain) {
+            var len = search_val.length
+            if (this.node.attrs.priority_domain && len == 0) {
                 return this.get_default_choices(search_val)
             }
             else {
