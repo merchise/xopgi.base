@@ -57,7 +57,6 @@
     <menuitem
         id="menu_board_my_dash"
         action="open_my_board_action"
-        sequence="1"
-        groups="base.group_hr_user"/>
+        sequence="1"/>
   </data>
 </openerp>
