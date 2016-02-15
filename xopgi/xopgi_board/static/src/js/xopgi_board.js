@@ -180,12 +180,14 @@ openerp.xopgi_board = function(instance) {
                     .then(function (data) {
                         if (data) {
                             action_menu_id = data;
-                            var menu = new instance.web.Menu(self);
+                            var menu = new instance.web.form.XopgiBoard.Menu(self);
                             menu.setElement(self.$el.parents().find('.oe_application_menu_placeholder'));
                             menu.start();
-                            $.when(menu.open_menu(action_menu_id)).then(function(){
-                                def.resolve();
-                            });
+                            menu.is_bound.then(function() {
+                                $.when(menu.open_menu(action_menu_id)).then(function(){
+                                    def.resolve();
+                                });
+			    });
                         }
                     });
             }
@@ -359,6 +361,14 @@ openerp.xopgi_board = function(instance) {
                 $left_bar.show();
             }
             return this._super.apply(this, arguments);
+        }
+    });
+
+    instance.web.form.XopgiBoard.Menu = instance.web.Menu.extend({
+        destroy: function () {
+            /* This is necessary to avoid main menu drop when leave a
+             instanced menu from board.
+            */
         }
     });
 };
