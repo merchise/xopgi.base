@@ -43,5 +43,3 @@ class ResCurrency(models.Model):
                     str(row['id']), return_str.format(
                         symbol=json.dumps(symbol), value=format_number_str))
             return function
-
-
