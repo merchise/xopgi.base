@@ -342,7 +342,7 @@ openerp.xopgi_board = function(instance) {
             var $left_bar = this.$el.parents('.oe_webclient').find('.oe_leftbar'),
                 $main_manu = this.$el.parents('body').find('div#oe_main_menu_placeholder');
             if (this.model == 'xopgi.board') {
-                this.ViewManager.$('.oe_view_manager_buttons').hide();
+                this.ViewManager.$('.oe_header_row').hide();
                 $left_bar.hide();
                 // Activate current main menu
                 new Model("ir.model.data")
@@ -355,10 +355,6 @@ openerp.xopgi_board = function(instance) {
                                 .parent().addClass('active');
                         }
                     });
-            }
-            else{
-                this.ViewManager.$('.oe_view_manager_buttons').show();
-                $left_bar.show();
             }
             return this._super.apply(this, arguments);
         }
