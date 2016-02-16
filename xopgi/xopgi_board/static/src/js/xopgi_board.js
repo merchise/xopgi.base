@@ -123,7 +123,12 @@ openerp.xopgi_board = function(instance) {
                     chart = nv.models.pieChart();
             }
             chart.xAxis.tickFormat(function (d) {
-                return values[0].values[d].label;
+                if (values && values[0].values && d) {
+                    return values[0].values[d].label;
+                }
+                else {
+                    return _t('Undefined')
+                }
             });
             chart.yAxis.tickFormat(function (d) {
                 return self.humanFriendlyNumber(d);
