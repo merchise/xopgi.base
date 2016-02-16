@@ -3,7 +3,7 @@
 # --------------------------------------------------------------------------
 # xopgi_documents_share_all.__openerp__
 # --------------------------------------------------------------------------
-# Copyright (c) 2014, 2015 Merchise Autrement and Contributors
+# Copyright (c) 2014, 2015, 2016 Merchise Autrement and Contributors
 # All rights reserved.
 #
 # Contributors: see CONTRIBUTORS and HISTORY file
@@ -17,11 +17,11 @@
     'name': 'Document Share All',
     'version': '1.0',
     'category': 'Knowledge',
-    'description': "Allows to share documents from any model "
-                    "to any model",
+    'description': ("Allows to share documents from any model "
+                    "to any model"),
     'author': 'Merchise Autrement',
     'website': '',
-    'depends': ['base','mail'],
+    'depends': ['base', 'mail'],
     'data': [
         'view/document_share_view.xml',
     ],
@@ -34,5 +34,3 @@
     'installable': True,
     'auto_install': False,
 }
-
-

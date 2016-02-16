@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#----------------------------------------------------------------------
+# ---------------------------------------------------------------------
 # xopgi_document_share.document_share
-#----------------------------------------------------------------------
-# Copyright (c) 2014, 2015 Merchise Autrement and Contributors
+# ---------------------------------------------------------------------
+# Copyright (c) 2014, 2015, 2016 Merchise Autrement and Contributors
 # All rights reserved.
 #
 # This is free software; you can redistribute it and/or modify it under the
@@ -14,13 +14,10 @@
 from __future__ import (absolute_import as _py3_abs_imports,
                         division as _py3_division,
                         print_function as _py3_print)
-
 from openerp import api, models, fields, _
 from openerp.exceptions import except_orm
-import openerp
 from openerp import SUPERUSER_ID
-from openerp.addons.base.res.res_request import referencable_models
-from xoeuf.osv.orm import get_modelname
+
 
 class Document(models.Model):
     _inherit = 'ir.attachment'
@@ -55,43 +52,43 @@ class DocumentShare(models.Model):
                     cr, uid, [], limit=1, context=context, count=True)
             except:
                 return False
+
         translate = lambda source: (
             self.pool['ir.translation']._get_source(
                 cr, SUPERUSER_ID, None, ('model',),
                 (context or {}).get('lang', False), source) or source)
-        models = [(n, translate(d))
-                  for n, d in thread_obj.message_capable_models(
-                      cr, uid, context=context).items()
-                  if (n != 'mail.thread' and check(n))]
+        models = [
+            (n, translate(d)) for n, d in thread_obj.message_capable_models(
+                cr, uid, context=context).items()
+            if (n != 'mail.thread' and check(n))]
         return models
 
     reference = fields.Reference(
-        string ='Model',
+        string='Model',
         selection='_get_model_selection'
     )
 
     @api.multi
     def action_share(self):
         try:
-           for value in self:
-              model = value.reference._name
-              res_id = value.reference.id
-              attachment_obj = self.env['ir.attachment']
-              if model and res_id:
-                 for active_id in self.env.context.get('active_ids', []):
-                    parent_document = self.env['ir.attachment'].browse(
-                        [ active_id])
-                    attachment_obj = parent_document.copy({
-                               'name': parent_document.name,
-                               'user_id': parent_document.env.uid,
-                               'res_id': res_id,
-                               'res_model': model,
-                               'owner': parent_document.id,
-                   })
-              else:
-                   raise except_orm(_('Error!'),
-                       _('Check Model and Resourse Name'))
+            for value in self:
+                model = value.reference._name
+                res_id = value.reference.id
+                if model and res_id:
+                    for active_id in self.env.context.get('active_ids', []):
+                        parent_document = self.env['ir.attachment'].browse(
+                            [active_id])
+                        parent_document.copy({
+                            'name': parent_document.name,
+                            'user_id': parent_document.env.uid,
+                            'res_id': res_id,
+                            'res_model': model,
+                            'owner': parent_document.id,
+                        })
+                else:
+                    raise except_orm(_('Error!'),
+                                     _('Check Model and Resourse Name'))
 
         except:
             raise except_orm(_('Error!'),
-                _('Check Model and Resourse Name'))
+                             _('Check Model and Resourse Name'))
