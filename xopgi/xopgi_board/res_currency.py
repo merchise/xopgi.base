@@ -26,15 +26,16 @@ class ResCurrency(models.Model):
     @api.model
     def get_format_currencies_js_function(self, return_type='float'):
         """ Extend original function to allow return an integer value"""
+        format_number_str = "openerp.web.format_value(" \
+                            "arguments[0], {type: 'integer'}, 0)"
         if return_type == 'float':
-            return super(ResCurrency, self).get_format_currencies_js_function()
+            function = super(ResCurrency, self).get_format_currencies_js_function()
         else:
             function = ""
             for row in self.search_read(
                     domain=[],
                     fields=['id', 'name', 'symbol', 'position']):
                 symbol = row['symbol'] or row['name']
-                format_number_str = "openerp.web.format_value(arguments[0], {type: 'integer'}, 0)"
                 if row['position'] == 'after':
                     return_str = "return {value} + '\\xA0' + {symbol};"
                 else:
@@ -42,4 +43,4 @@ class ResCurrency(models.Model):
                 function += "if (arguments[1] === %s) { %s }" % (
                     str(row['id']), return_str.format(
                         symbol=json.dumps(symbol), value=format_number_str))
-            return function
+        return function + 'return {value};'.format(value=format_number_str)
