@@ -123,7 +123,7 @@ openerp.xopgi_board = function(instance) {
                     chart = nv.models.pieChart();
             }
             chart.xAxis.tickFormat(function (d) {
-                if (values && values[0].values && d) {
+                if (values && values[0].values) {
                     return values[0].values[d].label;
                 }
                 else {
@@ -131,7 +131,7 @@ openerp.xopgi_board = function(instance) {
                 }
             });
             chart.yAxis.tickFormat(function (d) {
-                return self.humanFriendlyNumber(d);
+                return self.formatCurrency(d, values[0].currency_id);
             });
             chart.options({
                 margin: {'left': 30, 'right': 30, 'top': 0, 'bottom': 0},
