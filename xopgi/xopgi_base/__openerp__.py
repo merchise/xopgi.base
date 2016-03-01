@@ -2,7 +2,7 @@
 # ---------------------------------------------------------------------
 # xopgi_base
 # ---------------------------------------------------------------------
-# Copyright (c) 2013-2015 Merchise Autrement
+# Copyright (c) 2013-2016 Merchise Autrement
 # All rights reserved.
 #
 # This is free software; you can redistribute it and/or modify it under the
@@ -36,7 +36,7 @@ for all XOPGI's dependant components.
     "data": [
         'data/xopgi_security.xml',
         'data/xopgi_model_view.xml',
-        ],
+    ],
     "demo_xml": [],
     "application": False,
     "installable": True,

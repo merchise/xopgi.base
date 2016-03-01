@@ -2,7 +2,7 @@
 # ---------------------------------------------------------------------
 # xopgi_base.partner
 # ---------------------------------------------------------------------
-# Copyright (c) 2013-2015 Merchise Autrement
+# Copyright (c) 2013-2016 Merchise Autrement
 # All rights reserved.
 #
 # This is free software; you can redistribute it and/or modify it under the
@@ -53,6 +53,6 @@ class res_partner(Model):
         # TODO: There are other models that define the field "fax" -
         # "res.bank", "res.company", "crm.lead" and
         # "portal_crm.crm_contact_us".
-        }
+    }
 
     # TODO: _defaults = {'customer': False}

@@ -3,7 +3,7 @@
 # --------------------------------------------------------------------------
 # xopgi_object_merger.res_config
 # --------------------------------------------------------------------------
-# Copyright (c) 2014, 2015 Merchise Autrement and Contributors
+# Copyright (c) 2014-2016 Merchise Autrement and Contributors
 # All rights reserved.
 #
 # Author: Merchise Autrement
@@ -57,7 +57,7 @@ class ir_model(orm.Model):
         ('positive_merge_limit', 'check ( merge_limit >= 0 )',
          'The limit quantity of objects to allow merge at one time must be '
          'positive number!'),
-        ]
+    ]
 
     def fields_view_get(self, cr, uid, view_id=None, view_type='form',
                         context=None, toolbar=False, submenu=False):
