@@ -17,6 +17,8 @@ from __future__ import (division as _py3_division,
 
 import ast
 
+from openerp.tools.safe_eval import safe_eval
+
 
 def get_free_names(expr, debug=False):
     '''Detect the names (variable) that are `used free`__ in the 'expr'.
@@ -48,6 +50,15 @@ def get_free_names(expr, debug=False):
     detector = NameDetectorVisitor()
     detector.visit(tree.body)  # Go directly to the body
     return detector.freevars
+
+
+def evaluate(env, expression, mode='eval', **kwargs):
+    local_dict = dict(locals(), **kwargs)
+    local_dict.update(globals().get('__builtins__', {}))
+    res = safe_eval(expression, local_dict, mode=mode or 'eval', nocopy=True)
+    if mode == 'exec':
+        res = local_dict.get('result', None)
+    return res
 
 
 class NameDetectorVisitor(ast.NodeVisitor):
