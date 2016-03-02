@@ -20,7 +20,7 @@ Create bases to allow system event management.
 
     """, "author": "Merchise Autrement",
     "website": "http://xhg.ca.merchise.org/addons/xopgi_cdr",
-    'depends': ['base'],
+    'depends': ['base', 'email_template'],
     'data': [
         'data/templates.xml',
         'views/control_variable_views.xml',
@@ -28,6 +28,7 @@ Create bases to allow system event management.
         'views/system_event_views.xml',
         'views/cdr_history_views.xml',
         'wizard/new_event_views.xml',
+        'views/event_handler_views.xml',
     ],
     'installable': True,
     'auto_install': False,

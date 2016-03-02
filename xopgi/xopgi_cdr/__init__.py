@@ -22,3 +22,4 @@ from . import evidence  # noqa
 from . import system_event  # noqa
 from . import cdr_history  # noqa
 from . import wizard  # noqa
+from . import event_handler  # noqa
