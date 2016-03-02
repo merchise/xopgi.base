@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<openerp>
+    <data>
+      <!-- This Menu Item Must have a parent -->
+      <menuitem id="cdr_menu" name="CDR" parent="base.menu_config"
+                sequence="37"/>
+      <record id="view_cdr_control_variable_tree" model="ir.ui.view">
+        <field name="name">cdr.control.variable.tree</field>
+        <field name="model">cdr.control.variable</field>
+        <field name="arch" type="xml">
+          <tree string="Control Variables">
+            <field name="name"/>
+            <field name="description"/>
+            <field name="template"/>
+            <field name="value"/>
+            <field name="cycle"/>
+          </tree>
+        </field>
+      </record>
+
+      <record id="view_cdr_control_variable_form" model="ir.ui.view">
+        <field name="name">cdr.control.variable.form</field>
+        <field name="model">cdr.control.variable</field>
+        <field name="arch" type="xml">
+          <form string="Control Variables" version="7.0">
+            <sheet>
+              <div class="oe_title">
+                <label for="name" class="oe_edit_only"/>
+                <label string="( " class="oe_inline"/>
+                <field name="active" class="oe_inline"/>
+                <label for="active" class="oe_inline" string="Active )"/>
+                <h1>
+                  <field name="name"/>
+                </h1>
+              </div>
+              <group colspan="4" col="4">
+                <field name="description" colspan="4"/>
+                <field name="template"/>
+                <field name="args"
+                       attrs="{
+                        'required': [('args_need','=', True)],
+                        'invisible': [('args_need','!=', True)]
+                       }"/>
+                <label for="evidences"/>
+                <field name="evidences" colspan="4" nolabel="1" readonly="1"/>
+                <field name="args_need" invisible="1"/>
+              </group>
+            </sheet>
+          </form>
+        </field>
+      </record>
+
+      <record id="view_cdr_control_variable_search" model="ir.ui.view">
+        <field name="name">cdr.control.variable.search</field>
+        <field name="model">cdr.control.variable</field>
+        <field name="arch" type="xml">
+          <search string="Control Variables">
+            <field name="name" select="True"/>
+          </search>
+        </field>
+      </record>
+
+      <record model="ir.actions.act_window"
+              id="act_open_cdr_control_variable_view">
+        <field name="name">Control Variables</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">cdr.control.variable</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_cdr_control_variable_search"/>
+      </record>
+
+      <menuitem id="menu_cdr_control_variable"
+                parent="cdr_menu"
+                sequence="20"
+                action="act_open_cdr_control_variable_view"/>
+
+      <record id="view_cdr_control_variable_template_tree" model="ir.ui.view">
+        <field name="name">cdr.control.variable.template.tree</field>
+        <field name="model">cdr.control.variable.template</field>
+        <field name="arch" type="xml">
+          <tree string="Templates">
+            <field name="name"/>
+            <field name="eval_mode"/>
+          </tree>
+        </field>
+      </record>
+
+      <record id="view_cdr_control_variable_template_form" model="ir.ui.view">
+        <field name="name">cdr.control.variable.template.form</field>
+        <field name="model">cdr.control.variable.template</field>
+        <field name="arch" type="xml">
+          <form string="Templates" version="7.0">
+            <sheet>
+              <div class="oe_title">
+                <label for="name" class="oe_edit_only"/>
+                <h1>
+                  <field name="name"/>
+                </h1>
+              </div>
+              <group colspan="4" col="4">
+                <label for="definition" colspan="4"/>
+                <field name="definition" nolabel="1" colspan="4"/>
+                <field name="args_need"/>
+                <field name="eval_mode"/>
+              </group>
+            </sheet>
+          </form>
+        </field>
+      </record>
+
+      <record id="view_cdr_control_variable_template_search"
+              model="ir.ui.view">
+        <field name="name">cdr.control.variable.template.search</field>
+        <field name="model">cdr.control.variable.template</field>
+        <field name="arch" type="xml">
+          <search string="Templates">
+            <field name="name" select="True"/>
+          </search>
+        </field>
+      </record>
+
+      <record model="ir.actions.act_window"
+              id="act_open_cdr_control_variable_template_view">
+        <field name="name">Control Variables Templates</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">cdr.control.variable.template</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id"
+               ref="view_cdr_control_variable_template_search"/>
+      </record>
+
+      <menuitem id="menu_cdr_control_variable_template"
+                parent="cdr_menu"
+                sequence="10"
+                action="act_open_cdr_control_variable_template_view"/>
+    </data>
+</openerp>

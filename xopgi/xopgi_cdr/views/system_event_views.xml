@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<openerp>
+    <data>
+      <record id="view_cdr_system_event_tree" model="ir.ui.view">
+        <field name="name">cdr.system.event.tree</field>
+        <field name="model">cdr.system.event</field>
+        <field name="arch" type="xml">
+          <tree string="System Events">
+            <field name="name"/>
+            <field name="specific_event"/>
+            <field name="priority"/>
+            <field name="interval" widget="float_time"/>
+            <field name="next_call"/>
+          </tree>
+        </field>
+      </record>
+
+      <record id="view_cdr_system_event_form" model="ir.ui.view">
+        <field name="name">cdr.system.event.form</field>
+        <field name="model">cdr.system.event</field>
+        <field name="arch" type="xml">
+          <form string="System Events" version="7.0">
+            <sheet>
+              <div class="oe_title">
+                <label for="name" class="oe_edit_only"/>
+                <label string="( " class="oe_inline"/>
+                <field name="active" class="oe_inline"/>
+                <label for="active" class="oe_inline" string="Active )"/>
+                <h1 class="oe_inline">
+                  <field name="name"/>
+                </h1>
+              </div>
+              <group colspan="4" col="4">
+                <field name="definition" colspan="4"/>
+                <field name="priority"/>
+                <field name="interval" widget="float_time"/>
+                <field name="specific_event"/>
+                <label for="evidences"/>
+                <field name="evidences" colspan="4" nolabel="1"/>
+              </group>
+            </sheet>
+          </form>
+        </field>
+      </record>
+
+      <record id="view_cdr_system_event_search" model="ir.ui.view">
+        <field name="name">cdr.system.event.search</field>
+        <field name="model">cdr.system.event</field>
+        <field name="arch" type="xml">
+          <search string="System Events">
+            <field name="name" select="True"/>
+            <field name="specific_event" select="True"/>
+          </search>
+        </field>
+      </record>
+
+      <record model="ir.actions.act_window"
+              id="act_open_cdr_system_event_view">
+        <field name="name">System Events</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">cdr.system.event</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_cdr_system_event_search"/>
+        <field name="domain">[]</field>
+        <field name="context">{}</field>
+      </record>
+
+      <menuitem id="menu_cdr_system_event"
+                parent="cdr_menu"
+                sequence="40"
+                action="act_open_cdr_system_event_view"/>
+
+      <record id="view_cdr_basic_event_form" model="ir.ui.view">
+        <field name="name">cdr.basic.event.form</field>
+        <field name="model">cdr.basic.event</field>
+        <field name="arch" type="xml">
+          <form string="Basic Events">
+            <sheet>
+              <div class="oe_title">
+                <label for="name" class="oe_edit_only"/>
+                <label string="( " class="oe_inline"/>
+                <field name="active" class="oe_inline"/>
+                <label for="active" class="oe_inline" string="Active )"/>
+                <h1 class="oe_inline">
+                  <field name="name"/>
+                </h1>
+              </div>
+              <group colspan="4" col="4">
+                <field name="definition" colspan="4"/>
+                <field name="priority"/>
+                <newline/>
+                <field name="interval" widget="float_time"/>
+                <field name="time_to_wait" widget="float_time"/>
+                <label for="evidences"/>
+                <field name="evidences" colspan="4" nolabel="1"/>
+              </group>
+            </sheet>
+          </form>
+        </field>
+      </record>
+
+    </data>
+</openerp>
