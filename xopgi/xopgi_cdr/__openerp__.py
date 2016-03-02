@@ -26,6 +26,8 @@ Create bases to allow system event management.
         'views/control_variable_views.xml',
         'views/evidence_views.xml',
         'views/system_event_views.xml',
+        'views/cdr_history_views.xml',
+        'wizard/new_event_views.xml',
     ],
     'installable': True,
     'auto_install': False,

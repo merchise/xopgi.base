@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<openerp>
+    <data>
+      <record id="vigilant_cron" model="ir.cron">
+        <field name="name">Vigilant</field>
+        <field name="interval_type">minutes</field>
+        <field name="numbercall">-1</field>
+        <field name="model">cdr.agent</field>
+        <field name="function">new_evaluation_cycle</field>
+      </record>
+    </data>
+</openerp>

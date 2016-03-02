@@ -72,6 +72,7 @@ class ControlVariable(models.Model):
     evidences = fields.Many2many('cdr.evidence',
                                  'evidence_control_variable_rel', 'var_id',
                                  'evidence_id', ondelete='restrict')
+    evaluations = fields.One2many('cdr.history', 'var')
     active = fields.Boolean(default=True)
     cycle = fields.Many2one('cdr.evaluation.cycle')
 
