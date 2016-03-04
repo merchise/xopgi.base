@@ -3,7 +3,7 @@
 # --------------------------------------------------------------------------
 # xopgi_object_merge.object_merger
 # --------------------------------------------------------------------------
-# Copyright (c) 2014, 2015 Merchise Autrement and Contributors
+# Copyright (c) 2014-2016 Merchise Autrement and Contributors
 # All rights reserved.
 #
 # Author: Merchise Autrement
@@ -368,13 +368,11 @@ class object_merger(orm.TransientModel):
             pool = self.pool.get(model_name)
             if not pool:
                 continue
-            if ((not pool) or (hasattr(pool, '_auto') and not pool._auto)
-                    or hasattr(pool, '_check_time')):
+            if (not pool or (hasattr(pool, '_auto') and not pool._auto) or hasattr(pool, '_check_time')):
                 continue
             if hasattr(pool, '_columns'):
                 column = pool._columns.get(field_name, False)
-                if (not column) or (isinstance(column, fields.function)
-                                    and not column.store):
+                if not column or (isinstance(column, fields.function) and not column.store):
                     continue
             if hasattr(pool, '_table'):
                 table = pool._table
