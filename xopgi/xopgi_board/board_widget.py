@@ -20,7 +20,7 @@ from xoutil import logger
 from openerp import api, fields, models
 from openerp.tools.safe_eval import safe_eval
 
-from xoeuf.tools import localize_datetime
+from xoeuf.tools import normalize_datetime
 
 
 class XopgiBoardWidget(models.Model):
@@ -44,7 +44,7 @@ class XopgiBoardWidget(models.Model):
         widgets = self.env['hr.job.widget'].get_user_widgets()
         logger.debug(
             'Widgets to show %r' % [w['name'] for w in widgets])
-        today = localize_datetime(self, from_tz=None)
+        today = normalize_datetime(fields.Date.today(self))
         for widget in widgets:
             self._eval_python_code(widget, today)
         return widgets

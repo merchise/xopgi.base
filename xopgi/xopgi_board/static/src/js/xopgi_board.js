@@ -124,15 +124,18 @@ openerp.xopgi_board = function(instance) {
                     chart = nv.models.pieChart();
             }
             chart.xAxis.tickFormat(function (d) {
-                if (values && values[0].values) {
+                try {
                     return values[0].values[d].label;
-                }
-                else {
-                    return _t('Undefined')
+                } catch (err) {
+                    return '';
                 }
             });
             chart.yAxis.tickFormat(function (d) {
-                return self.formatCurrency(d, values[0].currency_id);
+                try {
+                    return self.formatCurrency(d, values[0].currency_id);
+                } catch (err) {
+                    return '';
+                }
             });
             chart.options({
                 margin: {'left': 30, 'right': 30, 'top': 0, 'bottom': 0},
