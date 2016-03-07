@@ -22,7 +22,7 @@ from .util import evaluate, get_free_names
 
 class Evidence(models.Model):
     _name = 'cdr.evidence'
-    _inherit = {'cdr.identifier': 'identifier_id'}
+    _inherits = {'cdr.identifier': 'identifier_id'}
 
     identifier_id = fields.Many2one('cdr.identifier', required=True,
                                     ondelete='cascade')

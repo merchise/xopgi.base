@@ -59,7 +59,7 @@ class CDRIdentifier(models.Model):
 
 class ControlVariable(models.Model):
     _name = 'cdr.control.variable'
-    _inherit = {'cdr.identifier': 'identifier_id'}
+    _inherits = {'cdr.identifier': 'identifier_id'}
 
     identifier_id = fields.Many2one('cdr.identifier',
                                     required=True, ondelete='cascade')
