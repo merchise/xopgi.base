@@ -64,7 +64,8 @@ class ControlVariable(models.Model):
     identifier_id = fields.Many2one('cdr.identifier',
                                     required=True, ondelete='cascade')
     description = fields.Char(translate=True)
-    template = fields.Many2one('cdr.control.variable.template', required=True)
+    template = fields.Many2one('cdr.control.variable.template',
+                               required=True, ondelete='restrict')
     args_need = fields.Boolean(related='template.args_need')
     args = fields.Text(
         help="Python dictionary with arguments that template expect.")
@@ -78,12 +79,15 @@ class ControlVariable(models.Model):
 
     @api.onchange('template', 'template.definition', 'args_need')
     def onchange_template(self):
-        args = [
-            "\n\t'%s': " % arg
-            for _, arg, _, _ in self.template.definition._formatter_parser()
-            if arg
-        ] if self.args_need else []
-        self.args = "{\n%s\n}" % ",".join(args)
+        if self.template and self.args_need:
+            args = [
+                "\n\t'%s': " % arg
+                for _, arg, _, _ in self.template.definition._formatter_parser()
+                if arg
+            ] if self.args_need else []
+            self.args = "{\n%s\n}" % ",".join(args)
+        else:
+            self.args = ""
 
     def get_value(self):
         '''Get name: value dictionary
@@ -123,11 +127,17 @@ class ControlVariableTemplate(models.Model):
     _name = 'cdr.control.variable.template'
 
     name = fields.Char(translate=True)
+    reusable = fields.Boolean(default=True)
     definition = fields.Text(help="Python code string. Allow format string "
                                   "arguments in it.")
     args_need = fields.Boolean(help="Marc if definition need to be formatted.")
     eval_mode = fields.Selection([('eval', 'Eval'), ('exec', 'Execute')],
                                  default='eval')
+
+    @api.onchange('reusable')
+    def onchange_template(self):
+        if not self.reusable:
+            self.args_need = False
 
     def eval(self, **kwargs):
         # TODO: exception treatment

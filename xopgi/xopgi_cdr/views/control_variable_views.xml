@@ -4,6 +4,7 @@
       <!-- This Menu Item Must have a parent -->
       <menuitem id="cdr_menu" name="CDR" parent="base.menu_config"
                 sequence="37"/>
+
       <record id="view_cdr_control_variable_tree" model="ir.ui.view">
         <field name="name">cdr.control.variable.tree</field>
         <field name="model">cdr.control.variable</field>
@@ -35,11 +36,13 @@
               </div>
               <group colspan="4" col="4">
                 <field name="description" colspan="4"/>
-                <field name="template"/>
+                <field name="template" domain="[('reusable','=', True)]"
+                       context="{'default_reusable': False, 'default_name': description}"
+                       required="0"/>
                 <field name="args"
                        attrs="{
-                        'required': [('args_need','=', True)],
-                        'invisible': [('args_need','!=', True)]
+                        'required': [('template','=', True), ('args_need','=', True)],
+                        'invisible': ['|', ('template','=', True), ('args_need','!=', True)]
                        }"/>
                 <label for="evidences"/>
                 <field name="evidences" colspan="4" nolabel="1" readonly="1"/>
@@ -94,6 +97,10 @@
             <sheet>
               <div class="oe_title">
                 <label for="name" class="oe_edit_only"/>
+                <label string="( " class="oe_inline"/>
+                <field name="reusable" class="oe_inline"
+                       readonly="context.get('handled', False)"/>
+                <label for="reusable" class="oe_inline" string="Reusable )"/>
                 <h1>
                   <field name="name"/>
                 </h1>
@@ -101,7 +108,8 @@
               <group colspan="4" col="4">
                 <label for="definition" colspan="4"/>
                 <field name="definition" nolabel="1" colspan="4"/>
-                <field name="args_need"/>
+                <field name="args_need"
+                       attrs="{'invisible': [('reusable','!=', True)]}"/>
                 <field name="eval_mode"/>
               </group>
             </sheet>
@@ -116,6 +124,8 @@
         <field name="arch" type="xml">
           <search string="Templates">
             <field name="name" select="True"/>
+            <filter name="reusable" string="Reusable"
+                    domain="[('reusable','=', True)]"/>
           </search>
         </field>
       </record>
@@ -129,6 +139,7 @@
         <field name="view_mode">tree,form</field>
         <field name="search_view_id"
                ref="view_cdr_control_variable_template_search"/>
+        <field name="context">{'search_default_reusable': 1}</field>
       </record>
 
       <menuitem id="menu_cdr_control_variable_template"
