@@ -94,17 +94,6 @@ class SystemEvent(models.Model):
                 event.evidences = evidences
 
     @api.depends('interval')
-    def update_cron(self):
-        '''Make vigilant cron execute as much as frequently as active
-        events demand.
-
-        '''
-        event = self.search([], order='interval', limit=1)
-        cron = self.env.ref('xopgi_cdr.vigilant_cron')
-        if cron and cron.interval_number != int(event.interval * 60):
-            cron.interval_number = int(event.interval * 60)
-
-    @api.depends('interval')
     def get_next_call(self):
         '''Compute the next evaluation date.
 
