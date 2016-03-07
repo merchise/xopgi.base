@@ -61,13 +61,13 @@ class EventHandler(models.Model):
         self.mail_template.send_mail(self.id)
 
     @signals.receiver(event_raise)
-    def do_notify(self, sender):
+    def do_notify(self, signal):
         '''Execute action method of each handler subscribed to any of
         raising events.
 
         '''
         for handler in self.env['cdr.event.basic.handler'].search(
-                [('subscribed_events', 'in', sender.ids)]):
+                [('subscribed_events', 'in', self.ids)]):
             action_method = getattr(handler, get_method(handler.action),
                                     NotImplemented)
             action_method()
