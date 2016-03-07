@@ -33,6 +33,7 @@ event_raise = Signal('event', '''
 class CDRAgent(models.Model):
     _name = 'cdr.agent'
 
+    @api.model
     def new_evaluation_cycle(self):
         # TODO: do this on celery task.
         return self.env['cdr.evaluation.cycle'].create()
