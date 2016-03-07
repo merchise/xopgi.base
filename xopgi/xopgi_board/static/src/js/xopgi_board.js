@@ -83,15 +83,16 @@ openerp.xopgi_board = function(instance) {
                 type = $svg.attr('type'),
                 values = $svg.attr('values') || false,
                 obj = $svg.attr('obj') || false,
+                context = instance.web.pyeval.eval('context', $svg.data('context'), {}),
                 method = $svg.attr('method') || false,
                 tmp = $.Deferred();
             if (values) {
-                values = json.parse(values);
+                values = JSON.parse(values);
                 tmp.resolve();
             }
             else if (!!obj && !!method) {
                 new instance.web.Model(obj)
-                    .call(method)
+                    .call(method, [],  {'context': context})
                     .then(function (data) {
                         values = data;
                         tmp.resolve();
@@ -123,15 +124,18 @@ openerp.xopgi_board = function(instance) {
                     chart = nv.models.pieChart();
             }
             chart.xAxis.tickFormat(function (d) {
-                if (values && values[0].values) {
+                try {
                     return values[0].values[d].label;
-                }
-                else {
-                    return _t('Undefined')
+                } catch (err) {
+                    return '';
                 }
             });
             chart.yAxis.tickFormat(function (d) {
-                return self.formatCurrency(d, values[0].currency_id);
+                try {
+                    return self.formatCurrency(d, values[0].currency_id);
+                } catch (err) {
+                    return '';
+                }
             });
             chart.options({
                 margin: {'left': 30, 'right': 30, 'top': 0, 'bottom': 0},
