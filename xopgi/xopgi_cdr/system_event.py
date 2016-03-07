@@ -169,7 +169,7 @@ class BasicEvent(models.Model):
         return True if value and self.times_to_raise <= 1 else False
 
     def update_event(self, value, to_raise, cycle):
-        values = self.get_values_to_update(value, cycle)
+        values = self.event_id.get_values_to_update(value, cycle)
         values.update(times_to_raise=((self.time_to_wait / self.interval)
                                       if not value or to_raise
                                       else self.times_to_raise - 1))
@@ -177,7 +177,7 @@ class BasicEvent(models.Model):
 
     def evaluate(self, cycle):
         try:
-            value = self._evaluate()
+            value = self.event_id._evaluate()
         except Exception, e:
             logger.exception('Error evaluating event %s defined as: ',
                              (self.name, self.definition))
