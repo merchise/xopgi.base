@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<openerp>
+  <data>
+    <record id="info_notification_template" model="email.template">
+      <field name="name">Info notifications</field>
+      <field name="email_from">${(user.email or '')|safe}</field>
+      <field name="subject">${object.name}</field>
+      <field name="model_id" ref="model_cdr_event_basic_handler"/>
+      <field name="auto_delete" eval="True"/>
+      <field name="body_html"><![CDATA[
+        <html>
+        <head>
+          <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+          <title>${object.name}</title>
+        </head>
+        <body>
+          <div style="border-radius: 2px; max-width: 1200px; height: auto; margin-left: auto; margin-right: auto; background-color: rgb(240, 255, 240);">
+            <div style="height: auto; text-align: center; font-size: 30px; color: rgb(138, 206, 137);">
+              <strong>${object.name}</strong>
+            </div>
+            <div style="height: 50px;text-align: left;font-size : 14px;border-collapse: separate;margin-top:10px">
+              <p style="margin-left:12px">${object.notification_text}</p>
+            </div>
+          </div>
+        </body>
+      </html>
+      ]]>
+      </field>
+    </record>
+    <record id="alert_notification_template" model="email.template">
+      <field name="name">Alert notifications</field>
+      <field name="email_from">${(user.email or '')|safe}</field>
+      <field name="subject">${object.name}</field>
+      <field name="model_id" ref="model_cdr_event_basic_handler"/>
+      <field name="auto_delete" eval="True"/>
+      <field name="body_html"><![CDATA[
+        <html>
+        <head>
+          <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+          <title>${object.name}</title>
+        </head>
+        <body>
+          <div style="border-radius: 2px; max-width: 1200px; height: auto; margin-left: auto; margin-right: auto; background-color: rgb(255, 255, 240);">
+            <div style="height: auto; text-align: center; font-size: 30px; color: rgb(206, 206, 137);">
+              <strong>${object.name}</strong>
+            </div>
+            <div style="height: 50px;text-align: left;font-size : 14px;border-collapse: separate;margin-top:10px">
+              <p style="margin-left:12px">${object.notification_text}</p>
+            </div>
+          </div>
+        </body>
+      </html>
+      ]]>
+      </field>
+    </record>
+    <record id="alarm_notification_template" model="email.template">
+
+      <field name="name">Alarm notifications</field>
+      <field name="email_from">${(user.email or '')|safe}</field>
+      <field name="subject">${object.name}</field>
+      <field name="model_id" ref="model_cdr_event_basic_handler"/>
+      <field name="auto_delete" eval="True"/>
+      <field name="body_html"><![CDATA[
+        <html>
+        <head>
+          <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+          <title>${object.name}</title>
+        </head>
+        <body>
+          <div style="border-radius: 2px; max-width: 1200px; height: auto; margin-left: auto; margin-right: auto; background-color: rgb(255, 240, 240);">
+            <div style="height: auto; text-align: center; font-size: 30px; color: rgb(206, 138, 137);">
+              <strong>${object.name}</strong>
+            </div>
+            <div style="height: 50px;text-align: left;font-size : 14px;border-collapse: separate;margin-top:10px">
+              <p style="margin-left:12px">${object.notification_text}</p>
+            </div>
+          </div>
+        </body>
+      </html>
+      ]]>
+      </field>
+    </record>
+  </data>
+</openerp>

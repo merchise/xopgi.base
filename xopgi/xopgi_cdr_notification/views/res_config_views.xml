@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+    <record id="view_xopgi_cdr_notification_config_form" model="ir.ui.view">
+      <field name="name">xopgi.cdr.notification.config.form</field>
+      <field name="model">xopgi.cdr.notification.config</field>
+      <field name="arch" type="xml">
+        <form string="" class="oe_form_configuration">
+          <header>
+            <button string="Apply" type="object" name="execute"
+                    class="oe_highlight"/>
+            or
+            <button string="Cancel" type="object" name="cancel"
+                    class="oe_link"/>
+          </header>
+          <group name="notification_config">
+            <label for="id" string="Notifications"/>
+            <div>
+              <div>
+                <field name="info_notification_template" class="oe_inline"/>
+                <label for="info_notification_template"/>
+              </div>
+              <div>
+                <field name="alert_notification_template" class="oe_inline"/>
+                <label for="alert_notification_template"/>
+              </div>
+              <div>
+                <field name="alarm_notification_template" class="oe_inline"/>
+                <label for="alarm_notification_template"/>
+              </div>
+            </div>
+          </group>
+        </form>
+      </field>
+    </record>
+
+    <record model="ir.actions.act_window"
+            id="act_open_xopgi_cdr_notification_config_view">
+      <field name="name">Configure Vigilant Notifications</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">xopgi.cdr.notification.config</field>
+      <field name="view_id" ref="view_xopgi_cdr_notification_config_form"/>
+      <field name="view_mode">form</field>
+      <field name="target">inline</field>
+    </record>
+
+    <menuitem id="menu_xopgi_cdr_notification_config"
+              parent="xopgi_cdr.cdr_menu"
+              sequence="50"
+              action="act_open_xopgi_cdr_notification_config_view"/>
+
+  </data>
+</openerp>
