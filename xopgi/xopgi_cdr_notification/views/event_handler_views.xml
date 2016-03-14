@@ -27,12 +27,8 @@
               <group colspan="4" col="4">
                 <field name="subscribed_events" colspan="4"/>
                 <field name="action"/>
-                <field name="mail_template"
-                       attrs="{'invisible': [('action','!=', 'mail')],
-                               'required': [('action','=', 'mail')]}"/>
-                <field name="notification_text" colspan="4"
-                       attrs="{'invisible': [('action','not in', ('js', 'chat'))],
-                               'required': [('action','in', ('js', 'chat'))]}"/>
+                <field name="priority"/>
+                <field name="notification_text" colspan="4"/>
                 <field name="recipients" colspan="4"/>
               </group>
             </sheet>

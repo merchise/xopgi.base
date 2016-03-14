@@ -18,6 +18,7 @@ from __future__ import (division as _py3_division,
 from openerp import api, fields, models
 from openerp.addons.xopgi_cdr.cdr_agent import event_raise
 from xoeuf import signals
+from .res_config import TEMPLATES
 
 ACTIONS = {
     'mail': dict(
@@ -46,19 +47,21 @@ class EventHandler(models.Model):
     _description = "Generic CDR event handler"
 
     name = fields.Char(translate=True)
+    priority = fields.Selection(TEMPLATES, default=TEMPLATES[0][0],
+                                required=True)
     subscribed_events = fields.Many2many('cdr.system.event')
     action = fields.Selection([(k, v['name']) for k, v in ACTIONS.items()])
     recipients = fields.Many2many('res.users',
                                   'cdr_notification_recipients_rel',
                                   'handler_id', 'user_id')
-    mail_template = fields.Many2one('email.template',
-                                    context={'thread_model': _name,
-                                             'default_use_default_to': True})
     notification_text = fields.Text()
     active = fields.Boolean(default=True)
 
     def do_mail_notify(self):
-        self.mail_template.send_mail(self.id)
+        template_id = self.env[
+            'xopgi.cdr.notification.config'].get_res_id(self.priority)
+        self.pool['email.template'].send_mail(
+            self._cr, self._uid, template_id, self.id, context=self._context)
 
     @signals.receiver(event_raise)
     def do_notify(self, signal):
@@ -83,7 +86,7 @@ class EventHandler(models.Model):
             partner_ids = [user.partner_id.id
                            for user in handler.recipients
                            if user.partner_id]
-            res.update(
+            res[handler.id] = dict(
                 partner_ids=partner_ids,
                 email_to=False,
                 email_cc=False
