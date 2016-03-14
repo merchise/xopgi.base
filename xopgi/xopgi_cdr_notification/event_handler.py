@@ -63,6 +63,26 @@ class EventHandler(models.Model):
         self.pool['email.template'].send_mail(
             self._cr, self._uid, template_id, self.id, context=self._context)
 
+    def do_chat_notify(self):
+        notification_text = self.notification_text
+        session_id = self.env['im_chat.session'].search(
+            [('user_ids', '=', i) for i in self.recipients.ids]).filtered(
+            lambda s: len(s.user_ids) == len(self.recipients))
+        if not session_id:
+            session_id = self.env['im_chat.session'].create(
+                {'user_ids': [(6, 0, self.recipients.ids)]})
+        self.env['im_chat.message'].post(False, session_id[0].uuid, 'meta',
+                                         notification_text)
+
+    def do_js_notify(self):
+        template_id = self.env['xopgi.cdr.notification.config'].get_res_id(
+            self.priority)
+        notification_text = self.pool['email.template'].generate_email_batch(
+            self._cr, self._uid, template_id, res_ids=[self.id],
+            fields=['body_html'], context=self._context)[self.id]['body']
+        # TODO: show notification
+        return notification_text
+
     @signals.receiver(event_raise)
     def do_notify(self, signal):
         '''Execute action method of each handler subscribed to any of
