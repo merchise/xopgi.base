@@ -60,7 +60,8 @@ class EvaluationCycle(models.Model):
             events = self.env['cdr.system.event'].search(
                 [('next_call', '<=', res.create_date)])
             events_to_raise = events.get_events_to_raise(res)
-            logger.debug('Raising Events: %s' % (', '.join(
-                [e.name for e in events_to_raise])))
-            event_raise.send(sender=events_to_raise)
+            if events_to_raise:
+                logger.debug('Raising Events: %s' % (', '.join(
+                    [e.name for e in events_to_raise])))
+                event_raise.send(sender=events_to_raise)
         return res
