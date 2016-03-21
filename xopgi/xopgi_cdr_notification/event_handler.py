@@ -61,7 +61,8 @@ class EventHandler(models.Model):
         template_id = self.env[
             'xopgi.cdr.notification.config'].get_res_id(self.priority)
         self.pool['email.template'].send_mail(
-            self._cr, self._uid, template_id, self.id, context=self._context)
+            self._cr, self._uid, template_id, self.id,
+            context=dict(self._context, tpl_force_default_to=True))
 
     def do_chat_notify(self):
         notification_text = self.notification_text
@@ -112,3 +113,7 @@ class EventHandler(models.Model):
                 email_cc=False
             )
         return res
+
+    @api.model
+    def _get_access_link(self, mail, partner):
+        return self.env['mail.thread']._get_access_link(mail, partner)
