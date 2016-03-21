@@ -171,7 +171,7 @@ class BasicEvent(models.Model):
     def update_event(self, value, to_raise, cycle):
         values = self.event_id.get_values_to_update(cycle)
         values.update(times_to_raise=((self.time_to_wait / self.interval)
-                                      if not value or to_raise
+                                      if not value
                                       else self.times_to_raise - 1))
         self.write(values)
 
