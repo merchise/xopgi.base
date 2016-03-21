@@ -123,7 +123,7 @@ class SystemEvent(models.Model):
 
     def _evaluate(self):
         return evaluate(self.env, self.definition,
-                        **self.evidences.get_value())
+                        **self.evidences.get_bool_value())
 
     @api.constrains('definition')
     def check_definition(self):
