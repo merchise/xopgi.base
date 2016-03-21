@@ -133,9 +133,9 @@ class SystemEvent(models.Model):
             raise exceptions.ValidationError(
                 _("Wrong definition: %s") % e.message)
 
-    def get_values_to_update(self, value, cycle):
+    def get_values_to_update(self, cycle):
         next_call = str2dt(cycle.create_date) + timedelta(hours=self.interval)
-        return dict(value=value, cycle=cycle.id, next_call=next_call)
+        return dict(next_call=next_call)
 
     def evaluate(self, cycle):
         ''' This method must be override on each specific event class
@@ -169,7 +169,7 @@ class BasicEvent(models.Model):
         return True if value and self.times_to_raise <= 1 else False
 
     def update_event(self, value, to_raise, cycle):
-        values = self.event_id.get_values_to_update(value, cycle)
+        values = self.event_id.get_values_to_update(cycle)
         values.update(times_to_raise=((self.time_to_wait / self.interval)
                                       if not value or to_raise
                                       else self.times_to_raise - 1))
