@@ -15,7 +15,7 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
-from openerp import api, fields, models
+from openerp import api, fields, models, _
 from openerp.addons.xopgi_cdr.cdr_agent import event_raise
 from openerp.addons.xopgi_cdr.util import evaluate
 from xoeuf import signals
@@ -86,7 +86,8 @@ class EventHandler(models.Model):
             context=dict(self._context, tpl_force_default_to=True))
 
     def do_chat_notify(self):
-        notification_text = self.notification_text
+        notification_text = "%s: \n%s" % (
+            _(ACTIONS[self.priority]['name']), self.notification_text)
         session_id = self.env['im_chat.session'].search(
             [('user_ids', '=', i) for i in self.recipients.ids]).filtered(
             lambda s: len(s.user_ids) == len(self.recipients))
