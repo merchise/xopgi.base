@@ -16,7 +16,7 @@
         <field name="model">cdr.history</field>
         <field name="arch" type="xml">
           <tree string="History" edit="false">
-            <field name="var"/>
+            <field name="identifier"/>
             <field name="value"/>
             <field name="cycle"/>
             <field name="create_date"/>
@@ -35,9 +35,9 @@
             </header>
             <sheet>
               <div class="oe_title">
-                <label for="var" class="oe_edit_only"/>
+                <label for="identifier" class="oe_edit_only"/>
                 <h1>
-                  <field name="var"/>
+                  <field name="identifier"/>
                 </h1>
               </div>
               <group colspan="4" col="4">
@@ -58,7 +58,7 @@
         <field name="priority" eval="8"/>
         <field name="arch" type="xml">
           <search string="History">
-            <field name="var" select="True"/>
+            <field name="identifier" select="True"/>
           </search>
         </field>
       </record>

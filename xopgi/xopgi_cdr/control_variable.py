@@ -45,7 +45,8 @@ class CDRIdentifier(models.Model):
                        help="Must be a available python identifier.\n"
                             "Just letters, digit (never in first position) "
                             "and underscore are allowed.")
-
+    value = fields.Char()
+    evaluations = fields.One2many('cdr.history', 'identifier')
     _sql_constraints = [
         ('identifier_name_unique', 'unique(name)', 'Name already exists')
     ]
@@ -69,11 +70,9 @@ class ControlVariable(models.Model):
     args_need = fields.Boolean(related='template.args_need')
     args = fields.Text(
         help="Python dictionary with arguments that template expect.")
-    value = fields.Char()
     evidences = fields.Many2many('cdr.evidence',
                                  'evidence_control_variable_rel', 'var_id',
                                  'evidence_id', ondelete='restrict')
-    evaluations = fields.One2many('cdr.history', 'var')
     active = fields.Boolean(default=True)
     cycle = fields.Many2one('cdr.evaluation.cycle')
 

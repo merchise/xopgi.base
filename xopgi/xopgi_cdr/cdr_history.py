@@ -23,7 +23,7 @@ class CDRHistory(models.Model):
 
     _order = 'cycle desc'
 
-    var = fields.Many2one('cdr.control.variable', required=True,
-                          ondelete='cascade')
+    identifier = fields.Many2one('cdr.identifier', required=True,
+                                 ondelete='cascade')
     cycle = fields.Many2one('cdr.evaluation.cycle', required=True)
     value = fields.Char()

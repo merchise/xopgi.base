@@ -17,6 +17,7 @@ from __future__ import (division as _py3_division,
 
 from openerp import api, exceptions, fields, models, _
 from openerp.tools.safe_eval import safe_eval
+from xoeuf.osv.orm import CREATE_RELATED
 from xoutil import logger
 from .util import evaluate, get_free_names
 
@@ -41,7 +42,6 @@ class Evidence(models.Model):
                                "Eg: 1000, False, 0.5, 'Some text'\n"
                                "It must be able to be in an expression like: \n"
                                "(result operator operand) resulting a boolean value.")
-    value = fields.Char()
     bool_value = fields.Boolean()
     control_vars = fields.Many2many('cdr.control.variable',
                                     'evidence_control_variable_rel',
@@ -90,4 +90,8 @@ class Evidence(models.Model):
                 logger.exception(e)
             else:
                 evidence.write(dict(
-                    value=str(value), bool_value=bool_value, cycle=cycle.id))
+                    value=str(value), bool_value=bool_value, cycle=cycle.id,
+                    evaluations=[CREATE_RELATED(**dict(value=str(value),
+                                                       cycle=cycle.id)),
+                                 CREATE_RELATED(**dict(value=str(bool_value),
+                                                       cycle=cycle.id))]))
