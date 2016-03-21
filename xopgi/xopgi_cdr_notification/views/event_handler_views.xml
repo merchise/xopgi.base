@@ -29,7 +29,8 @@
                 <field name="action"/>
                 <field name="priority"/>
                 <field name="notification_text" colspan="4"/>
-                <field name="recipients" colspan="4"/>
+                <field name="domain"/>
+                <field name="recipients"/>
               </group>
             </sheet>
           </form>

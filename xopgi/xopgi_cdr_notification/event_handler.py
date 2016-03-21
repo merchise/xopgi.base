@@ -17,6 +17,7 @@ from __future__ import (division as _py3_division,
 
 from openerp import api, fields, models
 from openerp.addons.xopgi_cdr.cdr_agent import event_raise
+from openerp.addons.xopgi_cdr.util import evaluate
 from xoeuf import signals
 from .res_config import TEMPLATES
 
@@ -53,9 +54,29 @@ class EventHandler(models.Model):
     action = fields.Selection([(k, v['name']) for k, v in ACTIONS.items()])
     recipients = fields.Many2many('res.users',
                                   'cdr_notification_recipients_rel',
-                                  'handler_id', 'user_id')
-    notification_text = fields.Text()
+                                  'handler_id', 'user_id',
+                                  compute='get_recipients')
+    domain = fields.Text(
+        help='Odoo domain to search recipients.',
+        default='''
+        #  Odoo domain like: [('field_name', 'operator', value)]
+        #  or python code to return on result var a odoo domain like
+        #  if uid != 1:
+        #      result = [('id', '=', uid)]
+        #  else:
+        #      result = [('id', '!=', 1)]
+        #  self, env, model, context and group are able to use:
+        #  self => active model (on new api).
+        #  context => active context.''')
+    notification_text = fields.Text(translate=True, required=True)
     active = fields.Boolean(default=True)
+
+    def get_recipients(self):
+        if not self.domain or self.domain.strip().startswith('['):
+            domain = evaluate(self.env, self.domain or '[]')
+        else:
+            domain = evaluate(self.env, self.domain, mode='exec')
+        return self.env['res.users'].search(domain)
 
     def do_mail_notify(self):
         template_id = self.env[
