@@ -1,0 +1,144 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* xopgi_cdr_notification
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 8.0.20160321.135431+ccd6bd0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-03-24 23:10+0000\n"
+"PO-Revision-Date: 2016-03-24 23:10+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: xopgi_cdr_notification
+#: field:cdr.event.basic.handler,action:0
+msgid "Action"
+msgstr "Action"
+
+#. module: xopgi_cdr_notification
+#: field:cdr.event.basic.handler,active:0
+msgid "Active"
+msgstr "Active"
+
+#. module: xopgi_cdr_notification
+#: selection:cdr.event.basic.handler,priority:0
+#: code:addons/xopgi_cdr_notification/event_handler.py:0
+#, python-format
+msgid "Alarm"
+msgstr "Alarm"
+
+#. module: xopgi_cdr_notification
+#: selection:cdr.event.basic.handler,priority:0
+#: code:addons/xopgi_cdr_notification/event_handler.py:0
+#, python-format
+msgid "Alert"
+msgstr "Alerta"
+
+#. module: xopgi_cdr_notification
+#: selection:cdr.event.basic.handler,action:0
+msgid "Chat Notification"
+msgstr "Chat Notification"
+
+#. module: xopgi_cdr_notification
+#: field:cdr.event.basic.handler,continue_raising:0
+msgid "Continue raising"
+msgstr "Continue raising"
+
+#. module: xopgi_cdr_notification
+#: field:cdr.event.basic.handler,domain:0
+msgid "Domain"
+msgstr "Domain"
+
+#. module: xopgi_cdr_notification
+#: view:cdr.event.basic.handler:xopgi_cdr_notification.view_cdr_event_handler_form
+#: view:cdr.event.basic.handler:xopgi_cdr_notification.view_cdr_event_handler_search
+#: view:cdr.event.basic.handler:xopgi_cdr_notification.view_cdr_event_handler_tree
+#: model:ir.actions.act_window,name:xopgi_cdr_notification.act_open_cdr_event_handler_view
+#: model:ir.ui.menu,name:xopgi_cdr_notification.menu_cdr_event_handler
+msgid "Event handler"
+msgstr "Event handler"
+
+#. module: xopgi_cdr_notification
+#: field:cdr.event.basic.handler,event_raise:0
+msgid "Event raise"
+msgstr "Event raise"
+
+#. module: xopgi_cdr_notification
+#: model:ir.model,name:xopgi_cdr_notification.model_cdr_event_basic_handler
+msgid "Generic CDR event handler"
+msgstr "Generic CDR event handler"
+
+#. module: xopgi_cdr_notification
+#: selection:cdr.event.basic.handler,priority:0
+#: code:addons/xopgi_cdr_notification/event_handler.py:0
+#, python-format
+msgid "Information"
+msgstr "Información"
+
+#. module: xopgi_cdr_notification
+#: field:cdr.event.basic.handler,name:0
+msgid "Name"
+msgstr "Name"
+
+#. module: xopgi_cdr_notification
+#: selection:cdr.js.notification,state:0
+msgid "New"
+msgstr "New"
+
+#. module: xopgi_cdr_notification
+#: field:cdr.event.basic.handler,notification_text:0
+msgid "Notification text"
+msgstr "Notification text"
+
+#. module: xopgi_cdr_notification
+#: help:cdr.event.basic.handler,domain:0
+msgid "Odoo domain to search recipients."
+msgstr "Odoo domain to search recipients."
+
+#. module: xopgi_cdr_notification
+#. openerp-web
+#: code:addons/xopgi_cdr_notification/static/src/xml/xopgi_cdr_notification.xml:18
+#, python-format
+msgid "Ok"
+msgstr "Ok"
+
+#. module: xopgi_cdr_notification
+#: selection:cdr.js.notification,state:0
+msgid "Open"
+msgstr "Open"
+
+#. module: xopgi_cdr_notification
+#: field:cdr.event.basic.handler,priority:0
+msgid "Priority"
+msgstr "Priority"
+
+#. module: xopgi_cdr_notification
+#: field:cdr.js.notification,state:0
+msgid "State"
+msgstr "State"
+
+#. module: xopgi_cdr_notification
+#: field:cdr.event.basic.handler,stop_raising:0
+msgid "Stop raising"
+msgstr "Stop raising"
+
+#. module: xopgi_cdr_notification
+#: field:cdr.event.basic.handler,subscribed_events:0
+msgid "Subscribed events"
+msgstr "Subscribed events"
+
+#. module: xopgi_cdr_notification
+#: field:cdr.js.notification,user_id:0
+msgid "User id"
+msgstr "User id"
+
+#. module: xopgi_cdr_notification
+#: selection:cdr.event.basic.handler,action:0
+msgid "Visual Notification"
+msgstr "Visual Notification"
+

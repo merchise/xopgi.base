@@ -1,0 +1,17 @@
+.e_cdr_info {
+    background-image: linear-gradient(to bottom, #337AB7, #285F8F);
+    border-radius: 3px;
+    padding-left: 3px;
+}
+
+.e_cdr_alert {
+    background-image: linear-gradient(to bottom, #FFB500, #ffA500);
+    border-radius: 3px;
+    padding-left: 3px;
+}
+
+.e_cdr_alarm {
+   background-image: linear-gradient(to bottom, #df3f3f, #a21a1a);
+    border-radius: 3px;
+    padding-left: 3px;
+}

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<openerp>
+    <data>
+
+      <template id="assets_backend" name="xopgi_cdr assets"
+                inherit_id="web.assets_backend">
+        <xpath expr="." position="inside">
+          <link rel="stylesheet"
+                href="/xopgi_cdr_notification/static/src/css/xopgi_cdr_notification.css"/>
+          <script type="text/javascript"
+                  src="/xopgi_cdr_notification/static/src/js/xopgi_cdr_notification.js"/>
+        </xpath>
+      </template>
+
+      <record id="view_cdr_event_handler_tree" model="ir.ui.view">
+        <field name="name">cdr.event.basic.handler.tree</field>
+        <field name="model">cdr.event.basic.handler</field>
+        <field name="arch" type="xml">
+          <tree string="Event handler">
+            <field name="name"/>
+            <field name="action"/>
+            <field name="event_raise"/>
+            <field name="continue_raising"/>
+            <field name="stop_raising"/>
+          </tree>
+        </field>
+      </record>
+
+      <record id="view_cdr_event_handler_form" model="ir.ui.view">
+        <field name="name">cdr.event.basic.handler.form</field>
+        <field name="model">cdr.event.basic.handler</field>
+        <field name="arch" type="xml">
+          <form string="Event handler" version="7.0">
+            <sheet>
+              <div class="oe_title">
+                <label for="name" class="oe_edit_only"/>
+                <h1>
+                  <field name="name"/>
+                </h1>
+              </div>
+              <group colspan="6" col="6">
+                <field name="subscribed_events" colspan="6"/>
+                <field name="event_raise" colspan="2"/>
+                <field name="continue_raising" colspan="2"/>
+                <field name="stop_raising" colspan="2"/>
+                <field name="action" colspan="3"/>
+                <field name="priority" colspan="3"/>
+                <field name="notification_text" colspan="6"/>
+                <field name="domain" colspan="3"/>
+                <field name="recipients" colspan="3"/>
+              </group>
+            </sheet>
+          </form>
+        </field>
+      </record>
+
+      <record id="view_cdr_event_handler_search" model="ir.ui.view">
+        <field name="name">cdr.event.basic.handler.search</field>
+        <field name="model">cdr.event.basic.handler</field>
+        <field name="type">search</field>
+        <field name="priority" eval="8"/>
+        <field name="arch" type="xml">
+          <search string="Event handler">
+            <field name="name" select="True"/>
+            <field name="subscribed_events" select="True"/>
+            <field name="event_raise" select="True"/>
+            <field name="continue_raising" select="True"/>
+            <field name="stop_raising" select="True"/>
+          </search>
+        </field>
+      </record>
+
+      <record model="ir.actions.act_window"
+              id="act_open_cdr_event_handler_view">
+        <field name="name">Event handler</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">cdr.event.basic.handler</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_cdr_event_handler_search"/>
+        <field name="domain">[]</field>
+        <field name="context">{}</field>
+      </record>
+
+      <menuitem id="menu_cdr_event_handler"
+                parent="xopgi_cdr.cdr_menu"
+                sequence="70"
+                action="act_open_cdr_event_handler_view"/>
+    </data>
+</openerp>

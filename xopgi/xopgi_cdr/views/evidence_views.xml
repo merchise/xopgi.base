@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<openerp>
+  <data>
+    <record id="view_cdr_evidence_tree" model="ir.ui.view">
+      <field name="name">cdr.evidence.tree</field>
+      <field name="model">cdr.evidence</field>
+      <field name="arch" type="xml">
+        <tree string="Evidences">
+          <field name="name"/>
+          <field name="value"/>
+          <field name="bool_value"/>
+          <field name="cycle"/>
+        </tree>
+      </field>
+    </record>
+
+    <record id="view_cdr_evidence_form" model="ir.ui.view">
+      <field name="name">cdr.evidence.form</field>
+      <field name="model">cdr.evidence</field>
+      <field name="arch" type="xml">
+        <form string="Evidences" version="7.0">
+          <sheet>
+            <div class="oe_title">
+              <label for="name" class="oe_edit_only"/>
+              <label string="( " class="oe_inline"/>
+              <field name="active" class="oe_inline"/>
+              <label for="active" class="oe_inline" string="Active )"/>
+              <h1>
+                <field name="name"/>
+              </h1>
+            </div>
+            <group colspan="6" col="6">
+              <field name="definition"/>
+              <field name="operand"/>
+              <field name="operator"/>
+              <label for="control_vars"/>
+              <field name="control_vars" nolabel="1" readonly="1"
+                     colspan="6"/>
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <record id="view_cdr_evidence_search" model="ir.ui.view">
+      <field name="name">cdr.evidence.search</field>
+      <field name="model">cdr.evidence</field>
+      <field name="arch" type="xml">
+        <search string="Evidences">
+          <field name="name" select="True"/>
+        </search>
+      </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="act_open_cdr_evidence_view">
+      <field name="name">Evidences</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">cdr.evidence</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">tree,form</field>
+      <field name="search_view_id" ref="view_cdr_evidence_search"/>
+    </record>
+
+    <menuitem id="menu_cdr_evidence"
+              parent="cdr_menu"
+              sequence="30"
+              action="act_open_cdr_evidence_view"/>
+  </data>
+</openerp>

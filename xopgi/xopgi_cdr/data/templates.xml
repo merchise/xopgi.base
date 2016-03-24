@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<openerp>
+    <data>
+      <record id="template_one_instance_field_value" 
+              model="cdr.control.variable.template">
+        <field name="name">One instance field value</field>
+        <field name="definition">
+          env['{model}'].browse({instance}).{field}
+        </field>
+        <field name="args_need" eval="True"/>
+      </record>
+      <record id="template_api_model_method"
+              model="cdr.control.variable.template">
+        <field name="name">Api Model Method without params</field>
+        <field name="definition">
+          env['{model}'].{method}()
+        </field>
+        <field name="args_need" eval="True"/>
+      </record>
+      <record id="template_api_model_method_with_params"
+              model="cdr.control.variable.template">
+        <field name="name">Api Model Method with params</field>
+        <field name="definition">
+          env['{model}'].{method}({args})
+        </field>
+        <field name="args_need" eval="True"/>
+      </record>
+      <record id="template_api_multi_method"
+              model="cdr.control.variable.template">
+        <field name="name">Api Multi Method without params</field>
+        <field name="definition">
+          env['{model}'].browse({ids}).{method}()
+        </field>
+        <field name="args_need" eval="True"/>
+      </record>
+      <record id="template_api_multi_method_with_params"
+              model="cdr.control.variable.template">
+        <field name="name">Api Multi Method with params</field>
+        <field name="definition">
+          env['{model}'].browse({ids}).{method}({args})
+        </field>
+        <field name="args_need" eval="True"/>
+      </record>
+    </data>
+</openerp>
