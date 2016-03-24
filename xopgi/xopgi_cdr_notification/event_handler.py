@@ -23,8 +23,6 @@ from xoeuf import signals
 PRIORITIES = [('info', 'Information'), ('alert', 'Alert'), ('alarm', 'Alarm')]
 
 ACTIONS = {
-    'mail': dict(
-        name='Mail Notification', action='do_mail_notify'),
     'js': dict(
         name='Visual Notification', action='do_js_notify'),
     'chat': dict(
@@ -81,13 +79,6 @@ class EventHandler(models.Model):
         else:
             domain = evaluate(self.env, self.domain, mode='exec')
         return self.env['res.users'].search(domain)
-
-    def do_mail_notify(self):
-        template_id = self.env[
-            'xopgi.cdr.notification.config'].get_res_id(self.priority)
-        self.pool['email.template'].send_mail(
-            self._cr, self._uid, template_id, self.id,
-            context=dict(self._context, tpl_force_default_to=True))
 
     def do_chat_notify(self):
         notification_text = "%s: \n%s" % (

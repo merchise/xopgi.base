@@ -17,4 +17,3 @@ from __future__ import (division as _py3_division,
                         absolute_import as _py3_abs_import)
 
 from . import event_handler  # noqa
-from . import res_config  # noqa

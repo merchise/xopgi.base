@@ -20,11 +20,9 @@ Create a basic event based notification system.
 
     """, "author": "Merchise Autrement",
     "website": "http://xhg.ca.merchise.org/addons/xopgi_cdr_notification",
-    'depends': ['web', 'xopgi_cdr', 'email_template', 'im_chat'],
+    'depends': ['web', 'xopgi_cdr', 'im_chat'],
     'data': [
-        'data/templates.xml',
         'views/event_handler_views.xml',
-        'views/res_config_views.xml',
     ],
     'installable': True,
     'auto_install': True,
