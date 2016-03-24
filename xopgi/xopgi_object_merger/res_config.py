@@ -54,7 +54,7 @@ class ir_model(orm.Model):
     _defaults = {'merge_limit': 0}
 
     _sql_constraints = [
-        ('positive_merge_limit', 'check ( merge_limit >= 0 )',
+        ('positive_merge_limit', 'check (merge_limit >= 0)',
          'The limit quantity of objects to allow merge at one time must be '
          'positive number!'),
     ]
