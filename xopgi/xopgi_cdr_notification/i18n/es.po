@@ -1,0 +1,150 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* xopgi_cdr_notification
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 8.0.20160321.135431+ccd6bd0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-03-23 15:44+0000\n"
+"PO-Revision-Date: 2016-03-23 15:44+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: xopgi_cdr_notification
+#: field:cdr.event.basic.handler,action:0
+msgid "Action"
+msgstr "Acción"
+
+#. module: xopgi_cdr_notification
+#: field:cdr.event.basic.handler,active:0
+msgid "Active"
+msgstr "Activo"
+
+#. module: xopgi_cdr_notification
+#: selection:cdr.event.basic.handler,priority:0
+#: selection:cdr.js.notification,priority:0
+msgid "Alarm"
+msgstr "Alarma"
+
+#. module: xopgi_cdr_notification
+#: selection:cdr.event.basic.handler,priority:0
+#: selection:cdr.js.notification,priority:0
+msgid "Alert"
+msgstr "Alerta"
+
+#. module: xopgi_cdr_notification
+#: view:xopgi.cdr.notification.config:xopgi_cdr_notification.view_xopgi_cdr_notification_config_form
+msgid "Apply"
+msgstr "Aplicar"
+
+#. module: xopgi_cdr_notification
+#: field:cdr.js.notification,body:0
+msgid "Body"
+msgstr "Cuerpo"
+
+#. module: xopgi_cdr_notification
+#: view:xopgi.cdr.notification.config:xopgi_cdr_notification.view_xopgi_cdr_notification_config_form
+msgid "Cancel"
+msgstr "Cancelar"
+
+#. module: xopgi_cdr_notification
+#: selection:cdr.event.basic.handler,action:0
+msgid "Chat Notification"
+msgstr "Notificación por chat"
+
+#. module: xopgi_cdr_notification
+#: model:ir.actions.act_window,name:xopgi_cdr_notification.act_open_xopgi_cdr_notification_config_view
+#: model:ir.ui.menu,name:xopgi_cdr_notification.menu_xopgi_cdr_notification_config
+msgid "Configure Vigilant Notifications"
+msgstr "Configurar Notificaciones del vigilante"
+
+#. module: xopgi_cdr_notification
+#: field:cdr.event.basic.handler,domain:0
+msgid "Domain"
+msgstr "Dominio"
+
+#. module: xopgi_cdr_notification
+#: view:cdr.event.basic.handler:xopgi_cdr_notification.view_cdr_event_handler_form
+#: view:cdr.event.basic.handler:xopgi_cdr_notification.view_cdr_event_handler_search
+#: view:cdr.event.basic.handler:xopgi_cdr_notification.view_cdr_event_handler_tree
+#: model:ir.actions.act_window,name:xopgi_cdr_notification.act_open_cdr_event_handler_view
+#: model:ir.ui.menu,name:xopgi_cdr_notification.menu_cdr_event_handler
+msgid "Event handler"
+msgstr "manejador de eventos"
+
+#. module: xopgi_cdr_notification
+#: model:ir.model,name:xopgi_cdr_notification.model_cdr_event_basic_handler
+msgid "Generic CDR event handler"
+msgstr "Manejador genérico de eventos"
+
+#. module: xopgi_cdr_notification
+#: selection:cdr.event.basic.handler,priority:0
+#: selection:cdr.js.notification,priority:0
+msgid "Information"
+msgstr "Información"
+
+#. module: xopgi_cdr_notification
+#: selection:cdr.event.basic.handler,action:0
+msgid "Mail Notification"
+msgstr "Notificación por correo"
+
+#. module: xopgi_cdr_notification
+#: field:cdr.event.basic.handler,name:0
+msgid "Name"
+msgstr "Nombre"
+
+#. module: xopgi_cdr_notification
+#: field:cdr.event.basic.handler,notification_text:0
+msgid "Notification text"
+msgstr "Texto de la notificación"
+
+#. module: xopgi_cdr_notification
+#: view:xopgi.cdr.notification.config:xopgi_cdr_notification.view_xopgi_cdr_notification_config_form
+msgid "Notifications"
+msgstr "Notificaciones"
+
+#. module: xopgi_cdr_notification
+#: help:cdr.event.basic.handler,domain:0
+msgid "Odoo domain to search recipients."
+msgstr "Dominio de odoo para buscar los destinatarios."
+
+#. module: xopgi_cdr_notification
+#: field:cdr.event.basic.handler,priority:0
+#: field:cdr.js.notification,priority:0
+msgid "Priority"
+msgstr "Prioridad"
+
+#. module: xopgi_cdr_notification
+#: field:cdr.js.notification,recipients:0
+msgid "Recipients"
+msgstr "Destinatarios"
+
+#. module: xopgi_cdr_notification
+#: field:cdr.js.notification,subject:0
+msgid "Subject"
+msgstr "Asunto"
+
+#. module: xopgi_cdr_notification
+#: field:cdr.event.basic.handler,subscribed_events:0
+msgid "Subscribed events"
+msgstr "Eventos subscritos"
+
+#. module: xopgi_cdr_notification
+#: field:cdr.event.basic.handler,message_summary:0
+msgid "Summary"
+msgstr "Resumen"
+
+#. module: xopgi_cdr_notification
+#: selection:cdr.event.basic.handler,action:0
+msgid "Visual Notification"
+msgstr "Notificaciones visuales"
+
+#. module: xopgi_cdr_notification
+#: view:xopgi.cdr.notification.config:xopgi_cdr_notification.view_xopgi_cdr_notification_config_form
+msgid "or"
+msgstr "o"

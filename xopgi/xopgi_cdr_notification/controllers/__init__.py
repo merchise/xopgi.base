@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 # ---------------------------------------------------------------------
-# __init__
+# xopgi_cdr_notification.controllers
 # ---------------------------------------------------------------------
 # Copyright (c) 2016 Merchise Autrement and Contributors
 # All rights reserved.
@@ -10,11 +10,10 @@
 # terms of the LICENCE attached (see LICENCE file) in the distribution
 # package.
 #
-# Created on 2016-03-07
+# Created on 2016-03-24
 
 from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
-from . import controllers  # noqa
-from . import event_handler  # noqa
+from . import main  # noqa

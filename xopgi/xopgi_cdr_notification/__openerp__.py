@@ -24,6 +24,7 @@ Create a basic event based notification system.
     'data': [
         'views/event_handler_views.xml',
     ],
+    'qweb': ['static/src/xml/xopgi_cdr_notification.xml'],
     'installable': True,
     'auto_install': True,
 }
