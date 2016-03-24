@@ -120,6 +120,13 @@ class ControlVariable(models.Model):
                     evaluations=[CREATE_RELATED(
                         **dict(value=str(value), cycle=cycle.id))]))
 
+    @api.model
+    @api.returns('self', lambda value: value.id)
+    def create(self, vals):
+        res = super(ControlVariable, self).create(vals)
+        self.env['cdr.evaluation.cycle'].create(vars_to_evaluate=res)
+        return res
+
 
 class ControlVariableTemplate(models.Model):
     _name = 'cdr.control.variable.template'

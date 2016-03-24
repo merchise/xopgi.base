@@ -44,18 +44,25 @@ class EvaluationCycle(models.Model):
 
     @api.model
     @api.returns('self', lambda value: value.id)
-    def create(self, values=None, vars_to_evaluate=None):
+    def create(self, values=None, vars_to_evaluate=None,
+               evidences_to_evaluate=None):
         ''' To force evaluation of some variable(s) pass varible names on
         vars_to_evaluate param as tuple.
 
         :param values: original method param that is ignore
-        :param vars_to_evaluate: tuple of variable's name to force evaluate
-
+        :param vars_to_evaluate: cdr.control.variable recordset to evaluate
+        :param evidences_to_evaluate: cdr.evidences recordset to evaluate
         '''
         res = super(EvaluationCycle, self).create({})
-        if vars_to_evaluate:
-            # TODO: Evaluate passed variables
-            return res
+        if vars_to_evaluate or evidences_to_evaluate:
+            if vars_to_evaluate:
+                vars_to_evaluate.evaluate(res)
+            if evidences_to_evaluate:
+                filter_fn = (lambda var: not (vars_to_evaluate and
+                                              var in vars_to_evaluate))
+                for evidence in evidences_to_evaluate:
+                    evidence.control_vars.filtered(filter_fn).evaluate(res)
+                evidences_to_evaluate.evaluate(res)
         else:
             events = self.env['cdr.system.event'].search(
                 [('next_call', '<=', res.create_date)])

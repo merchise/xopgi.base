@@ -95,3 +95,10 @@ class Evidence(models.Model):
                                                        cycle=cycle.id)),
                                  CREATE_RELATED(**dict(value=str(bool_value),
                                                        cycle=cycle.id))]))
+
+    @api.model
+    @api.returns('self', lambda value: value.id)
+    def create(self, vals):
+        res = super(Evidence, self).create(vals)
+        self.env['cdr.evaluation.cycle'].create(evidences_to_evaluate=res)
+        return res
