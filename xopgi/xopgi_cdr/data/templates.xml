@@ -11,17 +11,33 @@
       </record>
       <record id="template_api_model_method"
               model="cdr.control.variable.template">
-        <field name="name">Api Model Method</field>
+        <field name="name">Api Model Method without params</field>
         <field name="definition">
-          env['{model}'].{method}(*{args}, **{kwargs})
+          env['{model}'].{method}()
+        </field>
+        <field name="args_need" eval="True"/>
+      </record>
+      <record id="template_api_model_method_with_params"
+              model="cdr.control.variable.template">
+        <field name="name">Api Model Method with params</field>
+        <field name="definition">
+          env['{model}'].{method}({args})
         </field>
         <field name="args_need" eval="True"/>
       </record>
       <record id="template_api_multi_method"
               model="cdr.control.variable.template">
-        <field name="name">Api Multi Method</field>
+        <field name="name">Api Multi Method without params</field>
         <field name="definition">
-          env['{model}'].browse({ids}).{method}(*{args}, **{kwargs})
+          env['{model}'].browse({ids}).{method}()
+        </field>
+        <field name="args_need" eval="True"/>
+      </record>
+      <record id="template_api_multi_method_with_params"
+              model="cdr.control.variable.template">
+        <field name="name">Api Multi Method with params</field>
+        <field name="definition">
+          env['{model}'].browse({ids}).{method}({args})
         </field>
         <field name="args_need" eval="True"/>
       </record>
