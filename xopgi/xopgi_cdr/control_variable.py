@@ -95,8 +95,7 @@ class ControlVariable(models.Model):
         return {v.name: safe_eval(v.value) if v.value else None for v in self}
 
     def _evaluate(self):
-        return self.template.eval(**safe_eval(self.args)
-                                  if self.template.args_need else {})
+        return self.template.eval(self.args if self.template.args_need else {})
 
     @api.constrains('template', 'template.definition', 'args')
     def check_definition(self):
@@ -138,12 +137,13 @@ class ControlVariableTemplate(models.Model):
         if not self.reusable:
             self.args_need = False
 
-    def eval(self, **kwargs):
+    def eval(self, kwargs_str):
         # TODO: exception treatment
 
         code = self.definition
         if self.args_need:
             try:
+                kwargs = evaluate(self.env, kwargs_str)
                 code = code.format(**kwargs)
             except Exception, e:
                 logger.exception(
