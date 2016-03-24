@@ -53,6 +53,14 @@ def get_free_names(expr, debug=False):
 
 
 def evaluate(env, expression, mode='eval', **kwargs):
+    #  Import some datetime tools to allow it use on variable and evidences
+    #  definitions
+    from xoeuf.tools import (
+        date2str, dt2str, localize_datetime, normalize_datetime)  # noqa
+    from datetime import timedelta  # noqa
+    kwargs = dict(kwargs or {}, date2str=date2str, dt2str=dt2str,
+                  timedelta=timedelta, localize_datetime=localize_datetime,
+                  normalize_datetime=normalize_datetime)
     local_dict = dict(locals(), **kwargs)
     local_dict.update(globals().get('__builtins__', {}))
     res = safe_eval(expression, local_dict, mode=mode or 'eval', nocopy=True)
