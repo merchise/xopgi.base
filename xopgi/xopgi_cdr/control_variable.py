@@ -141,7 +141,7 @@ class ControlVariableTemplate(models.Model):
                                  default='eval')
 
     @api.onchange('reusable')
-    def onchange_template(self):
+    def onchange_reusable(self):
         if not self.reusable:
             self.args_need = False
 
