@@ -15,11 +15,12 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
-from openerp import api, fields, models, _
-from openerp.addons.xopgi_cdr.cdr_agent import event_raise
+from openerp import fields, models, _
+from openerp.addons.xopgi_cdr.cdr_agent import EVENT_SIGNALS
 from openerp.addons.xopgi_cdr.util import evaluate
 from xoeuf import signals
-from .res_config import TEMPLATES
+
+PRIORITIES = [('info', 'Information'), ('alert', 'Alert'), ('alarm', 'Alarm')]
 
 ACTIONS = {
     'mail': dict(
@@ -47,8 +48,8 @@ class EventHandler(models.Model):
     _name = 'cdr.event.basic.handler'
     _description = "Generic CDR event handler"
 
-    name = fields.Char(translate=True)
-    priority = fields.Selection(TEMPLATES, default=TEMPLATES[0][0],
+    name = fields.Char(translate=True, required=True)
+    priority = fields.Selection(PRIORITIES, default=PRIORITIES[0][0],
                                 required=True)
     subscribed_events = fields.Many2many('cdr.system.event')
     action = fields.Selection([(k, v['name']) for k, v in ACTIONS.items()])
@@ -70,6 +71,9 @@ class EventHandler(models.Model):
         #  context => active context.''')
     notification_text = fields.Text(translate=True, required=True)
     active = fields.Boolean(default=True)
+    event_raise = fields.Boolean(default=True)
+    continue_raising = fields.Boolean(default=True)
+    stop_raising = fields.Boolean()
 
     def get_recipients(self):
         if not self.domain or self.domain.strip().startswith('['):
@@ -106,36 +110,15 @@ class EventHandler(models.Model):
         # TODO: show notification
         return notification_text
 
-    @signals.receiver(event_raise)
+    @signals.receiver(EVENT_SIGNALS.values())
     def do_notify(self, signal):
         '''Execute action method of each handler subscribed to any of
         raising events.
 
         '''
         for handler in self.env['cdr.event.basic.handler'].search(
-                [('subscribed_events', 'in', self.ids)]):
+                [('subscribed_events', 'in', self.ids),
+                 (signal.action, '=', True)]):
             action_method = getattr(handler, get_method(handler.action),
                                     NotImplemented)
             action_method()
-
-    @api.multi
-    def message_get_default_recipients(self):
-        '''This method is used to get the default recipients of the mail
-        notification. It is called from email.template model.
-
-        '''
-        res = {}
-        for handler in self:
-            partner_ids = [user.partner_id.id
-                           for user in handler.recipients
-                           if user.partner_id]
-            res[handler.id] = dict(
-                partner_ids=partner_ids,
-                email_to=False,
-                email_cc=False
-            )
-        return res
-
-    @api.model
-    def _get_access_link(self, mail, partner):
-        return self.env['mail.thread']._get_access_link(mail, partner)

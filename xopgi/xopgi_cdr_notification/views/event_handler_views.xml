@@ -1,6 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <openerp>
     <data>
+
+      <template id="assets_backend" name="xopgi_cdr assets"
+                inherit_id="web.assets_backend">
+        <xpath expr="." position="inside">
+          <link rel="stylesheet"
+                href="/xopgi_cdr_notification/static/src/css/xopgi_cdr_notification.css"/>
+          <script type="text/javascript"
+                  src="/xopgi_cdr_notification/static/src/js/xopgi_cdr_notification.js"/>
+        </xpath>
+      </template>
+
       <record id="view_cdr_event_handler_tree" model="ir.ui.view">
         <field name="name">cdr.event.basic.handler.tree</field>
         <field name="model">cdr.event.basic.handler</field>
@@ -8,6 +19,9 @@
           <tree string="Event handler">
             <field name="name"/>
             <field name="action"/>
+            <field name="event_raise"/>
+            <field name="continue_raising"/>
+            <field name="stop_raising"/>
           </tree>
         </field>
       </record>
@@ -24,13 +38,16 @@
                   <field name="name"/>
                 </h1>
               </div>
-              <group colspan="4" col="4">
-                <field name="subscribed_events" colspan="4"/>
-                <field name="action"/>
-                <field name="priority"/>
-                <field name="notification_text" colspan="4"/>
-                <field name="domain"/>
-                <field name="recipients"/>
+              <group colspan="6" col="6">
+                <field name="subscribed_events" colspan="6"/>
+                <field name="event_raise" colspan="2"/>
+                <field name="continue_raising" colspan="2"/>
+                <field name="stop_raising" colspan="2"/>
+                <field name="action" colspan="3"/>
+                <field name="priority" colspan="3"/>
+                <field name="notification_text" colspan="6"/>
+                <field name="domain" colspan="3"/>
+                <field name="recipients" colspan="3"/>
               </group>
             </sheet>
           </form>
@@ -45,7 +62,10 @@
         <field name="arch" type="xml">
           <search string="Event handler">
             <field name="name" select="True"/>
-            <field name="subscribed_events"/>
+            <field name="subscribed_events" select="True"/>
+            <field name="event_raise" select="True"/>
+            <field name="continue_raising" select="True"/>
+            <field name="stop_raising" select="True"/>
           </search>
         </field>
       </record>
