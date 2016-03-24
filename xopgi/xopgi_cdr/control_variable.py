@@ -94,8 +94,9 @@ class ControlVariable(models.Model):
         '''
         return {v.name: safe_eval(v.value) if v.value else None for v in self}
 
-    def _evaluate(self):
-        return self.template.eval(self.args if self.template.args_need else {})
+    def _evaluate(self, now=None):
+        return self.template.eval(now or fields.Datetime.now(),
+                                  self.args if self.template.args_need else {})
 
     @api.constrains('template', 'template.definition', 'args')
     def check_definition(self):
@@ -108,7 +109,7 @@ class ControlVariable(models.Model):
     def evaluate(self, cycle):
         for var in self:
             try:
-                value = var._evaluate()
+                value = var._evaluate(cycle.create_date)
             except Exception, e:
                 logger.exception('Error evaluating control variable '
                                  '%s.', (self.name,))
@@ -144,7 +145,7 @@ class ControlVariableTemplate(models.Model):
         if not self.reusable:
             self.args_need = False
 
-    def eval(self, kwargs_str):
+    def eval(self, now, kwargs_str):
         # TODO: exception treatment
 
         code = self.definition
@@ -160,5 +161,5 @@ class ControlVariableTemplate(models.Model):
                 logger.exception(e)
                 code = None
         if code:
-            return evaluate(self.env, code, self.eval_mode)
+            return evaluate(self.env, code, self.eval_mode, now=now)
         return None
