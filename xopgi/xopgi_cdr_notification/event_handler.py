@@ -51,10 +51,7 @@ class EventHandler(models.Model):
                                 required=True)
     subscribed_events = fields.Many2many('cdr.system.event')
     action = fields.Selection([(k, v['name']) for k, v in ACTIONS.items()])
-    recipients = fields.Many2many('res.users',
-                                  'cdr_notification_recipients_rel',
-                                  'handler_id', 'user_id',
-                                  compute='get_recipients')
+    recipients = fields.Many2many('res.users', compute='get_recipients')
     domain = fields.Text(
         help='Odoo domain to search recipients.',
         default='''
