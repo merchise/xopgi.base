@@ -74,11 +74,18 @@ class EventHandler(models.Model):
     stop_raising = fields.Boolean()
 
     def get_recipients(self):
-        if not self.domain or self.domain.strip().startswith('['):
-            domain = evaluate(self.env, self.domain or '[]')
-        else:
-            domain = evaluate(self.env, self.domain, mode='exec')
-        return self.env['res.users'].search(domain)
+        for handler in self:
+            if not handler.domain or all(l.strip().startswith('#')
+                                         for l in handler.domain.splitlines()
+                                         if l.strip()):
+                domain = None
+            elif any(l.strip().startswith('result')
+                     for l in handler.domain.splitlines()):
+                domain = evaluate(self.env, handler.domain, mode='exec')
+            else:
+                domain = evaluate(self.env, handler.domain)
+            if domain:
+                handler.recipients = self.env['res.users'].search(domain)
 
     def do_chat_notify(self):
         for recipient in self.recipients:
