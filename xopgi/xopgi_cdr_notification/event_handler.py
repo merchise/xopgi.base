@@ -81,16 +81,20 @@ class EventHandler(models.Model):
         return self.env['res.users'].search(domain)
 
     def do_chat_notify(self):
-        notification_text = "%s: \n%s" % (
-            _(ACTIONS[self.priority]['name']), self.notification_text)
-        session_id = self.env['im_chat.session'].search(
-            [('user_ids', '=', i) for i in self.recipients.ids]).filtered(
-            lambda s: len(s.user_ids) == len(self.recipients))
-        if not session_id:
-            session_id = self.env['im_chat.session'].create(
-                {'user_ids': [(6, 0, self.recipients.ids)]})
-        self.env['im_chat.message'].post(False, session_id[0].uuid, 'meta',
-                                         notification_text)
+        for recipient in self.recipients:
+            # override self to get recipient right lang translation
+            self = self.with_context(lang=recipient.lang)
+            session_id = self.env['im_chat.session'].search(
+                [('user_ids', '=', recipient.id)]).filtered(
+                lambda s: len(s.user_ids) == 1)
+            if not session_id:
+                session_id = self.env['im_chat.session'].create(
+                    {'user_ids': [(6, 0, recipient.ids)]})
+            notification_text = "%s: \n%s" % (
+                _({k: v for k, v in PRIORITIES}[self.priority]),
+                self.notification_text)
+            self.env['im_chat.message'].post(False, session_id[0].uuid,
+                                             'meta', notification_text)
 
     def do_js_notify(self):
         template_id = self.env['xopgi.cdr.notification.config'].get_res_id(
