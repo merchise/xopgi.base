@@ -19,15 +19,32 @@ from openerp import api, models
 from xoeuf.signals import Signal
 from xoutil import logger
 
+EVENT_SIGNALS = {
+    'raise': Signal('event_raise', '''
+        Signal sent to notify some system event raising.
 
-event_raise = Signal('event', '''
-    Signal sent to notify some system event raising.
+        Arguments:
 
-    Arguments:
+        :param sender: 'cdr.system.event' recordset of events are raising.
 
-    :param sender: 'cdr.system.event' recordset of events are raising.
+    '''),
+    'continue_raising': Signal('continue_raising', '''
+        Signal sent to notify some system event continue raising.
 
-''')
+        Arguments:
+
+        :param sender: 'cdr.system.event' recordset of events are continuing raise.
+
+    '''),
+    'stop_raising': Signal('stop_raising', '''
+        Signal sent to notify some system event stop raising.
+
+        Arguments:
+
+        :param sender: 'cdr.system.event' recordset of events are stoping raise.
+
+    ''')
+}
 
 
 class CDRAgent(models.Model):
@@ -66,9 +83,11 @@ class EvaluationCycle(models.Model):
         else:
             events = self.env['cdr.system.event'].search(
                 [('next_call', '<=', res.create_date)])
-            events_to_raise = events.get_events_to_raise(res)
-            if events_to_raise:
-                logger.debug('Raising Events: %s' % (', '.join(
-                    [e.name for e in events_to_raise])))
-                event_raise.send(sender=events_to_raise)
+            events.evaluate(res)
+            for signal in EVENT_SIGNALS:
+                sender = events.filtered(lambda event: event.action == signal)
+                if sender:
+                    logger.debug('Sending signal (%s) for Events: (%s)' % (
+                        signal, ', '.join([e.name for e in sender])))
+                    EVENT_SIGNALS['raise'].send(sender=sender)
         return res

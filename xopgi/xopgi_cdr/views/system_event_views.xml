@@ -9,6 +9,8 @@
             <field name="name"/>
             <field name="specific_event"/>
             <field name="priority"/>
+            <field name="state"/>
+            <field name="action"/>
             <field name="interval" widget="float_time"/>
             <field name="next_call"/>
           </tree>
@@ -50,6 +52,8 @@
           <search string="System Events">
             <field name="name" select="True"/>
             <field name="specific_event" select="True"/>
+            <field name="state" select="True"/>
+            <field name="action" select="True"/>
           </search>
         </field>
       </record>

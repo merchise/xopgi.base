@@ -19,7 +19,13 @@ from datetime import timedelta, datetime
 from openerp import api, exceptions, fields, models, _
 from xoeuf.tools import str2dt
 from xoutil import logger
+from .cdr_agent import EVENT_SIGNALS
 from .util import evaluate, get_free_names
+
+EVENT_STATES = [
+    ('raising', 'Raising'),
+    ('not_raising', 'Not raising')
+]
 
 
 class SystemEvent(models.Model):
@@ -55,6 +61,11 @@ class SystemEvent(models.Model):
                                  'evidence_id',
                                  compute='get_evidences', store=True)
     specific_event = fields.Reference([], compute='_get_specific_event')
+    state = fields.Selection(EVENT_STATES)
+    action = fields.Selection([(k, k.replace('_', ' ').capitalize())
+                               for k in EVENT_SIGNALS.keys()] +
+                              [('do_nothing', 'Do nothing')],
+                              string="Last action")
 
     def get_specific_event_models(self):
         '''Get models that look like specific event.
@@ -138,18 +149,10 @@ class SystemEvent(models.Model):
         return dict(next_call=next_call)
 
     def evaluate(self, cycle):
-        ''' This method must be override on each specific event class
-
-        '''
-        raise NotImplementedError
-
-    def get_events_to_raise(self, cycle):
-        self.evaluate_dependences(cycle)
-        res = self.browse()
         for event in self:
-            if event.specific_event.evaluate(cycle):
-                res += event
-        return res
+            # call specific event evaluate method to get each
+            # corresponding behavior.
+            event.specific_event.evaluate(cycle)
 
 
 class BasicEvent(models.Model):
@@ -165,14 +168,16 @@ class BasicEvent(models.Model):
                             "consecutive positive evaluations before raise.")
     times_to_raise = fields.Integer()
 
-    def check_if_raise_is_needed(self, value):
-        return True if value and self.times_to_raise <= 1 else False
-
-    def update_event(self, value, to_raise, cycle):
+    def update_event(self, value, cycle):
         values = self.event_id.get_values_to_update(cycle)
-        values.update(times_to_raise=((self.time_to_wait / self.interval)
-                                      if not value
-                                      else self.times_to_raise - 1))
+        times_to_raise = ((self.time_to_wait / self.interval)
+                          if not value else self.times_to_raise - 1)
+        state = 'raising' if value and times_to_raise < 1 else 'not_raising'
+        if self.state == 'raising':
+            action = 'continue_raising' if state == 'raising' else 'stop_raising'
+        else:
+            action = 'raise' if state == 'raising' else 'do_nothing'
+        values.update(state=state, action=action)
         self.write(values)
 
     def evaluate(self, cycle):
@@ -184,6 +189,4 @@ class BasicEvent(models.Model):
             logger.exception(e)
             return None
         else:
-            to_raise = self.check_if_raise_is_needed(value)
-            self.update_event(value, to_raise, cycle)
-        return self if to_raise else None
+            self.update_event(value, cycle)
