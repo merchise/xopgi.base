@@ -31,8 +31,8 @@
             </div>
             <group colspan="6" col="6">
               <field name="definition"/>
-              <field name="operand"/>
               <field name="operator"/>
+              <field name="operand"/>
               <label for="control_vars"/>
               <field name="control_vars" nolabel="1" readonly="1"
                      colspan="6"/>

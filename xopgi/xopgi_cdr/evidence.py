@@ -68,7 +68,7 @@ class Evidence(models.Model):
 
     def evaluate_bool_expresion(self, definition_result):
         return bool(safe_eval(
-            "%s %s %s" % (definition_result, self.operand, self.operator)))
+            "%s %s %s" % (definition_result, self.operator, self.operand)))
 
     @api.constrains('definition', 'operand', 'operator')
     def check_definition(self):
