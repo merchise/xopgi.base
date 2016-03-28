@@ -22,6 +22,7 @@ Create bases to allow system event management.
     "website": "http://xhg.ca.merchise.org/addons/xopgi_cdr",
     'depends': ['base'],
     'data': [
+        'security/security.xml',
         'data/cron.xml',
         'data/templates.xml',
         'views/control_variable_views.xml',
