@@ -58,9 +58,11 @@ def evaluate(env, expression, mode='eval', **kwargs):
     from xoeuf.tools import (
         date2str, dt2str, localize_datetime, normalize_datetime)  # noqa
     from datetime import timedelta  # noqa
+    from dateutil.relativedelta import relativedelta  # noqa
     kwargs = dict(kwargs or {}, date2str=date2str, dt2str=dt2str,
                   timedelta=timedelta, localize_datetime=localize_datetime,
-                  normalize_datetime=normalize_datetime)
+                  normalize_datetime=normalize_datetime,
+                  relativedelta=relativedelta)
     local_dict = dict(locals(), **kwargs)
     local_dict.update(globals().get('__builtins__', {}))
     res = safe_eval(expression, local_dict, mode=mode or 'eval', nocopy=True)

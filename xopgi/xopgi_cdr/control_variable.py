@@ -92,7 +92,10 @@ class ControlVariable(models.Model):
         '''Get name: value dictionary
 
         '''
-        return {v.name: safe_eval(v.value) if v.value else None for v in self}
+        return {v.name: v._value() for v in self}
+
+    def _value(self):
+        return safe_eval(self.value) if self.value else None
 
     def _evaluate(self, now=None):
         return self.template.eval(now or fields.Datetime.now(),
