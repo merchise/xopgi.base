@@ -101,7 +101,7 @@ class ControlVariable(models.Model):
         return self.template.eval(now or fields.Datetime.now(),
                                   self.args if self.template.args_need else {})
 
-    @api.constrains('template', 'template.definition', 'args')
+    @api.constrains('template', 'args')
     def check_definition(self):
         try:
             self._evaluate()
