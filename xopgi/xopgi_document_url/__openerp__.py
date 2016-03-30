@@ -42,7 +42,10 @@ Module that allows to attach an URL as a document.
         'static/src/xml/url.xml',
     ],
 
-    "installable": True,
+    # MIGRATION POLICY: All addons are not included until someone work on them
+    # and upgrade them.
+    'installable': (8, 0) <= ODOO_VERSION_INFO < (9, 0),   # noqa
+
     "application": False,
     "auto_install": False,
 }

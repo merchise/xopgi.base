@@ -23,6 +23,10 @@ Set start and stop flow fields to crm.stage model.
     "website": "http://xhg.ca.merchise.org/addons/xopgi_crm_stage",
     'depends': ['xopgi_stage_ext', 'crm'],
     'data': ['views/crm.xml'],
-    'installable': True,
+
+    # MIGRATION POLICY: All addons are not included until someone work on them
+    # and upgrade them.
+    'installable': (8, 0) <= ODOO_VERSION_INFO < (9, 0),   # noqa
+
     'auto_install': True,
 }

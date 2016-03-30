@@ -102,4 +102,10 @@ be showed only once with internal list of each concrete object.
 
 from __future__ import absolute_import
 
-from . import res_users  # noqa
+from openerp.release import version_info as ODOO_VERSION_INFO
+
+if ODOO_VERSION_INFO < (9, 0):
+    # MIGRATION POLICY: All addons are not included until someone work on them
+    # and upgrade them.
+
+    from . import res_users  # noqa
