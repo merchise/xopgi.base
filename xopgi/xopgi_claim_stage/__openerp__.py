@@ -2,7 +2,7 @@
 # ---------------------------------------------------------------------
 # xopgi_claim_stage.__openerp__.py
 # ---------------------------------------------------------------------
-# Copyright (c) 2013-2015 Merchise Autrement
+# Copyright (c) 2013-2016 Merchise Autrement
 # All rights reserved.
 #
 # This is free software; you can redistribute it and/or modify it under the
@@ -22,6 +22,10 @@ Set start and stop flow fields to crm.claim.stage model.
     "website": "http://xhg.ca.merchise.org/addons/xopgi_claim_stage",
     'depends': ['xopgi_stage_ext', 'crm_claim'],
     'data': ['views/crm.xml'],
-    'installable': True,
+
+    # MIGRATION POLICY: All addons are not included until someone work on them
+    # and upgrade them.
+    'installable': (8, 0) <= ODOO_VERSION_INFO < (9, 0),   # noqa
+
     'auto_install': True,
 }
