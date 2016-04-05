@@ -76,7 +76,7 @@ class ControlVariable(models.Model):
     active = fields.Boolean(default=True)
     cycle = fields.Many2one('cdr.evaluation.cycle')
 
-    @api.onchange('template', 'template.definition', 'args_need')
+    @api.onchange('template', 'template', 'args_need')
     def onchange_template(self):
         if self.template and self.args_need:
             args = [
