@@ -22,6 +22,7 @@ Create a basic event based notification system.
     "website": "http://xhg.ca.merchise.org/addons/xopgi_cdr_notification",
     'depends': ['web', 'xopgi_cdr', 'im_chat'],
     'data': [
+        'security/security.xml',
         'views/event_handler_views.xml',
     ],
     'qweb': ['static/src/xml/xopgi_cdr_notification.xml'],
