@@ -46,8 +46,12 @@
                 <field name="action" colspan="3"/>
                 <field name="priority" colspan="3"/>
                 <field name="notification_text" colspan="6"/>
-                <field name="domain" colspan="3"/>
-                <field name="recipients" colspan="3"/>
+                <field name="use_domain_builder" colspan="3"/>
+                <field name="build_domain" widget="char_domain" colspan="3"
+                       options="{'model': 'res.users', 'no_create': True}"
+                       attrs="{'invisible': [('use_domain_builder','=', False)]}"/>
+                <field name="domain" colspan="6"
+                       attrs="{'invisible': [('use_domain_builder','!=', False)]}"/>
               </group>
             </sheet>
           </form>

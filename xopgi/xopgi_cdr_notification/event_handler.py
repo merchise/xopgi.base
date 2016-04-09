@@ -52,37 +52,50 @@ class EventHandler(models.Model):
     subscribed_events = fields.Many2many('cdr.system.event')
     action = fields.Selection([(k, v['name']) for k, v in ACTIONS.items()])
     recipients = fields.Many2many('res.users', compute='get_recipients')
-    domain = fields.Text(
-        help='Odoo domain to search recipients.',
-        default='''
-        #  Odoo domain like: [('field_name', 'operator', value)]
-        #  or python code to return on result var a odoo domain like
-        #  if uid != 1:
-        #      result = [('id', '=', uid)]
-        #  else:
-        #      result = [('id', '!=', 1)]
-        #  self, env, model, context and group are able to use:
-        #  self => active model (on new api).
-        #  context => active context.''')
+    use_domain_builder = fields.Boolean(default=True)
+    domain = fields.Text(help='Odoo domain to search recipients.')
+    build_domain = fields.Char(help='Odoo domain to search recipients.',
+                               string='Domain')
     notification_text = fields.Text(translate=True, required=True)
     active = fields.Boolean(default=True)
     event_raise = fields.Boolean(default=True)
     continue_raising = fields.Boolean(default=True)
     stop_raising = fields.Boolean()
 
+    def get_domain(self):
+        domain = self.domain or self.build_domain
+        if not domain or all(l.strip().startswith('#')
+                             for l in domain.splitlines()
+                             if l.strip()):
+            domain = []
+        elif any(l.strip().startswith('result')
+                 for l in domain.splitlines()):
+            domain = evaluate(self.env, domain, mode='exec')
+        else:
+            domain = evaluate(self.env, domain)
+        return domain
+
+    @api.onchange('use_domain_builder')
+    def onchange_use_domain_builder(self):
+        if self.use_domain_builder:
+            domain = self.get_domain()
+            domain = (str(domain) if domain else '')
+            self.build_domain = domain
+            self.domain = ''
+        else:
+            self.domain = (self.build_domain or '') + _('''
+#  Odoo domain like: [('field_name', 'operator', value)]
+#  or python code to return on result var a odoo domain like
+#  if uid != 1:
+#      result = [('id', '=', uid)]
+#  else:
+#      result = [('id', '!=', 1)]
+#  env are able to use.''')
+
     def get_recipients(self):
         for handler in self:
-            if not handler.domain or all(l.strip().startswith('#')
-                                         for l in handler.domain.splitlines()
-                                         if l.strip()):
-                domain = None
-            elif any(l.strip().startswith('result')
-                     for l in handler.domain.splitlines()):
-                domain = evaluate(self.env, handler.domain, mode='exec')
-            else:
-                domain = evaluate(self.env, handler.domain)
-            if domain:
-                handler.recipients = self.env['res.users'].search(domain)
+            domain = handler.get_domain()
+            handler.recipients = self.env['res.users'].search(domain)
 
     def do_chat_notify(self):
         for recipient in self.recipients:
