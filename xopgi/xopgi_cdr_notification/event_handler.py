@@ -70,9 +70,9 @@ class EventHandler(models.Model):
             domain = []
         elif any(l.strip().startswith('result')
                  for l in domain.splitlines()):
-            domain = evaluate(self.env, domain, mode='exec')
+            domain = evaluate(domain, mode='exec', env=self.env, uid=self._uid)
         else:
-            domain = evaluate(self.env, domain)
+            domain = evaluate(domain, env=self.env, uid=self._uid)
         return domain
 
     @api.onchange('use_domain_builder')
@@ -90,7 +90,7 @@ class EventHandler(models.Model):
 #      result = [('id', '=', uid)]
 #  else:
 #      result = [('id', '!=', 1)]
-#  env are able to use.''')
+#  env and uid are able to use.''')
 
     def get_recipients(self):
         for handler in self:

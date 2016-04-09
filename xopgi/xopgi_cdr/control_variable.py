@@ -154,7 +154,7 @@ class ControlVariableTemplate(models.Model):
         code = self.definition
         if self.args_need:
             try:
-                kwargs = evaluate(self.env, kwargs_str)
+                kwargs = evaluate(kwargs_str)
                 code = code.format(**kwargs)
             except Exception, e:
                 logger.exception(
@@ -164,5 +164,5 @@ class ControlVariableTemplate(models.Model):
                 logger.exception(e)
                 code = None
         if code:
-            return evaluate(self.env, code, self.eval_mode, now=now)
+            return evaluate(code, self.eval_mode, now=now, env=self.env)
         return None
