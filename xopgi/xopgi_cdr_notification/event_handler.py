@@ -33,18 +33,8 @@ ACTIONS = {
 get_method = lambda action: ACTIONS[action]['action']
 
 
-#  TODO: move to a new module.
 class EventHandler(models.Model):
-    ''' Generic cdr event definition. For specifics cdr events
-    implementations just need to inherit by delegation of this model and
-    override evaluate method.
-
-    Recommendation: define _description for specific event implementations
-    to allow correct user identification.
-
-    '''
     _name = 'cdr.event.basic.handler'
-    _description = "Generic CDR event handler"
 
     name = fields.Char(translate=True, required=True)
     priority = fields.Selection(PRIORITIES, default=PRIORITIES[0][0],
