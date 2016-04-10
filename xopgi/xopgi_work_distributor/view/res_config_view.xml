@@ -59,15 +59,33 @@
                              'required': [('strategy_by_group','=', True)]}"
                          domain="[('ttype', '=', 'many2one'),
                               ('model_id','=', model)]"/>
-                  <label for="domain" colspan="4"/>
-                  <field name="domain" required="1" colspan="4" nolabel="1"/>
+                  <label for="domain"/>
+                  <div attrs="{'invisible': [('destination_model','=', False)]}">
+                    (<field name="use_domain_builder" nolabel="1"/>
+                    <label for="use_domain_builder"/>)
+                  </div>
+                  <field name="destination_model" invisible="1"/>
+                  <field name="domain" colspan="4" nolabel="1"
+                         attrs="{'invisible': [('use_domain_builder','=', True)],
+                                 'required': [('use_domain_builder','!=', True)],}"/>
+                  <field name="build_domain" nolabel="1" widget="char_domain"
+                         options="{'model_field': 'destination_model'}"
+                         attrs="{'invisible':
+                                    ['|', ('use_domain_builder','!=', True),
+                                     ('destination_model', '=', False)],
+                                 'required':
+                                    [('use_domain_builder','=', True),
+                                     ('destination_model', '!=', False)],}"/>
                 </group>
               </page>
               <page string="Strategies">
                 <group colspan="4" col="4">
                   <field name="strategy_ids" nolabel="1" colspan="4"/>
                   <field name="other_fields"/>
-                  <field name="effort_domain"/>
+                  <field name="model_name" invisible="1"/>
+                  <field name="effort_domain" widget="char_domain"
+                         options="{'model_field': 'model_name'}"
+                         attrs="{'invisible': [('model_name','=', False)]}"/>
                 </group>
               </page>
             </notebook>

@@ -20,7 +20,7 @@
     'description': """
     Generic automatic work distribution for any model
     """,
-    'depends': ['base'],
+    'depends': ['base', 'web'],
     'data': [
         "security/security.xml",
         "view/res_config_view.xml",
