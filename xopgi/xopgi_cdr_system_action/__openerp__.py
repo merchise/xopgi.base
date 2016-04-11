@@ -1,28 +1,30 @@
-# -*- coding: utf-8 -*-
+# -*- encoding: utf-8 -*-
 # ---------------------------------------------------------------------
-# xopgi_crm_stage.__openerp__.py
+# xopgi_cdr_system_action.__openerp__
 # ---------------------------------------------------------------------
-# Copyright (c) 2013-2016 Merchise Autrement
+# Copyright (c) 2016 Merchise Autrement and Contributors
 # All rights reserved.
 #
 # This is free software; you can redistribute it and/or modify it under the
 # terms of the LICENCE attached (see LICENCE file) in the distribution
 # package.
 #
-# @created: 2015-12-12
+# Created on 2016-04-10
 
 {
-    'name': 'Extension for crm stage model',
+    'name': 'Vigilant Server Action handler',
     'version': '1.0',
     'category': 'Hidden',
     'description': """
-Set start and stop flow fields to crm.stage model.
+Allow to create cdr event handlers to execute server actions.
 
-    """,
-    "author": "Merchise Autrement",
-    "website": "http://xhg.ca.merchise.org/addons/xopgi_crm_stage",
-    'depends': ['xopgi_stage_ext', 'crm'],
-    'data': ['views/crm.xml'],
+    """, "author": "Merchise Autrement",
+    "website": "http://xhg.ca.merchise.org/addons/xopgi_cdr_system_action",
+    'depends': ['xopgi_cdr'],
+    'data': [
+        'security/security.xml',
+        'views/event_handler_views.xml',
+    ],
 
     # MIGRATION POLICY: All addons are not included until someone work on them
     # and upgrade them.

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<openerp>
+    <data>
+      <record id="view_cdr_action_event_handler_tree" model="ir.ui.view">
+        <field name="name">cdr.event.action.handler.tree</field>
+        <field name="model">cdr.event.action.handler</field>
+        <field name="arch" type="xml">
+          <tree string="Event handler">
+            <field name="name"/>
+            <field name="action"/>
+            <field name="event_raise"/>
+            <field name="continue_raising"/>
+            <field name="stop_raising"/>
+          </tree>
+        </field>
+      </record>
+
+      <record id="view_cdr_action_event_handler_form" model="ir.ui.view">
+        <field name="name">cdr.event.action.handler.form</field>
+        <field name="model">cdr.event.action.handler</field>
+        <field name="arch" type="xml">
+          <form string="Event handler" version="7.0">
+            <sheet>
+              <div class="oe_title">
+                <label for="name" class="oe_edit_only"/>
+                <h1>
+                  <field name="name"/>
+                </h1>
+              </div>
+              <group colspan="6" col="6">
+                <field name="subscribed_events" colspan="6"/>
+                <field name="event_raise" colspan="2"/>
+                <field name="continue_raising" colspan="2"/>
+                <field name="stop_raising" colspan="2"/>
+                <field name="action" widget="many2onebutton"/>
+              </group>
+            </sheet>
+          </form>
+        </field>
+      </record>
+
+      <record id="view_cdr_action_event_handler_search" model="ir.ui.view">
+        <field name="name">cdr.event.action.handler.search</field>
+        <field name="model">cdr.event.action.handler</field>
+        <field name="type">search</field>
+        <field name="priority" eval="8"/>
+        <field name="arch" type="xml">
+          <search string="Event handler">
+            <field name="name" select="True"/>
+            <field name="subscribed_events" select="True"/>
+            <field name="event_raise" select="True"/>
+            <field name="continue_raising" select="True"/>
+            <field name="stop_raising" select="True"/>
+          </search>
+        </field>
+      </record>
+
+      <record model="ir.actions.act_window"
+              id="act_open_cdr_action_event_handler_view">
+        <field name="name">Event handler (Actions)</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">cdr.event.action.handler</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_cdr_action_event_handler_search"/>
+        <field name="domain">[]</field>
+        <field name="context">{}</field>
+      </record>
+
+      <menuitem id="menu_cdr_action_event_handler2"
+                parent="xopgi_cdr.cdr_menu"
+                sequence="80"
+                action="act_open_cdr_action_event_handler_view"/>
+    </data>
+</openerp>

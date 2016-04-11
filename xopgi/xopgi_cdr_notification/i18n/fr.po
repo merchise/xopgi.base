@@ -60,8 +60,8 @@ msgstr "Domain"
 #: view:cdr.event.basic.handler:xopgi_cdr_notification.view_cdr_event_handler_tree
 #: model:ir.actions.act_window,name:xopgi_cdr_notification.act_open_cdr_event_handler_view
 #: model:ir.ui.menu,name:xopgi_cdr_notification.menu_cdr_event_handler
-msgid "Event handler"
-msgstr "Event handler"
+msgid "Event handler (Notifications)"
+msgstr "Event handler (Notifications)"
 
 #. module: xopgi_cdr_notification
 #: field:cdr.event.basic.handler,event_raise:0

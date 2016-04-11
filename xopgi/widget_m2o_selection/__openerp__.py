@@ -14,5 +14,9 @@ Many2One Selection Widget.
     'qweb': [
         'static/src/xml/many2one_selection.xml',
     ],
-    'auto_install': True
+    'auto_install': True,
+
+    # MIGRATION POLICY: All addons are not included until someone work on them
+    # and upgrade them.
+    'installable': (8, 0) <= ODOO_VERSION_INFO < (9, 0),   # noqa
 }

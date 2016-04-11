@@ -52,7 +52,7 @@ def get_free_names(expr, debug=False):
     return detector.freevars
 
 
-def evaluate(env, expression, mode='eval', **kwargs):
+def evaluate(expression, mode='eval', **kwargs):
     #  Import some datetime tools to allow it use on variable and evidences
     #  definitions
     from xoeuf.tools import (

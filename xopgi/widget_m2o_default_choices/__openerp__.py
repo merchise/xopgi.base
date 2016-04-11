@@ -31,5 +31,10 @@ Usage:
     'data': [
         'views/many2one_default_choices.xml',
     ],
-    'auto_install': False
+    'auto_install': False,
+
+    # MIGRATION POLICY: All addons are not included until someone work on them
+    # and upgrade them.
+    'installable': (8, 0) <= ODOO_VERSION_INFO < (9, 0),   # noqa
+
 }

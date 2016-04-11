@@ -1,6 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
   <data>
+    <record id="group_cdr_manager" model="res.groups">
+      <field name="name">CDR Manager</field>
+      <field name="category_id" ref="base.module_category_tools"/>
+    </record>
+
+    <record id="xopgi_cdr_var_template_acl_public" model="ir.model.access">
+      <field name="name">xopgi.cdr_var_template.acl.public</field>
+      <field name="model_id"
+             ref="xopgi_cdr.model_cdr_control_variable_template"/>
+      <field name="group_id" ref="base.group_user"/>
+      <field name="perm_read" eval="1"/>
+      <field name="perm_create" eval="0"/>
+      <field name="perm_write" eval="0"/>
+      <field name="perm_unlink" eval="0"/>
+    </record>
+
+    <record id="xopgi_cdr_var_template_acl_private" model="ir.model.access">
+      <field name="name">xopgi.cdr_var_template.acl.private</field>
+      <field name="model_id"
+             ref="xopgi_cdr.model_cdr_control_variable_template"/>
+      <field name="group_id" ref="base.group_system"/>
+      <field name="perm_read" eval="1"/>
+      <field name="perm_create" eval="1"/>
+      <field name="perm_write" eval="1"/>
+      <field name="perm_unlink" eval="1"/>
+    </record>
+
+    <record id="xopgi_cdr_var_template_acl_private2" model="ir.model.access">
+      <field name="name">xopgi.cdr_var_template.acl.private2</field>
+      <field name="model_id"
+             ref="xopgi_cdr.model_cdr_control_variable_template"/>
+      <field name="group_id" ref="group_cdr_manager"/>
+      <field name="perm_read" eval="1"/>
+      <field name="perm_create" eval="1"/>
+      <field name="perm_write" eval="1"/>
+      <field name="perm_unlink" eval="1"/>
+    </record>
+
     <record id="xopgi_cdr_control_var_acl_public" model="ir.model.access">
       <field name="name">xopgi.cdr_control_var.acl.public</field>
       <field name="model_id"
@@ -23,6 +61,17 @@
       <field name="perm_unlink" eval="1"/>
     </record>
 
+    <record id="xopgi_cdr_control_var_acl_private2" model="ir.model.access">
+      <field name="name">xopgi.cdr_control_var.acl.private2</field>
+      <field name="model_id"
+             ref="xopgi_cdr.model_cdr_control_variable"/>
+      <field name="group_id" ref="group_cdr_manager"/>
+      <field name="perm_read" eval="1"/>
+      <field name="perm_create" eval="1"/>
+      <field name="perm_write" eval="1"/>
+      <field name="perm_unlink" eval="1"/>
+    </record>
+
     <record id="xopgi_cdr_identifier_acl_public" model="ir.model.access">
       <field name="name">xopgi.cdr_identifier.acl.public</field>
       <field name="model_id"
@@ -39,6 +88,149 @@
       <field name="model_id"
              ref="xopgi_cdr.model_cdr_identifier"/>
       <field name="group_id" ref="base.group_system"/>
+      <field name="perm_read" eval="1"/>
+      <field name="perm_create" eval="1"/>
+      <field name="perm_write" eval="1"/>
+      <field name="perm_unlink" eval="1"/>
+    </record>
+
+    <record id="xopgi_cdr_identifier_acl_private2" model="ir.model.access">
+      <field name="name">xopgi.cdr_identifier.acl.private</field>
+      <field name="model_id"
+             ref="xopgi_cdr.model_cdr_identifier"/>
+      <field name="group_id" ref="group_cdr_manager"/>
+      <field name="perm_read" eval="1"/>
+      <field name="perm_create" eval="1"/>
+      <field name="perm_write" eval="1"/>
+      <field name="perm_unlink" eval="1"/>
+    </record>
+
+    <record id="xopgi_cdr_evidence_acl_public" model="ir.model.access">
+      <field name="name">xopgi.cdr_evidence.acl.public</field>
+      <field name="model_id"
+             ref="xopgi_cdr.model_cdr_evidence"/>
+      <field name="group_id" ref="base.group_user"/>
+      <field name="perm_read" eval="1"/>
+      <field name="perm_create" eval="0"/>
+      <field name="perm_write" eval="0"/>
+      <field name="perm_unlink" eval="0"/>
+    </record>
+
+    <record id="xopgi_cdr_evidence_acl_private" model="ir.model.access">
+      <field name="name">xopgi.cdr_evidence.acl.private</field>
+      <field name="model_id"
+             ref="xopgi_cdr.model_cdr_evidence"/>
+      <field name="group_id" ref="base.group_system"/>
+      <field name="perm_read" eval="1"/>
+      <field name="perm_create" eval="1"/>
+      <field name="perm_write" eval="1"/>
+      <field name="perm_unlink" eval="1"/>
+    </record>
+
+    <record id="xopgi_cdr_evidence_acl_private2" model="ir.model.access">
+      <field name="name">xopgi.cdr_evidence.acl.private2</field>
+      <field name="model_id"
+             ref="xopgi_cdr.model_cdr_evidence"/>
+      <field name="group_id" ref="group_cdr_manager"/>
+      <field name="perm_read" eval="1"/>
+      <field name="perm_create" eval="1"/>
+      <field name="perm_write" eval="1"/>
+      <field name="perm_unlink" eval="1"/>
+    </record>
+
+    <record id="xopgi_cdr_system_event_acl_public" model="ir.model.access">
+      <field name="name">xopgi.cdr_system_event.acl.public</field>
+      <field name="model_id"
+             ref="xopgi_cdr.model_cdr_system_event"/>
+      <field name="group_id" ref="base.group_user"/>
+      <field name="perm_read" eval="1"/>
+      <field name="perm_create" eval="0"/>
+      <field name="perm_write" eval="0"/>
+      <field name="perm_unlink" eval="0"/>
+    </record>
+
+    <record id="xopgi_cdr_system_event_acl_private" model="ir.model.access">
+      <field name="name">xopgi.cdr_system_event.acl.private</field>
+      <field name="model_id"
+             ref="xopgi_cdr.model_cdr_system_event"/>
+      <field name="group_id" ref="base.group_system"/>
+      <field name="perm_read" eval="1"/>
+      <field name="perm_create" eval="1"/>
+      <field name="perm_write" eval="1"/>
+      <field name="perm_unlink" eval="1"/>
+    </record>
+
+    <record id="xopgi_cdr_system_event_acl_private2" model="ir.model.access">
+      <field name="name">xopgi.cdr_system_event.acl.private2</field>
+      <field name="model_id"
+             ref="xopgi_cdr.model_cdr_system_event"/>
+      <field name="group_id" ref="group_cdr_manager"/>
+      <field name="perm_read" eval="1"/>
+      <field name="perm_create" eval="1"/>
+      <field name="perm_write" eval="1"/>
+      <field name="perm_unlink" eval="1"/>
+    </record>
+
+    <record id="xopgi_cdr_basic_event_acl_public" model="ir.model.access">
+      <field name="name">xopgi.cdr_basic_event.acl.public</field>
+      <field name="model_id"
+             ref="xopgi_cdr.model_cdr_basic_event"/>
+      <field name="group_id" ref="base.group_user"/>
+      <field name="perm_read" eval="1"/>
+      <field name="perm_create" eval="0"/>
+      <field name="perm_write" eval="0"/>
+      <field name="perm_unlink" eval="0"/>
+    </record>
+
+    <record id="xopgi_cdr_basic_event_acl_private" model="ir.model.access">
+      <field name="name">xopgi.cdr_basic_event.acl.private</field>
+      <field name="model_id"
+             ref="xopgi_cdr.model_cdr_basic_event"/>
+      <field name="group_id" ref="base.group_system"/>
+      <field name="perm_read" eval="1"/>
+      <field name="perm_create" eval="1"/>
+      <field name="perm_write" eval="1"/>
+      <field name="perm_unlink" eval="1"/>
+    </record>
+
+    <record id="xopgi_cdr_basic_event_acl_private2" model="ir.model.access">
+      <field name="name">xopgi.cdr_basic_event.acl.private2</field>
+      <field name="model_id"
+             ref="xopgi_cdr.model_cdr_basic_event"/>
+      <field name="group_id" ref="group_cdr_manager"/>
+      <field name="perm_read" eval="1"/>
+      <field name="perm_create" eval="1"/>
+      <field name="perm_write" eval="1"/>
+      <field name="perm_unlink" eval="1"/>
+    </record>
+
+    <record id="xopgi_cdr_history_acl_public" model="ir.model.access">
+      <field name="name">xopgi.cdr_history.acl.public</field>
+      <field name="model_id"
+             ref="xopgi_cdr.model_cdr_history"/>
+      <field name="group_id" ref="base.group_user"/>
+      <field name="perm_read" eval="1"/>
+      <field name="perm_create" eval="0"/>
+      <field name="perm_write" eval="0"/>
+      <field name="perm_unlink" eval="0"/>
+    </record>
+
+    <record id="xopgi_cdr_history_acl_private" model="ir.model.access">
+      <field name="name">xopgi.cdr_history.acl.private</field>
+      <field name="model_id"
+             ref="xopgi_cdr.model_cdr_history"/>
+      <field name="group_id" ref="base.group_system"/>
+      <field name="perm_read" eval="1"/>
+      <field name="perm_create" eval="1"/>
+      <field name="perm_write" eval="1"/>
+      <field name="perm_unlink" eval="1"/>
+    </record>
+
+    <record id="xopgi_cdr_history_acl_private2" model="ir.model.access">
+      <field name="name">xopgi.cdr_history.acl.private2</field>
+      <field name="model_id"
+             ref="xopgi_cdr.model_cdr_history"/>
+      <field name="group_id" ref="group_cdr_manager"/>
       <field name="perm_read" eval="1"/>
       <field name="perm_create" eval="1"/>
       <field name="perm_write" eval="1"/>

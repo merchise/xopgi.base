@@ -63,8 +63,7 @@ class Evidence(models.Model):
         return {e.name: e.bool_value for e in self}
 
     def _evaluate(self):
-        return evaluate(self.env, self.definition,
-                        **self.control_vars.get_value())
+        return evaluate(self.definition, **self.control_vars.get_value())
 
     def evaluate_bool_expresion(self, definition_result):
         return bool(safe_eval(
