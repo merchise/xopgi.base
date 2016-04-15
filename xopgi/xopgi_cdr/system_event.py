@@ -148,6 +148,7 @@ class SystemEvent(models.Model):
         return dict(next_call=next_call)
 
     def evaluate(self, cycle):
+        self.evaluate_dependences(cycle)
         for event in self:
             # call specific event evaluate method to get each
             # corresponding behavior.
