@@ -236,5 +236,38 @@
       <field name="perm_write" eval="1"/>
       <field name="perm_unlink" eval="1"/>
     </record>
+
+    <record id="xopgi_cdr_evaluation_cycle_acl_public" model="ir.model.access">
+      <field name="name">xopgi.cdr.evaluation.cycle.acl.public</field>
+      <field name="model_id"
+             ref="xopgi_cdr.model_cdr_evaluation_cycle"/>
+      <field name="group_id" ref="base.group_user"/>
+      <field name="perm_read" eval="1"/>
+      <field name="perm_create" eval="0"/>
+      <field name="perm_write" eval="0"/>
+      <field name="perm_unlink" eval="0"/>
+    </record>
+
+    <record id="xopgi_cdr_evaluation_cycle_acl_private" model="ir.model.access">
+      <field name="name">xopgi.cdr.evaluation.cycle.acl.private</field>
+      <field name="model_id"
+             ref="xopgi_cdr.model_cdr_evaluation_cycle"/>
+      <field name="group_id" ref="base.group_system"/>
+      <field name="perm_read" eval="1"/>
+      <field name="perm_create" eval="1"/>
+      <field name="perm_write" eval="1"/>
+      <field name="perm_unlink" eval="1"/>
+    </record>
+
+    <record id="xopgi_cdr_evaluation_cycle_acl_private2" model="ir.model.access">
+      <field name="name">xopgi.cdr.evaluation.cycle.acl.private2</field>
+      <field name="model_id"
+             ref="xopgi_cdr.model_cdr_evaluation_cycle"/>
+      <field name="group_id" ref="group_cdr_manager"/>
+      <field name="perm_read" eval="1"/>
+      <field name="perm_create" eval="1"/>
+      <field name="perm_write" eval="1"/>
+      <field name="perm_unlink" eval="1"/>
+    </record>
   </data>
 </openerp>

@@ -47,7 +47,7 @@ EVENT_SIGNALS = {
 }
 
 
-class CDRAgent(models.Model):
+class CDRAgent(models.TransientModel):
     _name = 'cdr.agent'
 
     @api.model
