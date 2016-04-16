@@ -65,6 +65,13 @@ class EventHandler(models.Model):
             domain = evaluate(domain, env=self.env, uid=self._uid)
         return domain
 
+    @api.depends('domain', 'action', 'active', 'notification_text',
+                 'subscribed_events')
+    def reset_js_notifications(self):
+        # remove related notifications when handler change.
+        self.env['cdr.js.notification'].search(
+            [('handler_id', 'in', self.ids)]).unlink()
+
     @api.onchange('use_domain_builder')
     def onchange_use_domain_builder(self):
         if self.use_domain_builder:
