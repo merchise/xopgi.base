@@ -46,12 +46,17 @@
                 <field name="action" colspan="3"/>
                 <field name="priority" colspan="3"/>
                 <field name="notification_text" colspan="6"/>
-                <field name="use_domain_builder" colspan="3"/>
-                <field name="build_domain" widget="char_domain" colspan="3"
+                <label for="domain"/><div class="oe_inline">(
+                <field name="use_domain_builder" class="oe_inline" nolabel="1"/>
+                <label for="use_domain_builder"/>)</div>
+                <field name="build_domain" widget="char_domain"
+                       class="oe_inline"
                        options="{'model': 'res.users', 'no_create': True}"
                        attrs="{'invisible': [('use_domain_builder','=', False)]}"/>
-                <field name="domain" colspan="6"
+                <field name="domain" class="oe_inline"
                        attrs="{'invisible': [('use_domain_builder','!=', False)]}"/>
+                <newline/>
+                <field name="recipients" colspan="6"/>
               </group>
             </sheet>
           </form>
