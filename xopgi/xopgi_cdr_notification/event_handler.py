@@ -88,19 +88,21 @@ class EventHandler(models.Model):
             handler.recipients = self.env['res.users'].search(domain)
 
     def do_chat_notify(self):
+        vigilant = self.env.ref('xopgi_cdr_notification.vigilant_user')
+        session_ids = self.env['im_chat.session'].search(
+            [('user_ids', '=', vigilant.id)])
         for recipient in self.recipients:
             # override self to get recipient right lang translation
             self = self.with_context(lang=recipient.lang)
-            session_id = self.env['im_chat.session'].search(
-                [('user_ids', '=', recipient.id)]).filtered(
-                lambda s: len(s.user_ids) == 1)
+            session_id = session_ids.filtered(
+                lambda s: recipient in s.user_ids and len(s.user_ids) == 2)
             if not session_id:
                 session_id = self.env['im_chat.session'].create(
-                    {'user_ids': [(6, 0, recipient.ids)]})
+                    {'user_ids': [(6, 0, (recipient.id, vigilant.id))]})
             notification_text = "%s: \n%s" % (
                 _({k: v for k, v in PRIORITIES}[self.priority]),
                 self.notification_text)
-            self.env['im_chat.message'].post(False, session_id[0].uuid,
+            self.env['im_chat.message'].post(vigilant.id, session_id[0].uuid,
                                              'meta', notification_text)
 
     def do_js_notify(self):
