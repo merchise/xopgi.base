@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+  <t t-name='web_notify_title'>
+    <span t-attf-class="e_web_id_#{id}">
+      <t t-raw="title"/>
+    </span>
+  </t>
+  <t t-name='web_notify_body'>
+    <span t-raw="message"/>
+    <br/>
+    <br t-if="action"/>
+    <button class='web_notification_action oe_highlight oe_form oe_button'
+            t-if="action">
+      <span>Ok</span>
+    </button>
+  </t>
+</template>

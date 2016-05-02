@@ -65,6 +65,13 @@ class EventHandler(models.Model):
             domain = evaluate(domain, env=self.env, uid=self._uid)
         return domain
 
+    @api.depends('domain', 'action', 'active', 'notification_text',
+                 'subscribed_events')
+    def reset_js_notifications(self):
+        # remove related notifications when handler change.
+        self.env['cdr.js.notification'].search(
+            [('handler_id', 'in', self.ids)]).unlink()
+
     @api.onchange('use_domain_builder')
     def onchange_use_domain_builder(self):
         if self.use_domain_builder:
@@ -88,24 +95,39 @@ class EventHandler(models.Model):
             handler.recipients = self.env['res.users'].search(domain)
 
     def do_chat_notify(self):
+        vigilant = self.env.ref('xopgi_cdr_notification.vigilant_user')
+        session_ids = self.env['im_chat.session'].search(
+            [('user_ids', '=', vigilant.id)])
         for recipient in self.recipients:
             # override self to get recipient right lang translation
             self = self.with_context(lang=recipient.lang)
-            session_id = self.env['im_chat.session'].search(
-                [('user_ids', '=', recipient.id)]).filtered(
-                lambda s: len(s.user_ids) == 1)
+            session_id = session_ids.filtered(
+                lambda s: recipient in s.user_ids and len(s.user_ids) == 2)
             if not session_id:
                 session_id = self.env['im_chat.session'].create(
-                    {'user_ids': [(6, 0, recipient.ids)]})
+                    {'user_ids': [(6, 0, (recipient.id, vigilant.id))]})
             notification_text = "%s: \n%s" % (
                 _({k: v for k, v in PRIORITIES}[self.priority]),
                 self.notification_text)
-            self.env['im_chat.message'].post(False, session_id[0].uuid,
+            self.env['im_chat.message'].post(vigilant.id, session_id[0].uuid,
                                              'meta', notification_text)
 
     def do_js_notify(self):
-        self.env['cdr.js.notification'].send(
-            handler_id=self.id, recipients=self.recipients)
+        notification = self.env['xopgi.web.notification']
+        title = u"""
+        <span class="e_cdr_{priority}">
+          {label}:
+        </span>
+        {name}
+        """
+        for user in self.recipients:
+            notification.notify(
+                uid=user.id,
+                title=title.format(
+                    priority=self.priority,
+                    label=_({k: v for k, v in PRIORITIES}[self.priority]),
+                    name=self.name),
+                body=self.notification_text)
 
     @signals.receiver(EVENT_SIGNALS.values())
     def do_notify(self, signal):
@@ -119,63 +141,3 @@ class EventHandler(models.Model):
             action_method = getattr(handler, get_method(handler.action),
                                     NotImplemented)
             action_method()
-
-    @api.multi
-    def message_get_default_recipients(self):
-        '''This method is used to get the default recipients of the mail
-        notification. It is called from email.template model.
-
-        '''
-        res = {}
-        for handler in self:
-            partner_ids = [user.partner_id.id
-                           for user in handler.recipients
-                           if user.partner_id]
-            res[handler.id] = dict(
-                partner_ids=partner_ids,
-                email_to=False,
-                email_cc=False
-            )
-        return res
-
-
-class JSNotification(models.TransientModel):
-    _name = 'cdr.js.notification'
-
-    handler_id = fields.Many2one('cdr.event.basic.handler', required=True)
-    title = fields.Char(related='handler_id.name')
-    message = fields.Text(related='handler_id.notification_text')
-    priority = fields.Selection(PRIORITIES, related='handler_id.priority')
-    user_id = fields.Many2one('res.users')
-    state = fields.Selection([('new', 'New'), ('open', 'Open')], default='new')
-
-    def __init__(self, pool, cr):
-        super(JSNotification, self).__init__(pool, cr)
-        #  Ensure 24 hours of js notifications life time.
-        JSNotification._transient_max_hours = 24
-        JSNotification._transient_max_count = None
-
-    def send(self, handler_id, recipients):
-        #  Only create if it not exist.
-        self.search([('handler_id', '=', handler_id),
-                     ('user_id', 'not in', recipients.ids)]).unlink()
-        for user in recipients:
-            self.create_or_renew(handler_id, user.id)
-
-    def create_or_renew(self, handler_id, user_id):
-        res = self.search([('handler_id', '=', handler_id),
-                           ('user_id', '=', user_id)])
-        if res and res.state != 'new':
-            res.state = 'new'
-        return res or self.create(dict(handler_id=handler_id, user_id=user_id))
-
-    @api.model
-    def get_notifications(self):
-        notifications = self.search([('user_id', '=', self._uid)])
-        priority = {k: v for k, v in PRIORITIES}
-        res = [{'title': item.title, 'message': item.message,
-                'priority': item.priority,
-                'label': _(priority.get(item.priority, 'Information'))}
-               for item in notifications]
-        notifications.write({'state': 'open'})
-        return res

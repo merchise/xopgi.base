@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 # ---------------------------------------------------------------------
-# xopgi_cdr_notification.__openerp__
+# xopgi_web_notification.__openerp__
 # ---------------------------------------------------------------------
 # Copyright (c) 2016 Merchise Autrement and Contributors
 # All rights reserved.
@@ -9,24 +9,22 @@
 # terms of the LICENCE attached (see LICENCE file) in the distribution
 # package.
 #
-# Created on 2016-03-07
+# Created on 2016-04-19
 
 {
-    'name': 'Vigilant Notifications handler',
+    'name': 'Web Notifications',
     'version': '1.0',
     'category': 'Hidden',
     'description': """
-Create a basic event based notification system.
+Create a basic web notification system.
 
     """, "author": "Merchise Autrement",
-    "website": "http://xhg.ca.merchise.org/addons/xopgi_cdr_notification",
-    'depends': ['web', 'xopgi_cdr', 'im_chat', 'xopgi_web_notification'],
+    "website": "http://xhg.ca.merchise.org/addons/xopgi_web_notification",
+    'depends': ['web', 'bus'],
     'data': [
-        'data/vigilant_user.xml',
-        'security/security.xml',
-        'views/event_handler_views.xml',
+        'view.xml',
     ],
-    'qweb': [],
+    'qweb': ['static/src/xml/xopgi_web_notification.xml'],
 
     # MIGRATION POLICY: All addons are not included until someone work on them
     # and upgrade them.

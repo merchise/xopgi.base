@@ -22,5 +22,4 @@ if ODOO_VERSION_INFO < (9, 0):
     # MIGRATION POLICY: All addons are not included until someone work on them
     # and upgrade them.
 
-    from . import controllers  # noqa
     from . import event_handler  # noqa
