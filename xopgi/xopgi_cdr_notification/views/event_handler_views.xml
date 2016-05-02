@@ -7,8 +7,6 @@
         <xpath expr="." position="inside">
           <link rel="stylesheet"
                 href="/xopgi_cdr_notification/static/src/css/xopgi_cdr_notification.css"/>
-          <script type="text/javascript"
-                  src="/xopgi_cdr_notification/static/src/js/xopgi_cdr_notification.js"/>
         </xpath>
       </template>
 
