@@ -115,7 +115,7 @@ class ControlVariable(models.Model):
                 value = var._evaluate(cycle.create_date)
             except Exception, e:
                 logger.exception('Error evaluating control variable '
-                                 '%s.', (self.name,))
+                                 '%s.', (var.name,))
                 logger.exception(e)
             else:
                 var.write(dict(
