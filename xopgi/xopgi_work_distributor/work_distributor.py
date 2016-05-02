@@ -34,28 +34,54 @@ FIELD_NAME_TO_SHOW_ON_WIZARD = \
 
 WIZARD_NAME = 'work.distributor.wizard'
 
+DOMAIN_DEFAULT = '''
+#  Odoo domain like: [('field_name', 'operator', value)]
+#  or python code to return on result var a odoo domain like
+#  if uid != 1:
+#      result = [('id', '=', uid)]
+#  else:
+#      result = [('id', '!=', 1)]
+#  self, env, model, values, context and group are able to use:
+#  self => active model (on new api).
+#  dist_model => work distribution model config entry. (
+#      .destination_field (objective field)
+#      .group_field (field to get group)
+#      .strategy_by_group (if grouping or not)
+#  )
+#  values => python dict to passed to create method.
+#  context => active context.
+#  group => group object from value passed on create method.
+#  E.g: result = ([('id', 'in', group.members_field_name.ids)]
+#                 if group else [])
+'''
+
 
 def _evaluate_domain(dist_model, values):
     ''' Pop user lang information from context to allow put in domain names
     and search always on original text and not on user lang translations.
 
     '''
-    group = False
-    if dist_model.group_field:
-        group = values.get(dist_model.group_field.name, False)
-        if group:
-            group = dist_model.env[dist_model.group_field.relation].browse(
-                group)
-    context = dict(dist_model.env.context)
+    domain = dist_model.domain or dist_model.build_domain
     self = dist_model.env[dist_model.destination_field.relation]
-    if not dist_model.domain or dist_model.domain.strip().startswith('['):
-        domain = safe_eval(dist_model.domain or '[]')
+    context = dict(dist_model.env.context, lang=False)
+    if not domain or all(l.strip().startswith('#')
+                         for l in domain.splitlines()
+                         if l.strip()):
+        domain = []
     else:
-        local_dict = locals()
-        local_dict.update(globals().get('__builtins__', {}))
-        safe_eval(dist_model.domain, local_dict, mode='exec', nocopy=True)
-        domain = local_dict.get('result', [])
-    context.pop('lang', False)
+        group = False
+        if dist_model.group_field:
+            group = values.get(dist_model.group_field.name, False)
+            if group:
+                group = self.browse(group)
+        if any(l.strip().startswith('result')
+               for l in domain.splitlines()):
+            local_dict = locals()
+            local_dict.update(globals().get('__builtins__', {}))
+            safe_eval(domain, local_dict, mode='exec', nocopy=True)
+            domain = local_dict.get('result', [])
+        else:
+            domain = safe_eval(domain)
     return self.with_context(context).search(domain)
 
 
@@ -74,35 +100,25 @@ class WorkDistributionModel(models.Model):
     model = fields.Many2one(
         'ir.model', required=True,
         help='Model where Work Distribution Strategies will be applied.')
+    model_name = fields.Char(related='model.model', readonly=True)
     group_field = fields.Many2one(
         'ir.model.fields', 'Group Field',
         help='many2one field where that it value determine domain of '
              'distribution destination.')
     strategy_by_group = fields.Boolean()
+    use_domain_builder = fields.Boolean()
     domain = fields.Text(
         help='Odoo domain to search in destination_field`s model.',
-        default='''#  Odoo domain like: [('field_name', 'operator', value)]
-#  or python code to return on result var a odoo domain like
-#  if uid != 1:
-#      result = [('id', '=', uid)]
-#  else:
-#      result = [('id', '!=', 1)]
-#  self, env, model, values, context and group are able to use:
-#  self => active model (on new api).
-#  dist_model => work distribution model config entry. (
-#      .destination_field (objective field)
-#      .group_field (field to get group)
-#      .strategy_by_group (if grouping or not)
-#  )
-#  values => python dict to passed to create method.
-#  context => active context.
-#  group => group object from value passed on create method.
-#  E.g: result = ([('id', 'in', group.members_field_name.ids)]
-#                 if group else [])''')
+        default=lambda self: _(DOMAIN_DEFAULT))
+    build_domain = fields.Char(
+        help='Odoo domain to search in destination_field`s model.',
+        string='Domain')
     destination_field = fields.Many2one(
         'ir.model.fields', 'Destination Field', required=True,
         help='Field that it value it will determinate by distribution '
              'strategy apply.')
+    destination_model = fields.Char(related='destination_field.relation',
+                                    readonly=True)
     other_fields = fields.Text(
         'Other fields', help='Python Dictionary with others variables (Keys) '
                              'used on some distribution strategy and '
@@ -119,8 +135,15 @@ class WorkDistributionModel(models.Model):
         [('all', 'Always'), ('no_set', 'When no value set')], default='all')
     effort_domain = fields.Text(help="Odoo domain to use on effort "
                                      "based strategies. \nEg: "
-                                     "[('state','not in',('done','cancel')]",
-                                default='[]')
+                                     "[('state','not in',('done','cancel')]")
+
+    @api.onchange('use_domain_builder')
+    def onchange_use_domain_builder(self):
+        if self.use_domain_builder:
+            self.build_domain = ''
+            self.domain = ''
+        else:
+            self.domain = (self.build_domain or '') + _(DOMAIN_DEFAULT)
 
     @api.constrains('other_fields')
     def _check_other_fields(self):

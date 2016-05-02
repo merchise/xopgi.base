@@ -3,7 +3,7 @@
 # --------------------------------------------------------------------------
 # xopgi_object_merge.__openerp__
 # --------------------------------------------------------------------------
-# Copyright (c) 2014, 2015 Merchise Autrement and Contributors
+# Copyright (c) 2014, 2015, 2016 Merchise Autrement and Contributors
 # All rights reserved.
 #
 # Author: Merchise Autrement
@@ -30,6 +30,10 @@
         "security/security.xml",
     ],
     'demo': [],
-    'installable': True,
+
+    # MIGRATION POLICY: All addons are not included until someone work on them
+    # and upgrade them.
+    'installable': (8, 0) <= ODOO_VERSION_INFO < (9, 0),   # noqa
+
     'aplication': True,
 }

@@ -3,7 +3,7 @@
 # --------------------------------------------------------------------------
 # xopgi_work_distributor.__openerp__
 # --------------------------------------------------------------------------
-# Copyright (c) 2014, 2015 Merchise Autrement and Contributors
+# Copyright (c) 2014, 2015, 2016 Merchise Autrement and Contributors
 # All rights reserved.
 #
 # Author: Merchise Autrement
@@ -20,7 +20,7 @@
     'description': """
     Generic automatic work distribution for any model
     """,
-    'depends': ['base'],
+    'depends': ['base', 'web'],
     'data': [
         "security/security.xml",
         "view/res_config_view.xml",
@@ -28,6 +28,10 @@
         "data/work_distribution_strategies.xml",
     ],
     'demo': [],
-    'installable': True,
+
+    # MIGRATION POLICY: All addons are not included until someone work on them
+    # and upgrade them.
+    'installable': (8, 0) <= ODOO_VERSION_INFO < (9, 0),   # noqa
+
     'aplication': True,
 }

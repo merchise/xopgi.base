@@ -17,6 +17,8 @@ from __future__ import (division as _py3_division,
 
 import ast
 
+from openerp.tools.safe_eval import safe_eval
+
 
 def get_free_names(expr, debug=False):
     '''Detect the names (variable) that are `used free`__ in the 'expr'.
@@ -48,6 +50,25 @@ def get_free_names(expr, debug=False):
     detector = NameDetectorVisitor()
     detector.visit(tree.body)  # Go directly to the body
     return detector.freevars
+
+
+def evaluate(expression, mode='eval', **kwargs):
+    #  Import some datetime tools to allow it use on variable and evidences
+    #  definitions
+    from xoeuf.tools import (
+        date2str, dt2str, localize_datetime, normalize_datetime)  # noqa
+    from datetime import timedelta  # noqa
+    from dateutil.relativedelta import relativedelta  # noqa
+    kwargs = dict(kwargs or {}, date2str=date2str, dt2str=dt2str,
+                  timedelta=timedelta, localize_datetime=localize_datetime,
+                  normalize_datetime=normalize_datetime,
+                  relativedelta=relativedelta)
+    local_dict = dict(locals(), **kwargs)
+    local_dict.update(globals().get('__builtins__', {}))
+    res = safe_eval(expression, local_dict, mode=mode or 'eval', nocopy=True)
+    if mode == 'exec':
+        res = local_dict.get('result', None)
+    return res
 
 
 class NameDetectorVisitor(ast.NodeVisitor):

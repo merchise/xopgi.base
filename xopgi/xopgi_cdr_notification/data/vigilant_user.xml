@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<openerp>
+  <data>
+    <record id="vigilant_user" model="res.users">
+      <field name="login">vigilant</field>
+      <field name="name">vigilant</field>
+      <!--To avoid create a new partner (it crash)-->
+      <field name="partner_id" ref="base.public_partner"/>
+    </record>
+  </data>
+</openerp>
