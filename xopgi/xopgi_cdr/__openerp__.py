@@ -20,7 +20,7 @@ Create bases to allow system event management.
 
     """, "author": "Merchise Autrement",
     "website": "http://xhg.ca.merchise.org/addons/xopgi_cdr",
-    'depends': ['base'],
+    'depends': ['base', 'xopgi_recurrence'],
     'data': [
         'security/security.xml',
         'data/cron.xml',
