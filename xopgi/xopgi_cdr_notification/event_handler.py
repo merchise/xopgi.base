@@ -123,6 +123,7 @@ class EventHandler(models.Model):
         for user in self.recipients:
             notification.notify(
                 uid=user.id,
+                id='cdr_handler_%s' % self.id,
                 title=title.format(
                     priority=self.priority,
                     label=_({k: v for k, v in PRIORITIES}[self.priority]),
