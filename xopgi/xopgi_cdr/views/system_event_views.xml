@@ -11,7 +11,6 @@
             <field name="priority"/>
             <field name="state"/>
             <field name="action"/>
-            <field name="interval" widget="float_time"/>
             <field name="next_call"/>
           </tree>
         </field>
@@ -35,7 +34,6 @@
               <group colspan="4" col="4">
                 <field name="definition" colspan="4"/>
                 <field name="priority"/>
-                <field name="interval" widget="float_time"/>
                 <field name="specific_event"/>
                 <label for="evidences"/>
                 <field name="evidences" colspan="4" nolabel="1"/>
@@ -99,6 +97,106 @@
                 <label for="evidences"/>
                 <field name="evidences" colspan="4" nolabel="1"/>
               </group>
+            </sheet>
+          </form>
+        </field>
+      </record>
+
+      <record id="view_cdr_recurrent_event_form" model="ir.ui.view">
+        <field name="name">cdr.recurrent.event.form</field>
+        <field name="model">cdr.recurrent.event</field>
+        <field name="arch" type="xml">
+          <form string="Recurrent Events">
+            <sheet>
+              <div class="oe_title">
+                <label for="name" class="oe_edit_only"/>
+                <label string="( " class="oe_inline"/>
+                <field name="active" class="oe_inline"/>
+                <label for="active" class="oe_inline" string="Active )"/>
+                <h1 class="oe_inline">
+                  <field name="name"/>
+                </h1>
+              </div>
+              <group colspan="4" col="4">
+                <field name="definition" colspan="4"/>
+                <field name="priority"/>
+                <newline/>
+                <field name="date_from"/>
+                <field name="time" widget="float_time"/>
+              </group>
+              <notebook colspan="4">
+                <page string="Recurrence">
+                  <group col="6" colspan="6" string="Recurrence pattern">
+                    <field name="interval" colspan="1" required="1"/>
+                    <field name="freq" colspan="4" nolabel="1" required="1"/>
+                    <newline/>
+                    <group attrs="{'invisible':
+                                               [('freq', '!=', 'yearly')]}"
+                           col="2"
+                           colspan="2">
+                      <field name="is_easterly" colspan="2"/>
+                      <field name="byeaster" colspan="2"
+                             attrs="{'invisible':
+                                                   [('is_easterly', '=',
+                                                     False)]}"
+                             placeholder="eg: 39 or -2"
+                             help="Count of days from easter, eg: 1(monday after easter) or -2(friday before easter)"/>
+                      <field name="months" colspan="2"
+                             attrs="{'invisible':
+                                                   [('is_easterly', '=',
+                                                     True)]}"/>
+                    </group>
+                    <group attrs="{'invisible':
+                                                   ['|',('freq', 'not in',
+                                                     ['monthly', 'yearly']),
+                                                    ('is_easterly', '=',
+                                                     True)]}" col="2"
+                           colspan="2">
+                      <field name="days_option" colspan="2"/>
+                      <newline/>
+                      <field name="by_week_day" colspan="2"
+                             attrs="{'invisible':
+                                                   [('days_option', '!=',
+                                                     'week_day')]}"/>
+                      <field name="monthly_day" colspan="2"
+                             attrs="{'invisible':
+                                                   [('days_option', '!=',
+                                                     'month_day')]}"
+                             placeholder="eg: 1 or -1 or 15"
+                             help="Days of month, eg: 1(first day) or -1(last day)"/>
+                    </group>
+                    <group attrs="{'invisible':[('freq', '!=',
+                                                     'weekly'), '|', ('freq', '!=',
+                                                     'monthly'), ('days_option', '!=',
+                                                     'week_day'),'|', '|', ('freq', '!=',
+                                                     'yearly'), ('days_option', '!=',
+                                                     'week_day'), ('is_easterly', '!=',
+                                                     False)]}" col="2"
+                           colspan="2">
+                      <field name="mo" colspan="2"/>
+                      <field name="tu" colspan="2"/>
+                      <field name="we" colspan="2"/>
+                      <field name="th" colspan="2"/>
+                      <field name="fr" colspan="2"/>
+                      <field name="sa" colspan="2"/>
+                      <field name="su" colspan="2"/>
+                    </group>
+                  </group>
+                  <group string="Range of recurrence">
+                    <field name="end_type" colspan="3"/>
+                    <newline/>
+                    <field name="count"
+                           attrs="{'invisible': [('end_type', '!=',
+                                                      'count')]}"/>
+                    <field name="until"
+                           attrs="{'invisible': [('end_type', '!=',
+                                                      'until')]}"/>
+                  </group>
+                </page>
+                <page string="Evidences">
+                  <field name="evidences"/>
+                </page>
+              </notebook>
             </sheet>
           </form>
         </field>

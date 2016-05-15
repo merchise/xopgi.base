@@ -11,7 +11,7 @@
             this.options = _.clone(options) || {};
 
             // business
-            var bus = this.bus = new openerp.bus.Bus();
+            var bus = this.bus = openerp.bus.bus;
             bus.on('notification', this, this.on_notification);
         },
 
@@ -20,14 +20,16 @@
             return this._super.apply(this, arguments);
         },
 
-        on_notification: function (notification) {
+        on_notification: function (notifications) {
             var self = this;
-            var channel = notification[0];
-            var message = notification[1];
+            _.each(notifications, function (notification) {
+                var channel = notification[0];
+                var message = notification[1];
 
-            if (Array.isArray(channel) && (channel[1] === 'res_user_notify' || channel[1] === 'res_user_warn')) {
-                self.received_message(channel[1], message);
-            }
+                if (Array.isArray(channel) && (channel[1] === 'res_user_notify' || channel[1] === 'res_user_warn')) {
+                    self.received_message(channel[1], message);
+                }
+            });
         },
 
         received_message: function (channel, message) {
@@ -35,7 +37,6 @@
                 a,
                 notif_box = $.find(".e_web_id_" + message.id);
             if (!notif_box.length) {
-                console.log(message);
                 var title = QWeb.render('web_notify_title', {
                     'title': message.title,
                     'id': message.id
