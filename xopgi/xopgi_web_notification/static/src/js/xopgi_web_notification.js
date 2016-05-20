@@ -1,23 +1,15 @@
-(function () {
-    "use strict";
+openerp.xopgi_web_notification = function (instance) {
 
     var QWeb = openerp.qweb;
-    var notification_bus = openerp.notification_bus = {};
 
-    notification_bus.bus = openerp.Widget.extend({
+    instance.web.WebClient = instance.web.WebClient.extend({
 
         init: function (parent, options) {
             this._super(parent);
             this.options = _.clone(options) || {};
 
-            // business
-            var bus = this.bus = openerp.bus.bus;
+            var bus = this.notification_bus = openerp.bus.bus;
             bus.on('notification', this, this.on_notification);
-        },
-
-        start: function () {
-            this.bus.start_polling();
-            return this._super.apply(this, arguments);
         },
 
         on_notification: function (notifications) {
@@ -36,53 +28,51 @@
             var self = this,
                 a,
                 notif_box = $.find(".e_web_id_" + message.id);
-            if (!notif_box.length) {
-                var title = QWeb.render('web_notify_title', {
-                    'title': message.title,
-                    'id': message.id
-                });
-                var body = QWeb.render('web_notify_body', {
-                    'message': message.body
-                });
-                if (channel == 'res_user_notify') {
-                    a = openerp.client.do_notify(title, body, true);
-                }
-                else {
-                    a = openerp.client.do_warn(title, body, true);
-                }
-                a.element.find(".link2recall")
-                    .on('click',
-                        function () {
-                            self.get_web_notif_box(this)
-                                .find('.ui-notify-close')
-                                .trigger("click");
-                        });
-                a.element.find(".link2showed")
-                    .on('click',
-                        function () {
-                            self.get_web_notif_box(this)
-                                .find('.ui-notify-close')
-                                .trigger("click");
-                        });
+            if (notif_box.length) {
+                self.get_web_notif_box(notif_box).remove();
             }
-            else if (self.get_web_notif_box(notif_box).attr("style") !== "") {
-                self.get_web_notif_box(notif_box).attr("style", "");
+            var title = QWeb.render('web_notify_title', {
+                'title': message.title,
+                'id': message.id
+            });
+            var body = QWeb.render('web_notify_body', {
+                'message': message.body,
+                'actions': message.actions
+            });
+            if (channel == 'res_user_notify') {
+                a = openerp.client.do_notify(title, body, true);
             }
+            else {
+                a = openerp.client.do_warn(title, body, true);
+            }
+            a.element.find(".web_notification_action").on('click', function (ev) {
+                var $target = $(ev.currentTarget),
+                    action = JSON.parse($target.attr('action') || {}),
+                    def = $.Deferred();
+                self.get_web_notif_box(this)
+                    .find('.ui-notify-close')
+                    .trigger("click");
+                if (action.action_id) {
+                    // Do this instead call do_action directly to allow extend
+                    // original action with custom values.
+                    self.rpc("/web/action/load", {
+                        action_id: action.action_id
+                    }).then(function (data) {
+                        action = _.extend(data, action);
+                        def.resolve();
+                    });
+                }
+                else
+                    def.resolve();
+                $.when(def)
+                    .then(function () {
+                        self.action_manager.do_action(action);
+                    });
+            });
         },
 
         get_web_notif_box: function (me) {
             return $(me).closest(".ui-notify-message-style");
         }
     });
-
-    openerp.web.WebClient.include({
-        show_application: function () {
-            this._super.apply(this, arguments);
-            var bus = new notification_bus.bus();
-            openerp.notification_bus.single = bus;
-            bus.appendTo(openerp.client.$el);
-        }
-    });
-
-    return notification_bus;
-})();
+};
