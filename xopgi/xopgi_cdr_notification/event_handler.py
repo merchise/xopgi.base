@@ -15,7 +15,7 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
-from openerp import api, fields, models, _
+from openerp import api, exceptions, fields, models, _
 from openerp.addons.xopgi_cdr.cdr_agent import EVENT_SIGNALS
 from openerp.addons.xopgi_cdr.util import evaluate
 from xoeuf import signals
@@ -47,6 +47,7 @@ class EventHandler(models.Model):
     build_domain = fields.Char(help='Odoo domain to search recipients.',
                                string='Domain')
     notification_text = fields.Text(translate=True, required=True)
+    buttons = fields.Many2many('cdr.notification.button')
     active = fields.Boolean(default=True)
     event_raise = fields.Boolean(default=True)
     continue_raising = fields.Boolean(default=True)
@@ -64,13 +65,6 @@ class EventHandler(models.Model):
         else:
             domain = evaluate(domain, env=self.env, uid=self._uid)
         return domain
-
-    @api.depends('domain', 'action', 'active', 'notification_text',
-                 'subscribed_events')
-    def reset_js_notifications(self):
-        # remove related notifications when handler change.
-        self.env['cdr.js.notification'].search(
-            [('handler_id', 'in', self.ids)]).unlink()
 
     @api.onchange('use_domain_builder')
     def onchange_use_domain_builder(self):
@@ -128,7 +122,8 @@ class EventHandler(models.Model):
                     priority=self.priority,
                     label=_({k: v for k, v in PRIORITIES}[self.priority]),
                     name=self.name),
-                body=self.notification_text)
+                body=self.notification_text,
+                actions=self.buttons.get_action())
 
     @signals.receiver(EVENT_SIGNALS.values())
     def do_notify(self, signal):
@@ -142,3 +137,44 @@ class EventHandler(models.Model):
             action_method = getattr(handler, get_method(handler.action),
                                     NotImplemented)
             action_method()
+
+
+class NotificationButton(models.Model):
+    _name = 'cdr.notification.button'
+
+    title = fields.Char(translate=True, required=True)
+    action_id = fields.Char()
+    action_dict = fields.Text()
+
+    @api.constrains('action_id', 'action_dict')
+    def check_action(self):
+        if not (self.action_id or self.action_dict):
+            raise exceptions.ValidationError(
+                _('Action id or Action dict must be define.'))
+        if self.action_id:
+            try:
+                assert self.env['ir.actions.actions'].browse(int(self.action_id))
+            except ValueError:
+                try:
+                    action = self.env.ref(self.action_id)
+                    assert action._name.startswith('ir.actions.')
+                except Exception as e:
+                    raise exceptions.ValidationError(e.message)
+        if self.action_dict:
+            try:
+                evaluate(self.action_dict or 'result={}',
+                         mode='exec', env=self.env)
+            except Exception as e:
+                raise exceptions.ValidationError(e.message)
+
+    def get_action(self):
+        result = []
+        for item in self:
+            res = dict(title=item.title)
+            if item.action_id:
+                res.update(action_id=item.action_id)
+            if item.action_dict:
+                res.update(evaluate(item.action_dict or 'result={}',
+                                    mode='exec', env=self.env))
+            result.append(res)
+        return result
