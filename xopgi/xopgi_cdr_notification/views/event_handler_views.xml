@@ -44,6 +44,7 @@
                 <field name="action" colspan="3"/>
                 <field name="priority" colspan="3"/>
                 <field name="notification_text" colspan="6"/>
+                <field name="buttons" colspan="6"/>
                 <label for="domain"/><div class="oe_inline">(
                 <field name="use_domain_builder" class="oe_inline" nolabel="1"/>
                 <label for="use_domain_builder"/>)</div>
@@ -93,5 +94,51 @@
                 parent="xopgi_cdr.cdr_menu"
                 sequence="70"
                 action="act_open_cdr_event_handler_view"/>
+
+      <record id="view_cdr_notification_button_tree" model="ir.ui.view">
+        <field name="name">cdr.notification.button.tree</field>
+        <field name="model">cdr.notification.button</field>
+        <field name="arch" type="xml">
+          <tree string="Buttons">
+              <field name="title"/>
+              <field name="action_id"/>
+              <field name="action_dict"/>
+          </tree>
+        </field>
+      </record>
+
+      <record id="view_cdr_notification_button_form" model="ir.ui.view">
+        <field name="name">cdr.notification.button.form</field>
+        <field name="model">cdr.notification.button</field>
+        <field name="arch" type="xml">
+          <form string="Buttons">
+            <group>
+              <field name="title"/>
+              <field name="action_id"/>
+              <field name="action_dict"/>
+              <separator/>
+              <label string="Action dict spect a python code that return a dict on result variable."/>
+              <separator/>
+              <label string="If action id is defined corresponding openerp action will be update "/>
+              <separator/>
+              <label
+                  string="with action dict and executed, else action dict must be a valid opener "/>
+              <separator/>
+              <label string="action dict."/>
+            </group>
+          </form>
+        </field>
+      </record>
+
+      <record id="view_cdr_notification_button_search" model="ir.ui.view">
+        <field name="name">cdr.notification.button.search</field>
+        <field name="model">cdr.notification.button</field>
+        <field name="arch" type="xml">
+          <search string="Buttons">
+            <field name="title" select="True"/>
+            <field name="action_id" select="True"/>
+          </search>
+        </field>
+      </record>
     </data>
 </openerp>
