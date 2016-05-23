@@ -199,7 +199,7 @@ class RecurrentEvent(models.Model):
                                required=True, ondelete='cascade')
     time = fields.Float()
     recurrence = fields.Many2one('recurrent.model', required=True,
-                                 delegate=True)
+                                 delegate=True, ondelete='cascade')
 
     def update_event(self, value):
         next_call = self.recurrence.next_date(self.recurrence.rrule)
