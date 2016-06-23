@@ -28,7 +28,7 @@
                 </h1>
               </div>
               <group colspan="6" col="6">
-                <field name="subscribed_events" colspan="6"/>
+                <field name="subscribed_events" colspan="6" required="1"/>
                 <field name="event_raise" colspan="2"/>
                 <field name="continue_raising" colspan="2"/>
                 <field name="stop_raising" colspan="2"/>

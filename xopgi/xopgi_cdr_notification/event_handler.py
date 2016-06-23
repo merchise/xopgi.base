@@ -109,6 +109,13 @@ class EventHandler(models.Model):
             raise exceptions.ValidationError(
                 _('At least one recipient is necessary.'))
 
+    @api.constrains('event_raise', 'continue_raising', 'stop_raising')
+    def _check_signals(self):
+        if not all(h.event_raise or h.continue_raising or h.stop_raising
+                   for h in self):
+            raise exceptions.ValidationError(
+                _('At least one signal must be checked.'))
+
     def do_chat_notify(self):
         vigilant = self.env.ref('xopgi_cdr_notification.vigilant_user')
         session_ids = self.env['im_chat.session'].search(

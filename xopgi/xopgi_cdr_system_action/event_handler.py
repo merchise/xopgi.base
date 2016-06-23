@@ -15,7 +15,7 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
-from openerp import fields, models
+from openerp import api, exceptions, fields, models, _
 from openerp.addons.xopgi_cdr.cdr_agent import EVENT_SIGNALS
 from xoeuf import signals
 
@@ -47,3 +47,10 @@ class EventHandler(models.Model):
             if handler.action:
                 actions += handler.action
         actions.run()
+
+    @api.constrains('event_raise', 'continue_raising', 'stop_raising')
+    def _check_signals(self):
+        if not all(h.event_raise or h.continue_raising or h.stop_raising
+                   for h in self):
+            raise exceptions.ValidationError(
+                _('At least one signal must be checked.'))

@@ -37,12 +37,12 @@
                 </h1>
               </div>
               <group colspan="6" col="6">
-                <field name="subscribed_events" colspan="6"/>
+                <field name="subscribed_events" colspan="6" required="1"/>
                 <field name="event_raise" colspan="2"/>
                 <field name="continue_raising" colspan="2"/>
                 <field name="stop_raising" colspan="2"/>
-                <field name="action" colspan="3"/>
-                <field name="priority" colspan="3"/>
+                <field name="action" colspan="3" required="1"/>
+                <field name="priority" colspan="3" required="1"/>
                 <field name="notification_text" colspan="6"/>
                 <field name="buttons" colspan="6"/>
                 <label for="domain"/>
@@ -59,7 +59,7 @@
                 <field name="domain" class="oe_inline" nolabel="1" colspan="5"
                        attrs="{'readonly': [('use_domain_builder','!=', False)]}"/>
                 <newline/>
-                <field name="recipients" colspan="6"/>
+                <field name="recipients" colspan="6" required="1"/>
               </group>
             </sheet>
           </form>
