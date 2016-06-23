@@ -18,13 +18,15 @@
     'description': """
 Create a basic event based notification system.
 
-    """, "author": "Merchise Autrement",
+    """,
+    "author": "Merchise Autrement",
     "website": "http://xhg.ca.merchise.org/addons/xopgi_cdr_notification",
     'depends': ['web', 'xopgi_cdr', 'im_chat', 'xopgi_web_notification'],
     'data': [
         'data/vigilant_user.xml',
         'security/security.xml',
         'views/event_handler_views.xml',
+        'views/res_users_views.xml',
     ],
     'qweb': [],
 
