@@ -14,7 +14,6 @@
             <field name="description"/>
             <field name="template"/>
             <field name="value"/>
-            <field name="cycle"/>
           </tree>
         </field>
       </record>
@@ -44,6 +43,11 @@
                         'required': [('template','=', True), ('args_need','=', True)],
                         'invisible': ['|', ('template','=', True), ('args_need','!=', True)]
                        }"/>
+                <newline/>
+                <field name="value"
+                       attrs="{'invisible': [('value','=', False)]}"
+                       colspan="4"/>
+                <newline/>
                 <label for="evidences"/>
                 <field name="evidences" colspan="4" nolabel="1" readonly="1"/>
                 <field name="args_need" invisible="1"/>
