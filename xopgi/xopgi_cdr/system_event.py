@@ -45,10 +45,9 @@ class SystemEvent(models.Model):
 
     name = fields.Char(translate=True)
     definition = fields.Char(
-        required=True, help="Python expression combining controls "
-                            "variables operators and literal values.\n"
-                            "Eg: var1 - var2 > (var3 or 400) \n"
-                            "The result will be evaluate as boolean value.")
+        required=True,
+        help="Boolean expression combining evidences and operators.\n"
+             "Eg: evidence1 or evidence2 and evidence3")
     next_call = fields.Datetime(default=fields.Datetime.now())
     priority = fields.Integer(default=10)
     active = fields.Boolean(default=True)

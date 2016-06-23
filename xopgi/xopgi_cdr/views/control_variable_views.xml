@@ -36,7 +36,7 @@
               <group colspan="4" col="4">
                 <field name="description" colspan="4"/>
                 <field name="template" domain="[('reusable','=', True)]"
-                       context="{'default_reusable': False, 'default_name': description}"
+                       context="{'default_reusable': False, 'default_name': description, 'handled': True}"
                        required="0"/>
                 <field name="args"
                        attrs="{
@@ -103,18 +103,18 @@
                 <label for="name" class="oe_edit_only"/>
                 <label string="( " class="oe_inline"/>
                 <field name="reusable" class="oe_inline"
-                       readonly="context.get('handled', False)"/>
+                       readonly="not context.get('handled', False)"/>
                 <label for="reusable" class="oe_inline" string="Reusable )"/>
                 <h1>
-                  <field name="name"/>
+                  <field name="name" required="1"/>
                 </h1>
               </div>
               <group colspan="4" col="4">
                 <label for="definition" colspan="4"/>
-                <field name="definition" nolabel="1" colspan="4"/>
+                <field name="definition" nolabel="1" colspan="4" required="1"/>
                 <field name="args_need"
                        attrs="{'invisible': [('reusable','!=', True)]}"/>
-                <field name="eval_mode"/>
+                <field name="eval_mode" required="1"/>
               </group>
             </sheet>
           </form>

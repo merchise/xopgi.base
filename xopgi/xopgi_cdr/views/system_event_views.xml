@@ -85,17 +85,20 @@
                 <field name="active" class="oe_inline"/>
                 <label for="active" class="oe_inline" string="Active )"/>
                 <h1 class="oe_inline">
-                  <field name="name"/>
+                  <field name="name" required="1"/>
                 </h1>
               </div>
-              <group colspan="4" col="4">
-                <field name="definition" colspan="4"/>
-                <field name="priority"/>
-                <newline/>
-                <field name="interval" widget="float_time"/>
-                <field name="time_to_wait" widget="float_time"/>
+              <group colspan="6" col="6">
+                <field name="definition" colspan="6"/>
+                <separator colspan="1"/>
+                <label
+                    string="Boolean expression combining evidences and operators. Eg: evidence1 or evidence2 and evidence3"
+                    colspan="5"/>
+                <field name="priority" required="1"/>
+                <field name="interval" widget="float_time" required="1"/>
+                <field name="time_to_wait" widget="float_time" required="1"/>
                 <label for="evidences"/>
-                <field name="evidences" colspan="4" nolabel="1"/>
+                <field name="evidences" colspan="6" nolabel="1"/>
               </group>
             </sheet>
           </form>
@@ -114,15 +117,18 @@
                 <field name="active" class="oe_inline"/>
                 <label for="active" class="oe_inline" string="Active )"/>
                 <h1 class="oe_inline">
-                  <field name="name"/>
+                  <field name="name" required="1"/>
                 </h1>
               </div>
-              <group colspan="4" col="4">
-                <field name="definition" colspan="4"/>
-                <field name="priority"/>
-                <newline/>
-                <field name="date_from"/>
-                <field name="time" widget="float_time"/>
+              <group colspan="6" col="6">
+                <field name="definition" colspan="6"/>
+                <separator colspan="1"/>
+                <label
+                    string="Boolean expression combining evidences and operators. Eg: evidence1 or evidence2 and evidence3"
+                    colspan="5"/>
+                <field name="priority" required="1"/>
+                <field name="date_from" required="1"/>
+                <field name="time" widget="float_time" required="1"/>
               </group>
               <notebook colspan="4">
                 <page string="Recurrence">
