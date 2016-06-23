@@ -45,15 +45,19 @@
                 <field name="priority" colspan="3"/>
                 <field name="notification_text" colspan="6"/>
                 <field name="buttons" colspan="6"/>
-                <label for="domain"/><div class="oe_inline">(
-                <field name="use_domain_builder" class="oe_inline" nolabel="1"/>
-                <label for="use_domain_builder"/>)</div>
+                <label for="domain"/>
+                <div class="oe_inline">
+                  (<field name="use_domain_builder" class="oe_inline" nolabel="1"/>
+                  <label for="use_domain_builder"/>)
+                </div>
                 <field name="build_domain" widget="char_domain"
-                       class="oe_inline"
+                       nolabel="1" colspan="4"
                        options="{'model': 'res.users', 'no_create': True}"
                        attrs="{'invisible': [('use_domain_builder','=', False)]}"/>
-                <field name="domain" class="oe_inline"
-                       attrs="{'invisible': [('use_domain_builder','!=', False)]}"/>
+                <newline/>
+                <separator colspan="1"/>
+                <field name="domain" class="oe_inline" nolabel="1" colspan="5"
+                       attrs="{'readonly': [('use_domain_builder','!=', False)]}"/>
                 <newline/>
                 <field name="recipients" colspan="6"/>
               </group>

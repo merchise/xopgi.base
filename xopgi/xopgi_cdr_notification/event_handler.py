@@ -55,15 +55,18 @@ class EventHandler(models.Model):
 
     def get_domain(self):
         domain = self.domain or self.build_domain
-        if not domain or all(l.strip().startswith('#')
-                             for l in domain.splitlines()
-                             if l.strip()):
+        try:
+            if not domain or all(l.strip().startswith('#')
+                                 for l in domain.splitlines()
+                                 if l.strip()):
+                domain = []
+            elif any(l.strip().startswith('result')
+                     for l in domain.splitlines()):
+                domain = evaluate(domain, mode='exec', env=self.env, uid=self._uid)
+            else:
+                domain = evaluate(domain, env=self.env, uid=self._uid)
+        except Exception:
             domain = []
-        elif any(l.strip().startswith('result')
-                 for l in domain.splitlines()):
-            domain = evaluate(domain, mode='exec', env=self.env, uid=self._uid)
-        else:
-            domain = evaluate(domain, env=self.env, uid=self._uid)
         return domain
 
     @api.onchange('use_domain_builder')
@@ -72,7 +75,7 @@ class EventHandler(models.Model):
             domain = self.get_domain()
             domain = (str(domain) if domain else '')
             self.build_domain = domain
-            self.domain = ''
+            self.domain = domain
         else:
             self.domain = (self.build_domain or '') + _('''
 #  Odoo domain like: [('field_name', 'operator', value)]
@@ -83,10 +86,28 @@ class EventHandler(models.Model):
 #      result = [('id', '!=', 1)]
 #  env and uid are able to use.''')
 
+    @api.onchange('build_domain')
+    def onchange_build_domain(self):
+        if self.build_domain:
+            domain = self.get_domain()
+            domain = (str(domain) if domain else '')
+            self.domain = domain
+
+    @api.onchange('build_domain', 'domain')
+    @api.depends('build_domain', 'domain')
     def get_recipients(self):
         for handler in self:
             domain = handler.get_domain()
-            handler.recipients = self.env['res.users'].search(domain)
+            if domain:
+                handler.recipients = self.env['res.users'].search(domain)
+            else:
+                handler.recipients = False
+
+    @api.constrains('domain', 'build_domain')
+    def _check_recipients(self):
+        if not all(handler.recipients for handler in self):
+            raise exceptions.ValidationError(
+                _('At least one recipient is necessary.'))
 
     def do_chat_notify(self):
         vigilant = self.env.ref('xopgi_cdr_notification.vigilant_user')
