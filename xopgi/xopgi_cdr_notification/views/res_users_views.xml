@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<openerp>
+  <data>
+    <record model="ir.ui.view" id="res_users_search_ext">
+      <field name="name">res.users.search.ext</field>
+      <field name="model">res.users</field>
+      <field name="inherit_id" ref="base.view_users_search"/>
+      <field name="arch" type="xml">
+        <xpath expr="//field[@name='company_ids']" position="before">
+          <field name="groups_id"/>
+        </xpath>
+      </field>
+    </record>
+  </data>
+</openerp>
