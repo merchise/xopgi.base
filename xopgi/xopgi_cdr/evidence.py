@@ -22,6 +22,15 @@ from xoutil import logger
 from .util import evaluate, get_free_names
 
 
+def _get_candidates(value):
+    if isinstance(value, dict):
+        return value.keys()
+    elif isinstance(value, (list, set, tuple)):
+        return (str(i) for i in range(len(value)))
+    else:
+        return []
+
+
 class Evidence(models.Model):
     _name = 'cdr.evidence'
     _inherits = {'cdr.identifier': 'identifier_id'}
@@ -49,6 +58,51 @@ class Evidence(models.Model):
                                     compute='get_vars', store=True)
     active = fields.Boolean(default=True)
     cycle = fields.Many2one('cdr.evaluation.cycle')
+
+    variable = fields.Many2one('cdr.control.variable')
+    expression = fields.Char()
+    key = fields.Char()
+    candidates = fields.Char()
+    result = fields.Char()
+
+    def _get_result(self):
+        if self.expression:
+            res = evaluate(self.expression, **self.variable.get_value())
+        else:
+            res = ''
+        return res
+
+    @api.onchange('variable')
+    def onchange_variable(self):
+        if self.variable:
+            self.expression = self.variable.name
+            result = self._get_result()
+            self.result = str(result)
+            self.candidates = ', '.join(_get_candidates(result))
+            self.key = ''
+        else:
+            self.expression = ''
+            self.candidates = ''
+            self.result = ''
+
+    @api.onchange('key')
+    def onchange_key(self):
+        if self.key:
+            expression = self.expression
+            res = self._get_result()
+            try:
+                if isinstance(res, dict):
+                    res = res.get(self.key)
+                    expression = "%s['%s']" % (expression, self.key)
+                else:
+                    res = res[int(self.key)]
+                    expression = "%s[%s]" % (expression, self.key)
+                self.key = ''
+                self.candidates = ', '.join(_get_candidates(res))
+                self.expression = expression
+            except:
+                res = _('Error')
+            self.result = str(res)
 
     @api.depends('active', 'definition')
     def get_vars(self):

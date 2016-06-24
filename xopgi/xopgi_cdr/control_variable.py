@@ -84,7 +84,7 @@ class ControlVariable(models.Model):
                 for _, arg, _, _ in self.template.definition._formatter_parser()
                 if arg
             ] if self.args_need else []
-            self.args = "{\n%s\n}" % ",".join(args)
+            self.args = "{%s\n}" % ",".join(args)
         else:
             self.args = ""
 
