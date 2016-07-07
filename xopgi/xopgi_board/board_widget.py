@@ -22,9 +22,12 @@ from openerp.tools.safe_eval import safe_eval
 
 from xoeuf.tools import normalize_datetime
 
+WIDGET_MODEL_NAME = 'xopgi.board.widget'
+WIDGET_REL_MODEL_NAME = 'xopgi.board.widget.rel'
+
 
 class XopgiBoardWidget(models.Model):
-    _name = 'xopgi.board.widget'
+    _name = WIDGET_MODEL_NAME
     _description = "Board Widget"
 
     _order = 'category, name'
@@ -41,7 +44,7 @@ class XopgiBoardWidget(models.Model):
         return [(item.id, item.name or item.template_name) for item in self]
 
     def get_widgets_dict(self):
-        widgets = self.env['hr.job.widget'].get_user_widgets()
+        widgets = self.env[WIDGET_REL_MODEL_NAME].get_widgets()
         logger.debug(
             'Widgets to show %r' % [w['name'] for w in widgets])
         today = normalize_datetime(fields.Date.today(self))
@@ -68,3 +71,55 @@ class XopgiBoardWidget(models.Model):
                              'code for \'%s\' board widget, python code: %s',
                              name, python_code)
         widget.update(local_dict.get('result', {}))
+
+
+class XopgiBoardWidgetRel(models.AbstractModel):
+    _name = WIDGET_REL_MODEL_NAME
+    _order = 'priority'
+
+    widget = fields.Many2one(WIDGET_MODEL_NAME, delegate=True,
+                             required=True, ondelete='cascade')
+    priority = fields.Integer(default=1000)
+
+    def get_widgets(self):
+        """ Get all widget dicts for uid.
+
+        """
+        models = self.get_widget_capable_models()
+        widgets = []
+        for model in models:
+            widgets.extend(list(model.get_user_widgets()))
+        widgets = sorted(widgets, key=lambda item: item.priority)
+        result = []
+        for widget in widgets:
+            widget.get_set_widgets(result)
+        return result
+
+    def get_user_widgets(self):
+        """ It must be implemented on extended models.
+
+        Should return a recordset of user's corresponding widgets.
+
+        """
+        raise NotImplementedError()
+
+    def get_widget_capable_models(self):
+        """ Get a list of models instances that have `get_user_widgets` item
+
+        """
+        result = []
+        for model in self.env.registry.values():
+            if hasattr(model, "get_user_widgets"):
+                if model._name != WIDGET_REL_MODEL_NAME:
+                    result.append(model._browse(self.env, ()))
+        return result
+
+    def get_set_widgets(self, result):
+        """ Update in-place result adding missing widgets.
+
+        """
+        for widget in self.read(fields=['name', 'category', 'template_name',
+                                        'xml_template', 'python_code']):
+            widget.pop('id', None)
+            if widget not in result:
+                result.append(widget)
