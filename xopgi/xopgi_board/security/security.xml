@@ -77,5 +77,38 @@
       <field name="perm_write" eval="1"/>
       <field name="perm_unlink" eval="1"/>
     </record>
+
+    <record id="xopgi_res_group_widget_acl_public" model="ir.model.access">
+      <field name="name">xopgi.res.group.widget.acl.public</field>
+      <field name="model_id"
+             ref="xopgi_board.model_res_group_widget"/>
+      <field name="group_id" ref="base.group_user"/>
+      <field name="perm_read" eval="1"/>
+      <field name="perm_create" eval="0"/>
+      <field name="perm_write" eval="0"/>
+      <field name="perm_unlink" eval="0"/>
+    </record>
+
+    <record id="xopgi_res_group_widget_acl_private" model="ir.model.access">
+      <field name="name">xopgi.res.group.widget.acl.private</field>
+      <field name="model_id"
+             ref="xopgi_board.model_res_group_widget"/>
+      <field name="group_id" ref="base.group_hr_user"/>
+      <field name="perm_read" eval="1"/>
+      <field name="perm_create" eval="1"/>
+      <field name="perm_write" eval="1"/>
+      <field name="perm_unlink" eval="1"/>
+    </record>
+
+    <record id="xopgi_res_group_widget_acl_private2" model="ir.model.access">
+      <field name="name">xopgi.res.group.widget.acl.private2</field>
+      <field name="model_id"
+             ref="xopgi_board.model_res_group_widget"/>
+      <field name="group_id" ref="base.group_system"/>
+      <field name="perm_read" eval="1"/>
+      <field name="perm_create" eval="1"/>
+      <field name="perm_write" eval="1"/>
+      <field name="perm_unlink" eval="1"/>
+    </record>
   </data>
 </openerp>

@@ -24,6 +24,7 @@ Create dashboard employee functions oriented.
     'data': [
         'views/xopgi_board_view.xml',
         'views/hr_job_view.xml',
+        'views/res_group_view.xml',
         'views/xopgi_board_widget_view.xml',
         'views/res_config_view.xml',
         'security/security.xml',
