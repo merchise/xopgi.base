@@ -37,7 +37,6 @@ class XopgiBoardWidget(models.Model):
     template_name = fields.Char(required=True)
     xml_template = fields.Text(translate=True)
     python_code = fields.Text()
-    job_positions = fields.Many2many('hr.job')
 
     @api.multi
     def name_get(self):
