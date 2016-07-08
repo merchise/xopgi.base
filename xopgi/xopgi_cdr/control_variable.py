@@ -105,7 +105,7 @@ class ControlVariable(models.Model):
     def check_definition(self):
         try:
             self._evaluate()
-        except Exception, e:
+        except Exception as e:
             raise exceptions.ValidationError(_("Wrong definition: %s") %
                                              e.message)
 
@@ -113,7 +113,7 @@ class ControlVariable(models.Model):
         for var in self:
             try:
                 value = var._evaluate(cycle.create_date)
-            except Exception, e:
+            except Exception as e:
                 logger.exception('Error evaluating control variable '
                                  '%s.', (var.name,))
                 logger.exception(e)
@@ -156,7 +156,7 @@ class ControlVariableTemplate(models.Model):
             try:
                 kwargs = evaluate(kwargs_str)
                 code = code.format(**kwargs)
-            except Exception, e:
+            except Exception as e:
                 logger.exception(
                     'Error formatting control variable template '
                     '%s: %s with %s params.', (self.name, self.definition,

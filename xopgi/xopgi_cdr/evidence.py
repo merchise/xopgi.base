@@ -128,7 +128,7 @@ class Evidence(models.Model):
         try:
             definition_res = self._evaluate()
             self.evaluate_bool_expresion(definition_res)
-        except Exception, e:
+        except Exception as e:
             raise exceptions.ValidationError(
                 _("Wrong definition: %s") % e.message)
 
@@ -137,7 +137,7 @@ class Evidence(models.Model):
             try:
                 value = evidence._evaluate()
                 bool_value = evidence.evaluate_bool_expresion(value)
-            except Exception, e:
+            except Exception as e:
                 logger.exception('Error evaluating evidence %s defined as: '
                                  '%s', (self.name, self.definition))
                 logger.exception(e)

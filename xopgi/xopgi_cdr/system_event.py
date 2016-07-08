@@ -124,7 +124,7 @@ class SystemEvent(models.Model):
     def check_definition(self):
         try:
             self._evaluate()
-        except Exception, e:
+        except Exception as e:
             raise exceptions.ValidationError(
                 _("Wrong definition: %s") % e.message)
 
@@ -179,7 +179,7 @@ class BasicEvent(models.Model):
     def evaluate(self, cycle):
         try:
             value = self.event_id._evaluate()
-        except Exception, e:
+        except Exception as e:
             logger.exception('Error evaluating event %s defined as: ',
                              (self.name, self.definition))
             logger.exception(e)
@@ -210,7 +210,7 @@ class RecurrentEvent(models.Model):
     def evaluate(self, cycle):
         try:
             value = self.event_id._evaluate()
-        except Exception, e:
+        except Exception as e:
             logger.exception('Error evaluating event %s defined as: ',
                              (self.name, self.definition))
             logger.exception(e)
