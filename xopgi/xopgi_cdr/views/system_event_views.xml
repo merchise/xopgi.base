@@ -5,7 +5,8 @@
         <field name="name">cdr.system.event.tree</field>
         <field name="model">cdr.system.event</field>
         <field name="arch" type="xml">
-          <tree string="System Events">
+          <tree string="System Events" create="false" edit="false"
+                duplicate="false">
             <field name="name"/>
             <field name="specific_event"/>
             <field name="priority"/>
@@ -20,7 +21,8 @@
         <field name="name">cdr.system.event.form</field>
         <field name="model">cdr.system.event</field>
         <field name="arch" type="xml">
-          <form string="System Events" version="7.0">
+          <form string="System Events" version="7.0" create="false"
+                edit="false" duplicate="false">
             <sheet>
               <div class="oe_title">
                 <label for="name" class="oe_edit_only"/>
