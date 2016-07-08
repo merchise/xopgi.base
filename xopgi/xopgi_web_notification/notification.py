@@ -34,9 +34,19 @@ class XopgiWebNotification(models.TransientModel):
     _name = 'xopgi.web.notification'
 
     def notify(self, uid=None, **values):
+        """Add a notification for uid user as recipient.
+
+        :param uid: recipient user id.
+        :param values: notification dict.
+        """
         return self.post(uid or self._uid, **values)
 
     def warn(self, uid=None, **values):
+        """Add a warning for uid user as recipient.
+
+        :param uid: recipient user id.
+        :param values: notification dict.
+        """
         return self.post(uid or self._uid, 'warn', **values)
 
     def post(self, uid, action='notify', channel=None, **values):
