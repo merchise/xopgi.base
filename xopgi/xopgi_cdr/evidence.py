@@ -170,5 +170,6 @@ class Evidence(models.Model):
     @api.returns('self', lambda value: value.id)
     def create(self, vals):
         res = super(Evidence, self).create(vals)
+        # evaluate by first time to get init value.
         self.env['cdr.evaluation.cycle'].create(evidences_to_evaluate=res)
         return res

@@ -128,6 +128,7 @@ class ControlVariable(models.Model):
     @api.returns('self', lambda value: value.id)
     def create(self, vals):
         res = super(ControlVariable, self).create(vals)
+        # evaluate by first time to get init value.
         self.env['cdr.evaluation.cycle'].create(vars_to_evaluate=res)
         return res
 
@@ -149,8 +150,12 @@ class ControlVariableTemplate(models.Model):
             self.args_need = False
 
     def eval(self, now, kwargs_str):
-        # TODO: exception treatment
+        """ Evaluate template definition with given param values.
 
+        :param now: datetime of evaluation cycle start.
+        :param kwargs_str: param values to to passe it to str.format() on
+        definition.
+        """
         code = self.definition
         if self.args_need:
             try:

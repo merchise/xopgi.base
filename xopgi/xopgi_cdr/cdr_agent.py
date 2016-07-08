@@ -63,8 +63,9 @@ class EvaluationCycle(models.Model):
     @api.returns('self', lambda value: value.id)
     def create(self, values=None, vars_to_evaluate=None,
                evidences_to_evaluate=None):
-        ''' To force evaluation of some variable(s) pass varible names on
-        vars_to_evaluate param as tuple.
+        ''' Add new cdr.evaluation.cycle evaluating events that must be
+        evaluated by schedule or cdr.control.variable and cdr.evidences
+        passed as params.
 
         :param values: original method param that is ignore
         :param vars_to_evaluate: cdr.control.variable recordset to evaluate
@@ -85,6 +86,8 @@ class EvaluationCycle(models.Model):
                 [('next_call', '<=', res.create_date)])
             events.evaluate(res)
             for signal in EVENT_SIGNALS:
+                # Not use groupby because a recordset is needed on
+                # signaling send.
                 sender = events.filtered(lambda event: event.action == signal)
                 if sender:
                     logger.debug('Sending signal (%s) for Events: (%s)' % (
