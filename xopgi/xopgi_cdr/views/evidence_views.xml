@@ -38,11 +38,11 @@
               <field name="operand" nolabel="1" colspan="1" required="1"/>
               <label colspan="2"
                      string="Python expression combining controls variables operators and literal values."/>
-              <label colspan="1" string="Python comparative operator."/>
+              <label colspan="1" string=""/>
               <label colspan="1" string="Python literal."/>
               <label colspan="2"
                      string="Eg: var1 - var2 * (var3 or 400)"/>
-              <label colspan="1" string="Eg: >, >=, is, in, not in"/>
+              <label colspan="1" string=""/>
               <label colspan="1" string="Eg: 1000, False, 0.5, 'Some text'"/>
             </group>
             <notebook colspan="4">
