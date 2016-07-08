@@ -13,7 +13,9 @@
             </sheet>
             <footer>
               <button string="Create Event" type="object"
-                      name="create_event"/>
+                      name="create_event" class="oe_highlight"/>
+              or
+              <button string="Cancel" class="oe_link" special="cancel"/>
             </footer>
           </form>
         </field>
