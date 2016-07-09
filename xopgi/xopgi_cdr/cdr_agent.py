@@ -94,5 +94,5 @@ class EvaluationCycle(models.Model):
                 if sender:
                     logger.debug('Sending signal (%s) for Events: (%s)' % (
                         signal, ', '.join([e.name for e in sender])))
-                    EVENT_SIGNALS['raise'].send(sender=sender)
+                    EVENT_SIGNALS[signal].send(sender=sender)
         return res
