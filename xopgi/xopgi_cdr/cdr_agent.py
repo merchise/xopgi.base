@@ -16,6 +16,7 @@ from __future__ import (division as _py3_division,
                         absolute_import as _py3_abs_import)
 
 from openerp import api, models
+from openerp.jobs import Deferred
 from xoeuf.signals import Signal
 from xoutil import logger
 
@@ -52,8 +53,9 @@ class CDRAgent(models.TransientModel):
 
     @api.model
     def new_evaluation_cycle(self):
-        # TODO: do this on celery task.
-        return self.env['cdr.evaluation.cycle'].create()
+        cr, uid, context = self.env.args
+        return Deferred('cdr.evaluation.cycle', cr, uid, 'create',
+                        context=context)
 
 
 class EvaluationCycle(models.Model):
