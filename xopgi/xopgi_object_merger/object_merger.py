@@ -52,42 +52,39 @@ class object_merger(orm.TransientModel):
     _name = 'object.merger'
     _description = 'Merge objects'
 
-    _columns = {
-        'name': fields.char('Name', size=16),
-        'info': fields.text('Objects to merge'),
-    }
+    _columns = {'name': fields.char('Name', size=16), }
 
     def fields_view_get(self, cr, uid, view_id=None, view_type='form',
                         context=None, toolbar=False, submenu=False):
-        res = super(object_merger, self).fields_view_get(
-            cr, uid, view_id, view_type, context=context, toolbar=toolbar,
-            submenu=submenu)
-        if view_type == 'form':
-            if context is None:
-                context = {}
-            object_ids = context.get('active_ids', [])
-            active_model = context.get('active_model')
-            if object_ids:
-                self._check_quantity(cr, uid, object_ids, active_model,
-                                     context=context)
-            field_name = 'x_' + (
-                active_model and active_model.replace('.', '_') or '') + '_id'
-            if object_ids:
-                view_part = """
-                <label for="{field_name}"/>
-                  <div>
-                    <field name="{field_name}" required="1"
-                           domain="[(\'id\', \'in\', {object_ids})]"/>
-                  </div>
-
-                """.format(field_name=field_name, object_ids=object_ids)
-                res['arch'] = res['arch'].decode('utf8').replace(
-                    """<separator string="to_replace"/>""", view_part
-                )
-                field = self.fields_get(cr, uid, [field_name], context=context)
-                res['fields'].update(field)
-                res['fields'][field_name]['domain'] = [('id', 'in', object_ids)]
-                res['fields'][field_name]['required'] = True
+        if context is None:
+            context = {}
+        object_ids = context.get('active_ids', [])
+        active_model = context.get('active_model')
+        if object_ids:
+            self._check_quantity(cr, uid, object_ids, active_model,
+                                 context=context)
+        res = super(object_merger, self).fields_view_get(cr, uid, view_id,
+                                                         view_type,
+                                                         context=context,
+                                                         toolbar=toolbar,
+                                                         submenu=submenu)
+        field_name = 'x_' + (
+            active_model and active_model.replace('.', '_') or '') + '_id'
+        if object_ids:
+            view_part = """
+            <label for='""" + field_name + """'/>
+              <div>
+                <field name='""" + field_name + """' required="1"
+                       domain="[(\'id\', \'in\', """ + str(object_ids) + """)]"/>
+              </div>
+            """
+            res['arch'] = res['arch'].decode('utf8').replace(
+                """<separator string="to_replace"/>""", view_part
+            )
+            field = self.fields_get(cr, uid, [field_name], context=context)
+            res['fields'] = field
+            res['fields'][field_name]['domain'] = [('id', 'in', object_ids)]
+            res['fields'][field_name]['required'] = True
         return res
 
     def _browse_active_model(self, cr, active_model):
@@ -507,17 +504,3 @@ class object_merger(orm.TransientModel):
                         defaults_dict[field] = res_val
                         _update_alias(alias_id, defaults_dict)
         return True
-
-    def default_get(self, cr, uid, fields_list, context=None):
-        result = super(object_merger, self).default_get(
-            cr, uid, fields_list, context=context)
-        if 'info' in fields_list:
-            active_ids = context.get('active_ids', False)
-            active_model = context.get('active_model', False)
-            names = [
-                item[1]
-                for item in self.pool[active_model].name_get(
-                    cr, uid, active_ids, context=context)
-            ]
-            result.update({'info': "\n".join(names)})
-            return result
