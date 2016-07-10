@@ -88,6 +88,17 @@
                          attrs="{'invisible': [('model_name','=', False)]}"/>
                 </group>
               </page>
+              <page string="Translations"
+                    attrs="{'invisible': [('strategy_by_group','=', False)]}">
+                <field name="translations" widget="one2many_list">
+                  <tree create="0" delete="0" editable="top">
+                    <field name="name" readonly="1"/>
+                    <field name="lang" readonly="1"/>
+                    <field name="src" readonly="1"/>
+                    <field name="value"/>
+                  </tree>
+                </field>
+              </page>
             </notebook>
             <group>
             </group>
