@@ -56,35 +56,31 @@ class object_merger(orm.TransientModel):
 
     def fields_view_get(self, cr, uid, view_id=None, view_type='form',
                         context=None, toolbar=False, submenu=False):
-        if context is None:
-            context = {}
-        object_ids = context.get('active_ids', [])
-        active_model = context.get('active_model')
-        if object_ids:
-            self._check_quantity(cr, uid, object_ids, active_model,
-                                 context=context)
-        res = super(object_merger, self).fields_view_get(cr, uid, view_id,
-                                                         view_type,
-                                                         context=context,
-                                                         toolbar=toolbar,
-                                                         submenu=submenu)
-        field_name = 'x_' + (
-            active_model and active_model.replace('.', '_') or '') + '_id'
-        if object_ids:
-            view_part = """
-            <label for='""" + field_name + """'/>
-              <div>
-                <field name='""" + field_name + """' required="1"
-                       domain="[(\'id\', \'in\', """ + str(object_ids) + """)]"/>
-              </div>
-            """
-            res['arch'] = res['arch'].decode('utf8').replace(
-                """<separator string="to_replace"/>""", view_part
-            )
-            field = self.fields_get(cr, uid, [field_name], context=context)
-            res['fields'] = field
-            res['fields'][field_name]['domain'] = [('id', 'in', object_ids)]
-            res['fields'][field_name]['required'] = True
+        res = super(object_merger, self).fields_view_get(
+            cr, uid, view_id, view_type, context=context, toolbar=toolbar,
+            submenu=submenu)
+        if view_type == 'form':
+            if context is None:
+                context = {}
+            object_ids = context.get('active_ids', [])
+            active_model = context.get('active_model')
+            if object_ids:
+                self._check_quantity(cr, uid, object_ids, active_model,
+                                     context=context)
+                field_name = 'x_%s_id' % (
+                    active_model and active_model.replace('.', '_') or '')
+                view_part = """
+                <field name="{field_name}" nolabel="1" widget='radio'/>
+                """.format(field_name=field_name)
+                res['arch'] = res['arch'].decode('utf8').replace(
+                    """<separator string="to_replace"/>""", view_part
+                )
+                field = self.fields_get(cr, uid, [field_name], context=context)
+                field[field_name]['domain'] = [('id', '=', object_ids)]
+                field[field_name]['selection'] = self.pool[active_model].name_get(
+                    cr, SUPERUSER_ID, object_ids, context=context)
+                field[field_name]['required'] = True
+                res['fields'] = field
         return res
 
     def _browse_active_model(self, cr, active_model):

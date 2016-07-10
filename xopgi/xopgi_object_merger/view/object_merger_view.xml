@@ -8,6 +8,8 @@
             <field name="arch" type="xml">
                 <form string="Merge Entries" version="7.0">
 	                <group>
+                      <label string="Select wish document do you want to keep"/>
+                      <newline/>
 	                    <separator string="to_replace"/>
 	                </group>
 	                <footer>
