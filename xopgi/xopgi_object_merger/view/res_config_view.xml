@@ -157,5 +157,13 @@
         </form>
       </field>
     </record>
+
+    <act_window id="act_merge_template"
+                name="Merge"
+                res_model="object.merger"
+                src_model="object.merger"
+                view_mode="form"
+                target="new"
+                groups="xopgi_object_merger.group_merger_manager"/>
   </data>
 </openerp>
