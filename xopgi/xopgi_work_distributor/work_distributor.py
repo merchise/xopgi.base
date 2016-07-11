@@ -3,10 +3,10 @@
 # --------------------------------------------------------------------------
 # xopgi_work_distributor.work_distributor
 # --------------------------------------------------------------------------
-# Copyright (c) 2014, 2015 Merchise Autrement and Contributors
+# Copyright (c) 2014, 2015 Merchise Autrement [~º/~] and Contributors
 # All rights reserved.
 #
-# Author: Merchise Autrement
+# Author: Merchise Autrement [~º/~]
 # Contributors: see CONTRIBUTORS and HISTORY file
 #
 # This is free software; you can redistribute it and/or modify it under the
