@@ -17,9 +17,26 @@ from __future__ import (division as _py3_division,
 
 from openerp import api, exceptions, fields, models, _
 from openerp.tools.safe_eval import safe_eval
+import operator
 from xoeuf.osv.orm import CREATE_RELATED
 from xoutil import logger
 from .util import evaluate, get_free_names
+
+
+OPERATORS = {
+    '==': ('equal', operator.eq),
+    '!=': ('not equal', operator.ne),
+    '>': ('greater than', operator.gt),
+    '<': ('lower than', operator.lt),
+    '>=': ('lower than or equal', operator.ge),
+    '<=': ('lower than or equal', operator.le),
+    'is': ('is', operator.is_),
+    'not is': ('is not', operator.is_not),
+    'in': ('is in', lambda a, b: operator.contains(b, a)),
+    'not in': ('is not in', lambda a, b: not operator.contains(b, a)),
+    'contain': ('contain', operator.contains),
+    'not contain': ('not contain', lambda a, b: not operator.contains(a, b)),
+}
 
 
 def _get_candidates(value):
@@ -44,13 +61,13 @@ class Evidence(models.Model):
                             "Eg: var1 - var2 * (var3 or 400) \n"
                             "The result must be able to be in an expression like: \n"
                             "(result operator operand) resulting a boolean value.")
-    operator = fields.Char(help="Python comparative operator.\n"
-                                "Eg: >, >=, is, in, not in\n"
-                                "It be apply between result of definition evaluation and operand.")
+    operator = fields.Selection([(k, v[0]) for k, v in OPERATORS.items()],
+                                required=True)
     operand = fields.Char(help="Python literal.\n"
                                "Eg: 1000, False, 0.5, 'Some text'\n"
                                "It must be able to be in an expression like: \n"
-                               "(result operator operand) resulting a boolean value.")
+                               "(result operator operand) resulting a boolean value.",
+                          required=True)
     bool_value = fields.Boolean()
     control_vars = fields.Many2many('cdr.control.variable',
                                     'evidence_control_variable_rel',
@@ -120,15 +137,15 @@ class Evidence(models.Model):
         return evaluate(self.definition, **self.control_vars.get_value())
 
     def evaluate_bool_expresion(self, definition_result):
-        return bool(safe_eval(
-            "%s %s %s" % (definition_result, self.operator, self.operand)))
+        op_funct = OPERATORS[self.operator][1]
+        return bool(op_funct(definition_result, safe_eval(self.operand)))
 
     @api.constrains('definition', 'operand', 'operator')
     def check_definition(self):
         try:
             definition_res = self._evaluate()
             self.evaluate_bool_expresion(definition_res)
-        except Exception, e:
+        except Exception as e:
             raise exceptions.ValidationError(
                 _("Wrong definition: %s") % e.message)
 
@@ -137,7 +154,7 @@ class Evidence(models.Model):
             try:
                 value = evidence._evaluate()
                 bool_value = evidence.evaluate_bool_expresion(value)
-            except Exception, e:
+            except Exception as e:
                 logger.exception('Error evaluating evidence %s defined as: '
                                  '%s', (self.name, self.definition))
                 logger.exception(e)
@@ -153,5 +170,6 @@ class Evidence(models.Model):
     @api.returns('self', lambda value: value.id)
     def create(self, vals):
         res = super(Evidence, self).create(vals)
+        # evaluate by first time to get init value.
         self.env['cdr.evaluation.cycle'].create(evidences_to_evaluate=res)
         return res

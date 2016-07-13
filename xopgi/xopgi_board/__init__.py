@@ -24,3 +24,5 @@ if ODOO_VERSION_INFO < (9, 0):
     from . import hr_job  # noqa
     from . import res_config  # noqa
     from . import res_currency  # noqa
+    from . import res_group  # noqa
+    from . import ir_ui_menu  # noqa

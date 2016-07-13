@@ -25,7 +25,7 @@ from openerp.exceptions import ValidationError, Warning
 from openerp.tools.safe_eval import safe_eval
 
 from xoeuf import signals
-from xoeuf.osv.orm import LINK_RELATED
+from xoeuf.osv.orm import LINK_RELATED, REPLACEWITH_RELATED
 from xoeuf.tools import date2str, dt2str, normalize_datetime
 
 
@@ -136,6 +136,7 @@ class WorkDistributionModel(models.Model):
     effort_domain = fields.Text(help="Odoo domain to use on effort "
                                      "based strategies. \nEg: "
                                      "[('state','not in',('done','cancel')]")
+    translations = fields.Many2many('ir.translation')
 
     @api.onchange('use_domain_builder')
     def onchange_use_domain_builder(self):
@@ -191,6 +192,12 @@ class WorkDistributionModel(models.Model):
         self.other_fields = str(other_fields)
         return {'warning': warning} if warning else None
 
+    @api.model
+    @api.onchange('strategy_by_group')
+    def onchange_strategy_by_group(self):
+        if not self.strategy_by_group:
+            self.group_field = False
+
     @signals.receiver(signals.pre_create)
     def distribute(self, signal, values):
         ''' Get all distribution configurations for model and apply each one.
@@ -234,8 +241,9 @@ class WorkDistributionModel(models.Model):
     def create(self, values):
         if values.get('group_field', False):
             self.sudo().create_related(values)
-        res_id = super(WorkDistributionModel, self).create(values)
-        return res_id
+        res = super(WorkDistributionModel, self).create(values)
+        res.update_translations()
+        return res
 
     def create_related(self, values):
         """ Create action and field associated.
@@ -338,6 +346,7 @@ class WorkDistributionModel(models.Model):
         actions_to_unlink = [i.action.id for i in self if i.action]
         fields_to_unlink = [i.strategy_field.id for i in self
                             if i.strategy_field]
+        self.update_translations(force_delete=True)
         result = super(WorkDistributionModel, self).unlink()
         self.sudo().unlink_actions(actions_to_unlink)
         self.sudo().unlink_fields(fields_to_unlink)
@@ -378,21 +387,63 @@ class WorkDistributionModel(models.Model):
 
     @api.multi
     def write(self, values):
-        if 'group_field' in values or 'destination_field' in values:
+        temp_fields = ['destination_field', 'group_field', 'model']
+        if any(f in values for f in temp_fields):
             actions_to_unlink = [i.action.id for i in self if i.action]
             fields_to_unlink = [i.strategy_field.id for i in self
                                 if i.strategy_field]
             self.sudo().unlink_actions(actions_to_unlink)
             self.sudo().unlink_fields(fields_to_unlink)
+            for item in self.sudo():
+                if item.translations:
+                    item.translations.unlink()
         result = super(WorkDistributionModel, self).write(values)
-        if values.get('group_field', False):
+        group_field = values.get('group_field', False)
+        if any(values.get(f, False) for f in temp_fields):
             for item in self:
-                vals = {'destination_field': item.destination_field.id,
-                        'group_field': item.group_field.id}
+                temp_fields = ['destination_field', 'group_field', 'model']
+                vals = {f: getattr(item, f).id for f in temp_fields}
                 self.create_related(vals)
-                vals.pop('destination_field', False)
-                vals.pop('group_field', False)
+                for f in temp_fields:
+                    vals.pop(f, None)
                 item.write(vals)
+        if any(f in values for f in temp_fields):
+            self.update_translations(force_create=group_field)
+        return result
+
+    @api.multi
+    def update_translations(self, force_create=False, force_delete=False):
+        to_unlink = self.env['ir.translation']
+        for item in self:
+            if not force_delete and item.group_field:
+                if force_create or not item.translations:
+                    translations = self.create_translations(
+                        item.group_field.relation, item.strategy_field.name,
+                        item.strategy_field.field_description,
+                        type='field')
+                    translations |= self.create_translations(
+                        'ir.actions.act_window', 'name', item.action.name,
+                        res_id=item.action.id)
+                    item.write(dict(
+                        translations=[REPLACEWITH_RELATED(*translations.ids)]
+                    ))
+            if item.translations and (force_delete or not item.group_field):
+                to_unlink |= item.translations
+        if to_unlink:
+            to_unlink.unlink()
+
+    def create_translations(self, model, field, src, res_id=0, type='model'):
+        result = self.env['ir.translation']
+        for lang in self.env['res.lang'].search([]):
+            result |= result.create({
+                'type': type,
+                'res_id': res_id,
+                'module': 'xopgi_work_distributor',
+                'name': '%s,%s' % (model, field),
+                'src': src,
+                'value': src,
+                'lang': lang.code
+            })
         return result
 
 

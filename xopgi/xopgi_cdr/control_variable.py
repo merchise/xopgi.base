@@ -105,7 +105,7 @@ class ControlVariable(models.Model):
     def check_definition(self):
         try:
             self._evaluate()
-        except Exception, e:
+        except Exception as e:
             raise exceptions.ValidationError(_("Wrong definition: %s") %
                                              e.message)
 
@@ -113,7 +113,7 @@ class ControlVariable(models.Model):
         for var in self:
             try:
                 value = var._evaluate(cycle.create_date)
-            except Exception, e:
+            except Exception as e:
                 logger.exception('Error evaluating control variable '
                                  '%s.', (var.name,))
                 logger.exception(e)
@@ -128,6 +128,7 @@ class ControlVariable(models.Model):
     @api.returns('self', lambda value: value.id)
     def create(self, vals):
         res = super(ControlVariable, self).create(vals)
+        # evaluate by first time to get init value.
         self.env['cdr.evaluation.cycle'].create(vars_to_evaluate=res)
         return res
 
@@ -149,14 +150,18 @@ class ControlVariableTemplate(models.Model):
             self.args_need = False
 
     def eval(self, now, kwargs_str):
-        # TODO: exception treatment
+        """ Evaluate template definition with given param values.
 
+        :param now: datetime of evaluation cycle start.
+        :param kwargs_str: param values to to passe it to str.format() on
+        definition.
+        """
         code = self.definition
         if self.args_need:
             try:
                 kwargs = evaluate(kwargs_str)
                 code = code.format(**kwargs)
-            except Exception, e:
+            except Exception as e:
                 logger.exception(
                     'Error formatting control variable template '
                     '%s: %s with %s params.', (self.name, self.definition,

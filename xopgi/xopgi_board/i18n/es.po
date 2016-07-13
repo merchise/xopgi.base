@@ -48,11 +48,6 @@ msgid "Job Description"
 msgstr "Descripción del trabajo"
 
 #. module: xopgi_board
-#: field:xopgi.board.widget,job_positions:0
-msgid "Job positions"
-msgstr "Puestos de trabajo"
-
-#. module: xopgi_board
 #: field:xopgi.board.widget,name:0
 msgid "Name"
 msgstr "Nombre"
