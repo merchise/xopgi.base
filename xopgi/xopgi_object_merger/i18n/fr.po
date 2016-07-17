@@ -359,10 +359,17 @@ msgid "The limit quantity of objects to allow merge at one time must be positive
 msgstr "The limit quantity of objects to allow merge at one time must be positive number!"
 
 #. module: xopgi_object_merger
-#: code:addons/xopgi_object_merger/res_config.py:247
+#: code:addons/xopgi_object_merger/res_config.py:0
+#: code:addons/xopgi_object_merger/object_merger.py:0
 #, python-format
 msgid "To keep"
 msgstr "To keep"
+
+#. module: xopgi_object_merger
+#: code:addons/xopgi_object_merger/object_merger.py:0
+#, python-format
+msgid "To merge"
+msgstr "To merge"
 
 #. module: xopgi_object_merger
 #: code:addons/xopgi_object_merger/object_merger.py:107
