@@ -2,7 +2,7 @@
 # ---------------------------------------------------------------------
 # xopgi_web_notification.notification
 # ---------------------------------------------------------------------
-# Copyright (c) 2016 Merchise Autrement and Contributors
+# Copyright (c) 2016 Merchise Autrement [~º/~] and Contributors
 # All rights reserved.
 #
 # This is free software; you can redistribute it and/or modify it under the
@@ -33,12 +33,21 @@ class Controller(bus.Controller):
 class XopgiWebNotification(models.TransientModel):
     _name = 'xopgi.web.notification'
 
-    def notify(self, uid=None, channel=None, **values):
-        return self.post(uid or self._uid, channel=channel, **values)
+    def notify(self, uid=None, **values):
+        """Add a notification for uid user as recipient.
 
-    def warn(self, uid=None, channel=None, **values):
-        return self.post(uid or self._uid, 'warn', channel=channel,
-                         **values)
+        :param uid: recipient user id.
+        :param values: notification dict.
+        """
+        return self.post(uid or self._uid, **values)
+
+    def warn(self, uid=None, **values):
+        """Add a warning for uid user as recipient.
+
+        :param uid: recipient user id.
+        :param values: notification dict.
+        """
+        return self.post(uid or self._uid, 'warn', **values)
 
     def post(self, uid, action='notify', channel=None, **values):
         if not channel:

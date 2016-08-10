@@ -2,7 +2,7 @@
 # ---------------------------------------------------------------------
 # xopgi_board
 # ---------------------------------------------------------------------
-# Copyright (c) 2013-2016 Merchise Autrement
+# Copyright (c) 2013-2016 Merchise Autrement [~º/~]
 # All rights reserved.
 #
 # This is free software; you can redistribute it and/or modify it under the
@@ -24,3 +24,5 @@ if ODOO_VERSION_INFO < (9, 0):
     from . import hr_job  # noqa
     from . import res_config  # noqa
     from . import res_currency  # noqa
+    from . import res_group  # noqa
+    from . import ir_ui_menu  # noqa

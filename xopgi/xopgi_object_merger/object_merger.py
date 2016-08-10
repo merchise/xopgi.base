@@ -3,10 +3,10 @@
 # --------------------------------------------------------------------------
 # xopgi_object_merge.object_merger
 # --------------------------------------------------------------------------
-# Copyright (c) 2014-2016 Merchise Autrement and Contributors
+# Copyright (c) 2014-2016 Merchise Autrement [~º/~] and Contributors
 # All rights reserved.
 #
-# Author: Merchise Autrement
+# Author: Merchise Autrement [~º/~]
 # Contributors: see CONTRIBUTORS and HISTORY file
 #
 # This is free software; you can redistribute it and/or modify it under the
@@ -56,35 +56,57 @@ class object_merger(orm.TransientModel):
 
     def fields_view_get(self, cr, uid, view_id=None, view_type='form',
                         context=None, toolbar=False, submenu=False):
-        if context is None:
-            context = {}
-        object_ids = context.get('active_ids', [])
-        active_model = context.get('active_model')
-        if object_ids:
-            self._check_quantity(cr, uid, object_ids, active_model,
-                                 context=context)
-        res = super(object_merger, self).fields_view_get(cr, uid, view_id,
-                                                         view_type,
-                                                         context=context,
-                                                         toolbar=toolbar,
-                                                         submenu=submenu)
-        field_name = 'x_' + (
-            active_model and active_model.replace('.', '_') or '') + '_id'
-        if object_ids:
-            view_part = """
-            <label for='""" + field_name + """'/>
-              <div>
-                <field name='""" + field_name + """' required="1"
-                       domain="[(\'id\', \'in\', """ + str(object_ids) + """)]"/>
-              </div>
-            """
-            res['arch'] = res['arch'].decode('utf8').replace(
-                """<separator string="to_replace"/>""", view_part
-            )
-            field = self.fields_get(cr, uid, [field_name], context=context)
-            res['fields'] = field
-            res['fields'][field_name]['domain'] = [('id', 'in', object_ids)]
-            res['fields'][field_name]['required'] = True
+        res = super(object_merger, self).fields_view_get(
+            cr, uid, view_id, view_type, context=context, toolbar=toolbar,
+            submenu=submenu)
+        if view_type == 'form':
+            if context is None:
+                context = {}
+            object_ids = context.get('active_ids', [])
+            active_model = context.get('active_model')
+            if object_ids:
+                self._check_quantity(cr, uid, object_ids, active_model,
+                                     context=context)
+                field_name = 'x_%s_id' % (
+                    active_model and active_model.replace('.', '_') or '')
+                view_part = """
+                <field name="{field_name}"/>
+                <separator string="{string}" colspan="4"/>
+                <field name="info" nolabel="1" colspan="4"/>
+                """.format(field_name=field_name, string=_("To merge"))
+                res['arch'] = res['arch'].decode('utf8').replace(
+                    """<separator string="to_replace"/>""", view_part
+                )
+                field = self.fields_get(cr, uid, [field_name, 'info'],
+                                        context=context)
+                field[field_name]['domain'] = [('id', '=', object_ids)]
+                field[field_name]['selection'] = self.pool[active_model].name_get(
+                    cr, SUPERUSER_ID, object_ids, context=context)
+                field[field_name]['required'] = True
+                res['fields'].update(field)
+        return res
+
+    def fields_get(self, cr, user, fields_list=None, context=None,
+                   write_access=True, attributes=None):
+        res = super(object_merger, self).fields_get(
+            cr, user, allfields=fields_list, context=context,
+            write_access=write_access, attributes=attributes)
+        if fields_list and 'info' in fields_list:
+            active_model = context.get('active_model')
+            fvg = lambda view: self.pool[active_model].fields_view_get(
+                cr, user, view_type=view, context=context)
+            res.update(info=dict(
+                type='many2many',
+                relation=active_model,
+                views={k: fvg(k) for k in ['tree', 'form']}
+            ))
+        return res
+
+    def default_get(self, cr, uid, fields_list, context=None):
+        res = super(object_merger, self).default_get(cr, uid, fields_list,
+                                                     context=context)
+        if fields_list and 'info' in fields_list:
+            res.update(info=context.get('active_ids', False))
         return res
 
     def _browse_active_model(self, cr, active_model):

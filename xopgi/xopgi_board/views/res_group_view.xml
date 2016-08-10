@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data>
+    <record id="board_widget_res_group_form" model="ir.ui.view">
+      <field name="name">board.widget.res.group</field>
+      <field name="model">res.groups</field>
+      <field name="inherit_id" ref="base.view_groups_form"/>
+      <field name="arch" type="xml">
+        <xpath expr="//notebook" position="inside">
+          <page string="Widgets">
+            <field name="widgets" nolabel="1"
+                   context="{'default_group': active_id}">
+              <tree editable="top">
+                <field name="widget"/>
+                <field name="priority"/>
+              </tree>
+            </field>
+          </page>
+        </xpath>
+      </field>
+    </record>
+  </data>
+</openerp>

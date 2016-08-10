@@ -3,7 +3,7 @@
 # ---------------------------------------------------------------------
 # xopgi.base._release
 # ---------------------------------------------------------------------
-# Copyright (c) 2013-2016 Merchise Autrement and Contributors
+# Copyright (c) 2013-2016 Merchise Autrement [~º/~] and Contributors
 # All rights reserved.
 #
 # This is free software; you can redistribute it and/or modify it under the

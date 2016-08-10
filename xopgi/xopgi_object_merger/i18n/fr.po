@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0.20160705.041549+65ff609\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-10 21:13+0000\n"
-"PO-Revision-Date: 2016-07-10 21:13+0000\n"
+"POT-Creation-Date: 2016-07-10 21:54+0000\n"
+"PO-Revision-Date: 2016-07-10 21:54+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,66 +16,66 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: xopgi_object_merger
-#: code:addons/xopgi_object_merger/object_merger.py:0
+#: code:addons/xopgi_object_merger/object_merger.py:166
 #, python-format
 msgid "%s(s) Merged"
-msgstr "%s(s) Fusionados"
+msgstr "%s(s) Merged"
 
 #. module: xopgi_object_merger
 #: view:ir.model:xopgi_object_merger.view_ir_model_merge_form
 msgid "(0 for no limit)"
-msgstr "(0 significa sin límite)"
+msgstr "(0 for no limit)"
 
 #. module: xopgi_object_merger
 #: code:addons/xopgi_object_merger/object_merger.py:168
 #, python-format
 msgid "<b>ID:</b> %s; <b>Name:</b> %s"
-msgstr "<b>ID:</b> %s; <b>Nombre:</b> %s"
+msgstr "<b>ID:</b> %s; <b>Name:</b> %s"
 
 #. module: xopgi_object_merger
 #: model:field.merge.way,name:xopgi_object_merger.uniform
 msgid "Add/Concat"
-msgstr "Concatenar"
+msgstr "Add/Concat"
 
 #. module: xopgi_object_merger
 #: view:object.merger.settings:xopgi_object_merger.view_object_merger_settings
 msgid "Apply"
-msgstr "Aplicar"
+msgstr "Apply"
 
 #. module: xopgi_object_merger
 #: code:addons/xopgi_object_merger/object_merger.py:103
 #, python-format
 msgid "At less two items are necessary for merge."
-msgstr "Debe seleccionar al menos dos elementos para fusionar"
+msgstr "At less two items are necessary for merge."
 
 #. module: xopgi_object_merger
 #: model:field.merge.way,name:xopgi_object_merger.average
 msgid "Average"
-msgstr "Promedio"
+msgstr "Average"
 
 #. module: xopgi_object_merger
 #: view:object.merger:xopgi_object_merger.view_object_merge_form
 #: view:object.merger.settings:xopgi_object_merger.view_object_merger_settings
 msgid "Cancel"
-msgstr "Cancelar"
+msgstr "Cancel"
 
 #. module: xopgi_object_merger
 #: field:field.merge.way,code:0
 msgid "Code"
-msgstr "Código"
+msgstr "Code"
 
 #. module: xopgi_object_merger
 #: code:addons/xopgi_object_merger/object_merger.py:127
 #: code:addons/xopgi_object_merger/object_merger.py:136
 #, python-format
 msgid "Configuration Error!"
-msgstr "Error de configuración!"
+msgstr "Configuration Error!"
 
 #. module: xopgi_object_merger
 #: model:ir.actions.act_window,name:xopgi_object_merger.action_object_merger_settings
 #: view:object.merger.settings:xopgi_object_merger.view_object_merger_settings
 msgid "Configure Object Merger"
-msgstr "Configurar fusionador de objetos"
+msgstr "Configure Object Merger"
 
 #. module: xopgi_object_merger
 #: field:field.merge.way,create_uid:0
@@ -102,23 +102,23 @@ msgstr "Created on"
 #: field:object.merger,display_name:0
 #: field:object.merger.settings,display_name:0
 msgid "Display Name"
-msgstr "Nombre"
+msgstr "Display Name"
 
 #. module: xopgi_object_merger
 #: view:field.merge.way:xopgi_object_merger.view_field_merge_way_tree
 msgid "Field Merge Way"
-msgstr "Método de fusión por campo"
+msgstr "Field Merge Way"
 
 #. module: xopgi_object_merger
 #: view:ir.model:xopgi_object_merger.view_ir_model_merge_form
 #: field:ir.model,general_merge_way:0
 msgid "General Merge Way"
-msgstr "Método de fusión general"
+msgstr "General Merge Way"
 
 #. module: xopgi_object_merger
 #: help:informal.reference,model_field_value:0
 msgid "How save destination model reference."
-msgstr "Cómo guardar la referencia del modelo destino."
+msgstr "How save destination model reference."
 
 #. module: xopgi_object_merger
 #: field:field.merge.way,id:0
@@ -132,24 +132,29 @@ msgstr "ID"
 #. module: xopgi_object_merger
 #: field:informal.reference,id_field_name:0
 msgid "Id Field Name"
-msgstr "Campo ID"
+msgstr "Id Field Name"
+
+#. module: xopgi_object_merger
+#: help:ir.model,object_merger_model:0
+msgid "If checked, by default the Object Merger configuration will get this module in the list"
+msgstr "If checked, by default the Object Merger configuration will get this module in the list"
 
 #. module: xopgi_object_merger
 #: view:object.merger.settings:xopgi_object_merger.view_object_merger_settings
 #: field:object.merger.settings,informal_reference_ids:0
 msgid "Informal References"
-msgstr "Referencias informales"
+msgstr "Informal References"
 
 #. module: xopgi_object_merger
 #: code:addons/xopgi_object_merger/object_merger.py:102
 #, python-format
 msgid "Information!"
-msgstr "¡Información!"
+msgstr "Information!"
 
 #. module: xopgi_object_merger
 #: help:object.merger.settings,informal_reference_ids:0
 msgid "Know cases of pair of field represented a reference to an specific object from especific model."
-msgstr "Casos conocidos de pares de campos que referencian a un objeto específico."
+msgstr "Know cases of pair of field represented a reference to an specific object from especific model."
 
 #. module: xopgi_object_merger
 #: field:field.merge.way,__last_update:0
@@ -181,52 +186,52 @@ msgstr "Last Updated on"
 #. module: xopgi_object_merger
 #: help:ir.model,merge_limit:0
 msgid "Limit quantity of objects to allow merge at one time."
-msgstr "Límite máximo de objetos a fusionar a la vez."
+msgstr "Limit quantity of objects to allow merge at one time."
 
 #. module: xopgi_object_merger
 #: model:field.merge.way,name:xopgi_object_merger.effort
 msgid "Max"
-msgstr "Máximo"
+msgstr "Max"
 
 #. module: xopgi_object_merger
 #: model:ir.actions.act_window,name:xopgi_object_merger.act_merge_template
 msgid "Merge"
-msgstr "Fusionar"
+msgstr "Merge"
 
 #. module: xopgi_object_merger
 #: view:object.merger:xopgi_object_merger.view_object_merge_form
 msgid "Merge Entries"
-msgstr "Fusionar"
+msgstr "Merge Entries"
 
 #. module: xopgi_object_merger
 #: field:ir.model,merge_limit:0
 msgid "Merge Limit"
-msgstr "Límite"
+msgstr "Merge Limit"
 
 #. module: xopgi_object_merger
 #: field:ir.model,merge_cyclic:0
 msgid "Merge cyclic relations"
-msgstr "Fusionar relaciones cíclicas"
+msgstr "Merge cyclic relations"
 
 #. module: xopgi_object_merger
 #: model:ir.model,name:xopgi_object_merger.model_object_merger
 msgid "Merge objects"
-msgstr "Fusionador de objetos"
+msgstr "Merge objects"
 
 #. module: xopgi_object_merger
 #: view:ir.model:xopgi_object_merger.view_ir_model_merge_form
 msgid "Merge options"
-msgstr "Opciones para fusionar"
+msgstr "Merge options"
 
 #. module: xopgi_object_merger
 #: field:field.merge.way.rel,merge_way:0
 msgid "Merge way"
-msgstr "Método de fusión"
+msgstr "Merge way"
 
 #. module: xopgi_object_merger
 #: model:field.merge.way,name:xopgi_object_merger.effort_month
 msgid "Min"
-msgstr "Mínnimo"
+msgstr "Min"
 
 #. module: xopgi_object_merger
 #: field:field.merge.way.rel,model:0
@@ -234,149 +239,149 @@ msgstr "Mínnimo"
 #: view:informal.reference:xopgi_object_merger.view_informal_reference_tree
 #: view:ir.model:xopgi_object_merger.view_ir_model_merge_form
 msgid "Model"
-msgstr "Modelo"
+msgstr "Modèle"
 
 #. module: xopgi_object_merger
 #: field:informal.reference,model_field_name:0
 msgid "Model Field Name"
-msgstr "Campo Modelo"
+msgstr "Model Field Name"
 
 #. module: xopgi_object_merger
 #: field:informal.reference,model_field_value:0
 msgid "Model Field Value"
-msgstr "Valor del Campo Modelo"
+msgstr "Model Field Value"
 
 #. module: xopgi_object_merger
 #: selection:informal.reference,model_field_value:0
 msgid "Model Id"
-msgstr "Id del modelo"
+msgstr "Model Id"
 
 #. module: xopgi_object_merger
 #: selection:informal.reference,model_field_value:0
 msgid "Model Name"
-msgstr "Nombre del modelo"
+msgstr "Model Name"
 
 #. module: xopgi_object_merger
 #: model:ir.model,name:xopgi_object_merger.model_ir_model
 #: view:object.merger.settings:xopgi_object_merger.view_object_merger_settings
 #: field:object.merger.settings,models_ids:0
 msgid "Models"
-msgstr "Modelos"
+msgstr "Modèles"
 
 #. module: xopgi_object_merger
 #: field:field.merge.way,name:0
 #: field:field.merge.way.rel,name:0
 #: field:object.merger,name:0
 msgid "Name"
-msgstr "Nombre"
+msgstr "Name"
 
 #. module: xopgi_object_merger
 #: help:informal.reference,table_name:0
 msgid "Name of DB table where informal reference are."
-msgstr "Nombre de la tabla donde se encuentra la referencia informal."
+msgstr "Name of DB table where informal reference are."
 
 #. module: xopgi_object_merger
 #: help:informal.reference,id_field_name:0
 msgid "Name of field where destination id are saved."
-msgstr "Nombre del campo don de encuentra el id del objeto referenciado."
+msgstr "Name of field where destination id are saved."
 
 #. module: xopgi_object_merger
 #: help:informal.reference,model_field_name:0
 msgid "Name of field where destination model are saved."
-msgstr "Nombre del campo don de encuentra el modelo referenciado."
+msgstr "Name of field where destination model are saved."
 
 #. module: xopgi_object_merger
 #: field:ir.model,object_merger_model:0
 #: model:ir.ui.menu,name:xopgi_object_merger.menu_object_merger_settings
 msgid "Object Merger"
-msgstr "Fusionador de objetos"
+msgstr "Object Merger"
 
 #. module: xopgi_object_merger
 #: model:res.groups,name:xopgi_object_merger.group_merger_manager
 msgid "Object Merger Manager"
-msgstr "Responsable de fusionar objetos"
+msgstr "Object Merger Manager"
 
 #. module: xopgi_object_merger
 #: view:object.merger.settings:xopgi_object_merger.view_object_merger_settings
 msgid "Object MergerConfiguration"
-msgstr "Configuración del fusionador de objetos"
+msgstr "Object MergerConfiguration"
 
 #. module: xopgi_object_merger
 #: code:addons/xopgi_object_merger/object_merger.py:137
 #, python-format
 msgid "Please select one value to keep"
-msgstr "Debe seleccionar el objeto que mantendrá"
+msgstr "Please select one value to keep"
 
 #. module: xopgi_object_merger
 #: field:field.merge.way,predefine:0
 msgid "Predefine"
-msgstr "Predefinido"
+msgstr "Predefine"
 
 #. module: xopgi_object_merger
 #: view:ir.model:xopgi_object_merger.view_ir_model_merge_form
 msgid "Python code to return on result var a python dict like:"
-msgstr "Código python que debe retornar un diccionario en la variable result:"
+msgstr "Python code to return on result var a python dict like:"
 
 #. module: xopgi_object_merger
 #: view:object.merger:xopgi_object_merger.view_object_merge_form
 msgid "Select wish document do you want to keep"
-msgstr "Seleccione que objeto desea mantener"
+msgstr "Select wish document do you want to keep"
 
 #. module: xopgi_object_merger
 #: field:ir.model,field_merge_way_ids:0
 msgid "Specific Merge Ways"
-msgstr "Métodos específicos de fusión"
+msgstr "Specific Merge Ways"
 
 #. module: xopgi_object_merger
 #: view:ir.model:xopgi_object_merger.view_ir_model_merge_form
 msgid "Specific Merge Ways for model fields"
-msgstr "Métodos de fusión específicos para campos"
+msgstr "Specific Merge Ways for model fields"
 
 #. module: xopgi_object_merger
 #: sql_constraint:field.merge.way:0
 msgid "Strategy must be unique!"
-msgstr "La estrategia debe ser única!"
+msgstr "Strategy must be unique!"
 
 #. module: xopgi_object_merger
 #: field:informal.reference,table_name:0
 msgid "Table Name"
-msgstr "Nombre de tabla"
+msgstr "Table Name"
 
 #. module: xopgi_object_merger
 #: code:addons/xopgi_object_merger/object_merger.py:128
 #, python-format
 msgid "The is no active model defined!"
-msgstr "No se encontró el modelo activo!"
+msgstr "The is no active model defined!"
 
 #. module: xopgi_object_merger
 #: sql_constraint:ir.model:0
 msgid "The limit quantity of objects to allow merge at one time must be positive number!"
-msgstr "El límite de objetos a fusionar debe ser un valor positivo!"
+msgstr "The limit quantity of objects to allow merge at one time must be positive number!"
 
 #. module: xopgi_object_merger
 #: code:addons/xopgi_object_merger/res_config.py:0
 #: code:addons/xopgi_object_merger/object_merger.py:0
 #, python-format
 msgid "To keep"
-msgstr "A mantener"
+msgstr "To keep"
 
 #. module: xopgi_object_merger
 #: code:addons/xopgi_object_merger/object_merger.py:0
 #, python-format
 msgid "To merge"
-msgstr "A fusionar"
+msgstr "To merge"
 
 #. module: xopgi_object_merger
 #: code:addons/xopgi_object_merger/object_merger.py:107
 #, python-format
 msgid "Warning!"
-msgstr "¡Advertencia!"
+msgstr "Warning!"
 
 #. module: xopgi_object_merger
 #: code:addons/xopgi_object_merger/object_merger.py:108
 #, python-format
 msgid "You can`t merge so much objects at one time."
-msgstr "Usted no puede fusionar tantos objetos de una vez."
+msgstr "You can`t merge so much objects at one time."
 
 #. module: xopgi_object_merger
 #: view:ir.model:xopgi_object_merger.view_ir_model_merge_form
@@ -387,7 +392,7 @@ msgstr "dst_obj => merge destination object."
 #: view:object.merger:xopgi_object_merger.view_object_merge_form
 #: view:object.merger.settings:xopgi_object_merger.view_object_merger_settings
 msgid "or"
-msgstr "o"
+msgstr "or"
 
 #. module: xopgi_object_merger
 #: view:ir.model:xopgi_object_merger.view_ir_model_merge_form

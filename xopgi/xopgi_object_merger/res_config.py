@@ -3,10 +3,10 @@
 # --------------------------------------------------------------------------
 # xopgi_object_merger.res_config
 # --------------------------------------------------------------------------
-# Copyright (c) 2014-2016 Merchise Autrement and Contributors
+# Copyright (c) 2014-2016 Merchise Autrement [~º/~] and Contributors
 # All rights reserved.
 #
-# Author: Merchise Autrement
+# Author: Merchise Autrement [~º/~]
 # Contributors: see CONTRIBUTORS and HISTORY file
 #
 # This is free software; you can redistribute it and/or modify it under the
@@ -24,8 +24,6 @@ from openerp.tools.safe_eval import safe_eval
 from openerp.tools.translate import _
 from operator import gt, lt
 from openerp import api, fields as new_api_fields, models, SUPERUSER_ID
-
-from xoeuf.osv.orm import LINK_RELATED
 
 IS_MODEL_ID = '1'
 MODEL_FIELD_VALUE_SELECTION = [('0', 'Model Name'), (IS_MODEL_ID, 'Model Id')]
@@ -186,8 +184,8 @@ class object_merger_settings(osv.osv_memory):
         action_obj = self.pool.get('ir.actions.act_window')
         value_obj = self.pool.get('ir.values')
         field_obj = self.pool.get('ir.model.fields')
-        rol = self.pool['ir.model.data'].xmlid_to_res_id(
-            cr, SUPERUSER_ID, 'xopgi_object_merger.group_merger_manager',
+        template_action = self.pool['ir.model.data'].xmlid_to_res_id(
+            cr, SUPERUSER_ID, 'xopgi_object_merger.act_merge_template',
             raise_if_not_found=False)
         if not vals or not vals.get('models_ids', False):
             return False
@@ -196,9 +194,9 @@ class object_merger_settings(osv.osv_memory):
             if isinstance(model_ids[0], (list)):
                 model_ids = model_ids[0][2]
         # Unlink Previous Actions
-        unlink_ids = action_obj.search(cr, uid,
-                                       [('res_model', '=', 'object.merger')],
-                                       context=context)
+        unlink_ids = action_obj.search(
+            cr, uid, [('res_model', '=', 'object.merger'),
+                      ('id', '!=', template_action)], context=context)
         for unlink_id in unlink_ids:
             action_obj.unlink(cr, uid, unlink_id)
             un_val_ids = value_obj.search(
@@ -219,38 +217,34 @@ class object_merger_settings(osv.osv_memory):
         # Put all models which are selected to be an object_merger
         model_obj.write(cr, uid, model_ids, {'object_merger_model': True},
                         context=context)
-        object_merger_ids = model_obj.search(cr, uid,
-                                             [('model', '=', 'object.merger')],
-                                             context=context)
-        read_datas = model_obj.read(cr, uid, model_ids,
-                                    ['model', 'name', 'object_merger_model'],
-                                    context=context)
-        for model in read_datas:
-            field_name = 'x_' + model['model'].replace('.', '_') + '_id'
-            act_id = action_obj.create(cr, uid, {
-                'name': "%s " % model['name'] + _("Merger"),
-                'type': 'ir.actions.act_window', 'res_model': 'object.merger',
-                'src_model': model['model'], 'view_type': 'form',
-                'groups_id': [LINK_RELATED(rol)],
-                'context': "{'field_to_read':'%s'}" % field_name,
-                'view_mode': 'form', 'target': 'new', }, context=context)
+        object_merger_ids = model_obj.search(
+            cr, uid, [('model', '=', 'object.merger')], context=context)
+        for model in model_obj.browse(cr, uid, model_ids, context=context):
+            field_name = 'x_' + model.model.replace('.', '_') + '_id'
+            name = "Merge"
+            default = {
+                'src_model': model.model,
+                'context': {'field_to_read': field_name}
+            }
+            act_id = action_obj.copy(cr, uid, template_action,
+                                     default=default, context=context)
             value_obj.create(
                 cr,
                 uid,
-                {'name': "%s " % model['name'] + _("Merger"),
-                 'model': model['model'], 'key2': 'client_action_multi',
+                {'name': name,
+                 'model': model.model, 'key2': 'client_action_multi',
                  'value': "ir.actions.act_window," + str(act_id), },
                 context=context
             )
-            field_name = 'x_' + model['model'].replace('.', '_') + '_id'
+            field_name = 'x_' + model.model.replace('.', '_') + '_id'
             if not field_obj.search(cr, uid, [('name', '=', field_name), (
                     'model', '=', 'object.merger')], context=context):
                 field_data = {
                     'model': 'object.merger',
                     'model_id': object_merger_ids and object_merger_ids[0] or False,
                     'name': field_name,
-                    'relation': model['model'],
-                    'field_description': "%s " % model['name'] + _('To keep'),
+                    'relation': model.model,
+                    'field_description': _('To keep'),
                     'state': 'manual',
                     'ttype': 'many2one',
                 }
