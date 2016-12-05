@@ -22,12 +22,12 @@
     """,
     'depends': ['base'],
     'data': [
+        "security/security.xml",
+
         "view/res_config_view.xml",
         "view/object_merger_view.xml",
         "data/know_informal_reference.xml",
         "data/predefine_field_merge_way.xml",
-
-        "security/security.xml",
     ],
     'demo': [],
 
