@@ -2,14 +2,13 @@
 # ---------------------------------------------------------------------
 # xopgi_claim_stage
 # ---------------------------------------------------------------------
-# Copyright (c) 2013-2015 Merchise Autrement [~º/~]
+# Copyright (c) 2013-2017 Merchise Autrement [~º/~] and Contributors
 # All rights reserved.
 #
 # This is free software; you can redistribute it and/or modify it under the
 # terms of the LICENCE attached (see LICENCE file) in the distribution
 # package.
 #
-# @created: 2015-12-12
 
 from __future__ import absolute_import as _py3_abs_imports
 

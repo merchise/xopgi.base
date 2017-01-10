@@ -2,14 +2,13 @@
 # ---------------------------------------------------------------------
 # xopgi_board.res_currency
 # ---------------------------------------------------------------------
-# Copyright (c) 2015, 2016 Merchise Autrement [~º/~] and Contributors
+# Copyright (c) 2015-2017 Merchise Autrement [~º/~] and Contributors
 # All rights reserved.
 #
 # This is free software; you can redistribute it and/or modify it under the
 # terms of the LICENCE attached (see LICENCE file) in the distribution
 # package.
 #
-# Created on 2016-02-08
 
 from __future__ import (division as _py3_division,
                         print_function as _py3_print,
