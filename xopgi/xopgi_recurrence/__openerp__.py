@@ -27,4 +27,6 @@
     'data': [
         'security/ir.model.access.csv',
     ],
+
+    'installable': (8, 0) <= ODOO_VERSION_INFO < (9, 0),  # noqa
 }

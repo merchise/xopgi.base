@@ -13,11 +13,18 @@
 
 from __future__ import absolute_import as _py3_abs_imports
 
-from openerp import fields, models
+try:
+    from openerp.release import version_info as ODOO_VERSION_INFO
+    from openerp import fields, models
+except ImportError:
+    # This is Odoo 10+, but let's be able to get the ODOO_VERSION_INFO
+    from odoo.release import version_info as ODOO_VERSION_INFO
+    from odoo import fields, models
 
 
-class BaseStage(models.AbstractModel):
-    _name = 'base.stage'
+if (8, 0) <= ODOO_VERSION_INFO < (9, 0):
+    class BaseStage(models.AbstractModel):
+        _name = 'base.stage'
 
-    flow_start = fields.Boolean()
-    flow_stop = fields.Boolean()
+        flow_start = fields.Boolean()
+        flow_stop = fields.Boolean()
