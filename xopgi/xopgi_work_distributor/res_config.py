@@ -3,7 +3,7 @@
 # --------------------------------------------------------------------------
 # xopgi_work_distributor.res_config
 # --------------------------------------------------------------------------
-# Copyright (c) 2014, 2015 Merchise Autrement [~º/~] and Contributors
+# Copyright (c) 2014-2017 Merchise Autrement [~º/~] and Contributors
 # All rights reserved.
 #
 # Author: Merchise Autrement [~º/~]

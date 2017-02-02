@@ -3,7 +3,7 @@
 # --------------------------------------------------------------------------
 # xopgi_documents_share.__openerp__
 # --------------------------------------------------------------------------
-# Copyright (c) 2014, 2015, 2016 Merchise Autrement [~º/~] and Contributors
+# Copyright (c) 2014-2017 Merchise Autrement [~º/~] and Contributors
 # All rights reserved.
 #
 # Contributors: see CONTRIBUTORS and HISTORY file

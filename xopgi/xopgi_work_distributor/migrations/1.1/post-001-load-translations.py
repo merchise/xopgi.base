@@ -3,7 +3,7 @@
 # ---------------------------------------------------------------------
 # xopgi_work_distributor.migrations.1.2.post-001-load-translations
 # ---------------------------------------------------------------------
-# Copyright (c) 2015, 2016 Merchise Autrement [~º/~] and Contributors
+# Copyright (c) 2016-2017 Merchise Autrement [~º/~] and Contributors
 # All rights reserved.
 #
 # This is free software; you can redistribute it and/or modify it under the

@@ -3,7 +3,7 @@
 # --------------------------------------------------------------------------
 # xopgi_object_merge.__openerp__
 # --------------------------------------------------------------------------
-# Copyright (c) 2014, 2015, 2016 Merchise Autrement [~º/~] and Contributors
+# Copyright (c) 2014-2017 Merchise Autrement [~º/~] and Contributors
 # All rights reserved.
 #
 # Author: Merchise Autrement [~º/~]

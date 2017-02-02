@@ -2,7 +2,7 @@
 # ---------------------------------------------------------------------
 # xopgi_cdr.cdr_agent
 # ---------------------------------------------------------------------
-# Copyright (c) 2016 Merchise Autrement [~º/~] and Contributors
+# Copyright (c) 2016-2017 Merchise Autrement [~º/~] and Contributors
 # All rights reserved.
 #
 # This is free software; you can redistribute it and/or modify it under the
@@ -16,9 +16,20 @@ from __future__ import (division as _py3_division,
                         absolute_import as _py3_abs_import)
 
 from openerp import api, models
-from openerp.jobs import Deferred
+from openerp.jobs import DeferredType, queue
 from xoeuf.signals import Signal
 from xoutil import logger
+
+
+# The CDR will use a dedicated queue (you should use a single worker).
+#
+# Since a new CDR cycle is issued at a 60s rate, waiting longer than 65s,
+# would only server to create a backlog of jobs that just do the same.  So
+# jobs expire after 65s in the queue.  Also retrying is not needed for the
+# same reason.
+#
+Deferred = DeferredType(queue=queue('cdr'), expires=65, retry=False)
+
 
 EVENT_SIGNALS = {
     'raise': Signal('event_raise', '''
