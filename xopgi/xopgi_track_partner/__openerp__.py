@@ -22,7 +22,8 @@ Define track visibility in res.partner fields.
     """,
     "author": "Merchise Autrement",
     "website": "http://xhg.ca.merchise.org/addons/xopgi_track_partner",
-    'depends': ['base'],
+    'depends': ['base', 'mail'],
+    'data': ['data/partner_data.xml'],
 
     # MIGRATION POLICY: All addons are not included until someone work on them
     # and upgrade them.
