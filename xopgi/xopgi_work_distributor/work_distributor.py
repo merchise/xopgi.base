@@ -504,13 +504,11 @@ class WorkDistributionStrategy(models.Model):
         self.env.cr.execute(query, params=params)
         last_dist = self.env.cr.fetchone()
         last_dist = last_dist[0] if last_dist and last_dist[0] else 0
-        next_dist = (
-            min(_id for _id in candidates.ids if _id > last_dist)
-            if last_dist and any(_id > last_dist
-                                 for _id in candidates.ids)
-            else candidates.ids[0]
+        candidates = candidates.sorted(key=lambda r: r.id)
+        return next(
+            (id for id in candidates.ids if not last_dist or id > last_dist),
+            candidates.ids[0]
         )
-        return next_dist
 
     def effort(self, dist_model, candidates, values, **kwargs):
         return self._effort(dist_model, candidates, values)
