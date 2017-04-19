@@ -13,10 +13,10 @@
 from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _absolute_import)
-
-
-from openerp import api, fields, models
-
+try:
+    from odoo import api, fields, models
+except ImportError:
+    from openerp import api, fields, models
 
 class DirectoryConfig(models.TransientModel):
     _name = 'directory.config'

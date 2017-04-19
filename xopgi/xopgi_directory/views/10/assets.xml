@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data>
+    <template id="assets_backend"
+	      name="xopgi contact information"
+	      inherit_id="mail.assets_backend">
+      <xpath expr="." position="inside">
+        <link rel="stylesheet"
+              href="/xopgi_directory/static/css/res_partner_contact.css"/>
+      </xpath>
+    </template>
+  </data>
+</openerp>

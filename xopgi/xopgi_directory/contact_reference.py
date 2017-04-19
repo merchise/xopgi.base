@@ -14,11 +14,25 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _absolute_import)
 
-from openerp import api, fields, models, _
+try:
+    from odoo import api, fields, models, _
+except ImportError:
+    from openerp import api, fields, models, _
+
 from xoeuf import signals
 
 
 class ContactReferenceModel(models.Model):
+    ''' Allows to reference a model with the objective of mapping their fields
+        with the fields of the model ``res.partners`` of type char and text.
+
+        In odoo the contacts are represented through a ``res.partner``, and a
+        res.partner can be present in the logic of many models.  This cant means
+        that the information of a contact can be collected from different
+        models.  Only one contact reference per model will be allowed to ensure
+        the integrity of the information.
+
+    '''
     _name = 'contact.reference.model'
     _description = 'Contact Reference Model'
     _rec_name = 'model'
@@ -34,16 +48,28 @@ class ContactReferenceModel(models.Model):
 
     @api.multi
     def get_contact(self, reference):
+        '''Gets fake contacts where the owner field of res.partner is found
+           in a reference.
+
+        '''
         return self.with_context(only_fake=True).env['res.partner'].search(
             [('owner', 'in', self.get_contact_identity(reference))])
 
     @api.one
     def get_contact_identity(self, reference):
+        ''' Returns a string as the identity of a contact following the
+            structure 'model, idreference'.
+
+        '''
         return '%s,%s' % (self.model.model, str(reference.id))
 
     @api.one
     @api.multi
     def sync_contact(self, action, reference, values=None):
+        ''' Synchronizes the values ​​of the contacts depending on the action
+            that is passed by parameter passing the values. The action could be
+            create, write or unlink.
+        '''
         contact = self.get_contact(reference)
         if action == 'unlink':
             if contact:
@@ -64,6 +90,13 @@ class ContactReferenceModel(models.Model):
 
 
 class ContactReferenceField(models.Model):
+    ''' Represents the relationship between the fields reference_field and
+        contact_field:
+         -reference_field: Field that is chosen from a previously selected model
+         -contact_field: Field that is chosen from  model `` res.partner ``
+         -model: Field related to the ``model`` of a ``ContactReferenceModel``
+
+    '''
     _name = 'contact.reference.field'
     _description = 'Contact Reference Model Field'
     _rec_name = 'reference_field'
@@ -83,6 +116,10 @@ class ContactReferenceField(models.Model):
 
     @api.multi
     def get_fields_map(self):
+        ''' Returns a dictionary of fields_map following structure
+            reference_field: contact_field
+
+        '''
         result = {i.reference_field.name: i.contact_field.name for i in self}
         return result
 

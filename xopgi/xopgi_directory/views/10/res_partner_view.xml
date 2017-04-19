@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<openerp>
+  <data>
+    <record id="view_res_partner_inherit_form" model="ir.ui.view">
+      <field name="name">res.partner.inherit.form</field>
+      <field name="model">res.partner</field>
+      <field name="inherit_id" ref="base.view_partner_form"/>
+      <field name="arch" type="xml">
+        <xpath expr="//notebook" position="inside">
+          <page string="Contact Information"
+                attrs="{'invisible': [('contact_information','=', False)]}">
+            <field name="contact_information" nolabel="1" mode="kanban">
+              <kanban>
+                <field name="owner"/>
+                <field name="email"/>
+                <field name="phone"/>
+                <field name="street"/>
+                <field name="street2"/>
+                <field name="zip"/>
+                <field name="city"/>
+                <field name="country_id"/>
+                <field name="mobile"/>
+                <field name="fax"/>
+                <field name="state_id"/>
+                <field name="image_small"/>
+                <field name="type"/>
+                <field name="is_company"/>
+                <templates>
+                  <t t-name="kanban-box">
+                    <div class="oe_kanban_global_click o_res_partner_kanban">
+                      <a t-if="! read_only_mode" type="delete" class="fa fa-times pull-right">
+                      </a>
+                      <div class="oe_module_vignette">
+                        <div class="oe_module_desc">
+                          <div class="oe_kanban_box_content oe_kanban_color_bglight oe_kanban_color_border">
+                            <div class="o_kanban_image">
+                              <t t-if="record.image_small.raw_value">
+                                <img t-att-src="kanban_image('res.partner', 'image_small', record.id.value)"/>
+                              </t>
+                              <t t-if="!record.image_small.raw_value">
+                                <t t-if="record.type.raw_value === 'delivery'">
+                                  <img t-att-src='_s + "/base/static/src/img/truck.png"' class="o_kanban_image oe_kanban_avatar_smallbox"/>
+                                </t>
+                                <t t-if="record.type.raw_value === 'invoice'">
+                                  <img t-att-src='_s + "/base/static/src/img/money.png"' class="o_kanban_image oe_kanban_avatar_smallbox"/>
+                                </t>
+                                <t t-if="record.type.raw_value != 'invoice' &amp;&amp; record.type.raw_value != 'delivery'">
+                                  <t t-if="record.is_company.raw_value === true">
+                                    <img t-att-src='_s + "/base/static/src/img/company_image.png"'/>
+                                  </t>
+                                  <t t-if="record.is_company.raw_value === false">
+                                    <img t-att-src='_s + "/base/static/src/img/avatar.png"'/>
+                                  </t>
+                                </t>
+                              </t>
+                            </div>
+                            <div class="oe_kanban_details">
+                              <strong class="oe_partner_heading"><field name="display_name"/></strong>
+                              <ul>
+                                <li t-if="record.email.raw_value" class="fa fa-envelope-o" title="Email"> <field name="email"/></li>
+                                <li t-if="record.phone.raw_value" class="fa fa-phone" title="Phone"> <field name="phone"/></li>
+                                <li t-if="record.mobile.raw_value" class="fa fa-tablet" title="Mobile"> <field name="mobile"/></li>
+                              </ul>
+                              <div class="oe_kanban_partner_links"/>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </t>
+                </templates>
+              </kanban>
+              <form>
+                <div class="oe_title">
+                  <h1>
+                    <field name="owner_identity" readonly="1"/>
+                  </h1>
+                  <newline/>
+                  <field name="fake" invisible="1"/>
+                  <field name="owner" readonly="1"
+                         attrs="{'invisible': [('fake','!=', True)]}"/>
+                </div>
+                <group>
+                  <field name="phone"/>
+                  <field name="mobile"/>
+                  <field name="fax"/>
+                  <field name="email" widget="email"
+                         required="context.get('force_email', False)"
+                         attrs="{'required': [('user_ids','!=', [])]}"/>
+                  <field name="user_ids" invisible="1"/>
+                </group>
+              </form>
+            </field>
+          </page>
+        </xpath>
+      </field>
+    </record>
+
+    <record id="view_res_partner_fake_form" model="ir.ui.view">
+      <field name="name">res.partner.fake.form</field>
+      <field name="model">res.partner</field>
+      <field name="inherit_id" ref="base.view_partner_simple_form"/>
+      <field name="arch" type="xml">
+        <xpath expr="//div[@class='oe_title']" position="after">
+          <field name="fake" invisible="1"/>
+          <field name="owner" readonly="1"
+                 attrs="{'invisible': [('fake', '!=', True)]}"/>
+        </xpath>
+        <xpath expr="//field[@name='name']" position="attributes">
+          <attribute name="attrs">
+            {'readonly':[('fake', '=', True)]}
+          </attribute>
+        </xpath>
+        <xpath expr="//field[@name='image']" position="attributes">
+          <attribute name="attrs">
+            {'invisible':[('fake', '=', True)]}
+          </attribute>
+        </xpath>
+        <xpath expr="//div[@class='oe_title']" position="attributes">
+          <attribute name="attrs">
+            {'invisible':[('fake', '=', True)]}
+          </attribute>
+        </xpath>
+      </field>
+    </record>
+  </data>
+</openerp>
+
+
+<!-- Local Variables: -->
+<!-- indent-tabs-mode: nil -->
+<!-- End: -->

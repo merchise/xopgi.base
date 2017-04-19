@@ -22,10 +22,11 @@
     """,
     "depends": ['base'],
     "data": [
-        'views/res_partner_view.xml',
+        'views/%d/assets.xml' % ODOO_VERSION_INFO[0],  # noqa
         'views/contact_reference_view.xml',
-        'views/directory_config_view.xml',
-        'views/res_partner_classification_view.xml',
+        'views/%d/res_partner_view.xml' % ODOO_VERSION_INFO[0],   # noqa
+        'views/%d/directory_config_view.xml' % ODOO_VERSION_INFO[0],   # noqa
+        'views/%d/res_partner_classification_view.xml' % ODOO_VERSION_INFO[0],   # noqa
         'data/res_partner_classification.xml',
         'wizards/make_fake_view.xml',
         'security/security.xml'
@@ -36,6 +37,6 @@
 
     # MIGRATION POLICY: All addons are not included until someone work on them
     # and upgrade them.
-    'installable': (8, 0) <= ODOO_VERSION_INFO < (9, 0),   # noqa
+    'installable': (8, 0) <= ODOO_VERSION_INFO < (11, 0),   # noqa
 
 }

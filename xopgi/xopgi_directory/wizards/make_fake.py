@@ -13,9 +13,11 @@
 from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _absolute_import)
+try:
+    from odoo import api, exceptions, fields, models, _
+except ImportError:
+    from openerp import api, exceptions, fields, models, _
 
-
-from openerp import api, exceptions, fields, models, _
 from xoeuf.osv.orm import LINK_RELATED
 
 

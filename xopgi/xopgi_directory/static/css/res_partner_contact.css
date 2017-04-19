@@ -1,0 +1,10 @@
+.fa-envelope-o {
+  display: list-item;
+  cursor: pointer;
+  color: blue;
+}
+
+.fa-tablet {
+  display: list-item;
+  cursor: pointer;
+}
