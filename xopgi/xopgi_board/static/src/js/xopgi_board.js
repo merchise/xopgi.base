@@ -1,7 +1,7 @@
 openerp.xopgi_board = function(instance) {
     var QWeb = instance.web.qweb,
         Model = instance.web.Model;
-
+    var _t = instance.web._t;
     instance.xopgi_board = instance.xopgi_board || {};
 
     instance.web.form.XopgiBoard = instance.web.form.FormWidget.extend({

@@ -620,8 +620,14 @@ class WorkDistributorWizard(models.TransientModel):
                 'strategy_id', False):
             return result
         active_model = self.env.context.get('active_model', False)
+        strategy_field = self.env.context.get('strategy_field_id', False)
         model = self.env[WORKDIST_MODELNAME].search(
-            [('group_field.relation', '=', active_model)])
+            [
+                ('group_field.relation', '=', active_model),
+                ('strategy_field', '=', strategy_field)
+            ],
+            limit=1
+        )
         result['fields']['strategy_id']['domain'] = [
             ('id', 'in', model.strategy_ids.ids)]
         return result
