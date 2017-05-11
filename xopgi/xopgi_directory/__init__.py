@@ -20,11 +20,14 @@ except ImportError:
     from odoo.release import version_info as ODOO_VERSION_INFO
 
 
+# This only have models of our own, not extensions to Odoo's models.  So
+# no conflict in any version so far.
+from . import partner_classification  # noqa
+
 if ODOO_VERSION_INFO < (9, 0):
     # MIGRATION POLICY: All addons are not included until someone work on them
     # and upgrade them.
-
-    from . import res_partner  # noqa
+    from . import fake_partner  # noqa
     from . import wizards  # noqa
     from . import contact_reference  # noqa
     from . import res_config  # noqa
