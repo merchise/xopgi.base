@@ -47,6 +47,10 @@
       <field name="search_view_id" ref="view_partner_classification_config_search"/>
     </record>
 
+    <menuitem id="menu_configuration"
+              parent="base.menu_administration"
+	      sequence="1" name="Configuration"/>
+
     <menuitem id="menu_partner_classification_config"
               parent="menu_configuration"
               sequence="3" action="action_partner_classification_config"/>

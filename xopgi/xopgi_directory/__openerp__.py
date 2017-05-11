@@ -22,13 +22,10 @@
     """,
     "depends": ['base'],
     "data": [
-        'views/%d/assets.xml' % ODOO_VERSION_INFO[0],  # noqa
-        'views/contact_reference_view.xml',
         'views/%d/res_partner_view.xml' % ODOO_VERSION_INFO[0],   # noqa
-        'views/%d/directory_config_view.xml' % ODOO_VERSION_INFO[0],   # noqa
         'views/%d/res_partner_classification_view.xml' % ODOO_VERSION_INFO[0],   # noqa
         'data/res_partner_classification.xml',
-        'wizards/make_fake_view.xml',
+        'wizards/%d/make_fake_view.xml' % ODOO_VERSION_INFO[0],   # noqa
         'security/security.xml'
 
     ],

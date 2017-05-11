@@ -53,7 +53,6 @@ class ResPartner(models.Model):
                       else FORGET_RELATED)
             self.write({'classifications': [action(classific.id)]})
 
-
     @api.model
     def migrate_classifications(self):
         """This is needed because a migration not occur on module installation.
