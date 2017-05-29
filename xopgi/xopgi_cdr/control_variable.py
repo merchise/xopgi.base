@@ -110,9 +110,12 @@ class ControlVariable(models.Model):
                                              e.message)
 
     def evaluate(self, cycle):
+        from celery.exceptions import SoftTimeLimitExceeded
         for var in self:
             try:
                 value = var._evaluate(cycle.create_date)
+            except SoftTimeLimitExceeded:
+                raise
             except Exception:
                 logger.exception(
                     'Error evaluating control variable %s.',
