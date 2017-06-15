@@ -37,5 +37,7 @@ def get_var_value(self, xml_id, module):
     '''Get the value of variable defined with an XML id.
 
     '''
+    module = module.rsplit('.', 1)[-1]  # Allow module to be fully qualified
+                                        # so you can say __name__  # noqa
     var = self.env.ref('%s.%s' % (module, xml_id), raise_if_not_found=False)
     return var._value() if var else None
