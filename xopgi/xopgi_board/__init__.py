@@ -31,3 +31,11 @@ if ODOO_VERSION_INFO < (9, 0):
     from . import res_currency  # noqa
     from . import res_group  # noqa
     from . import ir_ui_menu  # noqa
+
+
+def get_var_value(self, xml_id, module):
+    '''Get the value of variable defined with an XML id.
+
+    '''
+    var = self.env.ref('%s.%s' % (module, xml_id), raise_if_not_found=False)
+    return var._value() if var else None
