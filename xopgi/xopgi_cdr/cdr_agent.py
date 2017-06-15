@@ -64,9 +64,8 @@ class CDRAgent(models.TransientModel):
 
     @api.model
     def new_evaluation_cycle(self):
-        cr, uid, context = self.env.args
-        return Deferred('cdr.evaluation.cycle', cr, uid, 'create',
-                        context=context)
+        Cycle = self.env['cdr.evaluation.cycle']
+        return Deferred(Cycle.create)
 
 
 class EvaluationCycle(models.Model):
@@ -76,34 +75,42 @@ class EvaluationCycle(models.Model):
     @api.returns('self', lambda value: value.id)
     def create(self, values=None, vars_to_evaluate=None,
                evidences_to_evaluate=None):
-        ''' Add new cdr.evaluation.cycle evaluating events that must be
-        evaluated by schedule or cdr.control.variable and cdr.evidences
-        passed as params.
+        '''Add new cdr.evaluation.cycle.
+
+        Evaluates events that must be evaluated by schedule or
+        cdr.control.variable and cdr.evidences passed as params.
 
         :param values: original method param that is ignore
+
         :param vars_to_evaluate: cdr.control.variable recordset to evaluate
+
         :param evidences_to_evaluate: cdr.evidences recordset to evaluate
+
         '''
         res = super(EvaluationCycle, self).create({})
         if vars_to_evaluate or evidences_to_evaluate:
             if vars_to_evaluate:
                 vars_to_evaluate.evaluate(res)
             if evidences_to_evaluate:
-                filter_fn = (lambda var: not (vars_to_evaluate and
+                valid_var = (lambda var: not (vars_to_evaluate and
                                               var in vars_to_evaluate))
                 for evidence in evidences_to_evaluate:
-                    evidence.control_vars.filtered(filter_fn).evaluate(res)
+                    evidence.control_vars.filtered(valid_var).evaluate(res)
                 evidences_to_evaluate.evaluate(res)
         else:
             events = self.env['cdr.system.event'].search(
-                [('next_call', '<=', res.create_date)])
+                [('next_call', '<=', res.create_date)]
+            )
             events.evaluate(res)
             for signal in EVENT_SIGNALS:
                 # Not use groupby because a recordset is needed on
                 # signaling send.
                 sender = events.filtered(lambda event: event.action == signal)
                 if sender:
-                    logger.debug('Sending signal (%s) for Events: (%s)' % (
-                        signal, ', '.join([e.name for e in sender])))
+                    logger.debug(
+                        'Sending signal (%s) for Events: (%s)',
+                        signal,
+                        ', '.join(e.name for e in sender)
+                    )
                     EVENT_SIGNALS[signal].send(sender=sender)
         return res
