@@ -15,8 +15,27 @@ from __future__ import (division as _py3_division,
                         absolute_import as _absolute_import)
 
 
-from openerp import api, fields, models
+from xoeuf import api, fields, models
 from xoeuf.osv.orm import FORGET_RELATED, LINK_RELATED
+
+
+EMPLOYEE_CLASSIFIER_XMLID = 'xopgi_directory.employee'
+CUSTOMER_CLASSIFIER_XMLID = 'xopgi_directory.customer'
+SUPPLIER_CLASSIFIER_XMLID = 'xopgi_directory.supplier'
+PROVIDER_CLASSIFIER_XMLID = SUPPLIER_CLASSIFIER_XMLID
+
+
+STANDARD_CLASSIFIERS = (
+    EMPLOYEE_CLASSIFIER_XMLID,
+    CUSTOMER_CLASSIFIER_XMLID,
+    SUPPLIER_CLASSIFIER_XMLID,
+)
+
+ATTR2CLASSIFIER_MAPPING = dict(
+    employee=EMPLOYEE_CLASSIFIER_XMLID,
+    supplier=SUPPLIER_CLASSIFIER_XMLID,
+    customer=CUSTOMER_CLASSIFIER_XMLID,
+)
 
 
 class ResPartner(models.Model):
@@ -40,15 +59,15 @@ class ResPartner(models.Model):
     def _get_classification(self):
         classes_ids = self.classifications.ids
         ref = lambda xml_id: self.env.ref(xml_id, raise_if_not_found=False)
-        for att in ('employee', 'customer', 'supplier'):
-            classific = ref('xopgi_directory.%s' % att)
+        for attr, classname in ATTR2CLASSIFIER_MAPPING.items():
+            classific = ref(classname)
             setattr(self, attr, classific.id in classes_ids)
 
-    def _set_classification(self, classification):
+    def _set_classification(self, attrname):
         ref = lambda xml_id: self.env.ref(xml_id, raise_if_not_found=False)
-        classific = ref('xopgi_directory.%s' % classification)
+        classific = ref(ATTR2CLASSIFIER_MAPPING.get(attrname, 'null'))
         if classific:
-            if getattr(self, classification, False):
+            if getattr(self, attrname, False):
                 self.write({'classifications': [LINK_RELATED(classific.id)]})
             else:
                 self.write({'classifications': [FORGET_RELATED(classific.id)]})
@@ -60,18 +79,22 @@ class ResPartner(models.Model):
         """
         ref = lambda xml_id: self.env.ref(xml_id, raise_if_not_found=False)
         partners = self.with_context(active_test=False)
-        for att in ('employee', 'customer', 'supplier'):
-            partners = partners.search([(att, '=', True)])
-            classification = ref('xopgi_directory.%s' % att)
+        for attr, classname in ATTR2CLASSIFIER_MAPPING.items():
+            partners = partners.search([(attr, '=', True)])
+            classification = ref(classname)
             if partners and classification:
                 partners.write(
-                    {'classifications': [LINK_RELATED(classification.id)]})
+                    {'classifications': [LINK_RELATED(classification.id)]}
+                )
 
 
 class PartnerClassification(models.Model):
     _name = 'res.partner.classification'
 
     name = fields.Char(required=True, translate=True)
-    partners = fields.Many2many('res.partner',
-                                'res_partner_classification_rel',
-                                'classification_id', 'partner_id')
+    partners = fields.Many2many(
+        'res.partner',
+        'res_partner_classification_rel',
+        'classification_id',
+        'partner_id'
+    )
