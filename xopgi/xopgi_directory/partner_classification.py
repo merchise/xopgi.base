@@ -38,20 +38,20 @@ class ResPartner(models.Model):
     @api.one
     @api.depends('classifications')
     def _get_classification(self):
-        c_ids = self.classifications.ids
+        classes_ids = self.classifications.ids
         ref = lambda xml_id: self.env.ref(xml_id, raise_if_not_found=False)
         for att in ('employee', 'customer', 'supplier'):
             classific = ref('xopgi_directory.%s' % att)
-            setattr(self, att,
-                    True if classific and classific.id in c_ids else False)
+            setattr(self, attr, classific.id in classes_ids)
 
     def _set_classification(self, classification):
         ref = lambda xml_id: self.env.ref(xml_id, raise_if_not_found=False)
         classific = ref('xopgi_directory.%s' % classification)
         if classific:
-            action = (LINK_RELATED if getattr(self, classification, False)
-                      else FORGET_RELATED)
-            self.write({'classifications': [action(classific.id)]})
+            if getattr(self, classification, False):
+                self.write({'classifications': [LINK_RELATED(classific.id)]})
+            else:
+                self.write({'classifications': [FORGET_RELATED(classific.id)]})
 
     @api.model
     def migrate_classifications(self):
