@@ -20,8 +20,13 @@ except ImportError:
     from odoo.release import version_info as ODOO_VERSION_INFO
     from odoo import models
 
+if ODOO_VERSION_INFO[0] < 9:
+    CRM_STAGE = 'crm.case.stage'
+else:
+    CRM_STAGE = 'crm.stage'
 
-if ODOO_VERSION_INFO < (9, 0):
+
+if ODOO_VERSION_INFO[0] in (8, 9, 10):
     class CrmCaseStage(models.Model):
-        _inherit = ['crm.case.stage', 'base.stage']
-        _name = 'crm.case.stage'
+        _inherit = [CRM_STAGE , 'base.stage']
+        _name = CRM_STAGE
