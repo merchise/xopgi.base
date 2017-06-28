@@ -21,7 +21,7 @@ except ImportError:
     from odoo import fields, models
 
 
-if (8, 0) <= ODOO_VERSION_INFO < (9, 0):
+if 8 <= ODOO_VERSION_INFO[0] < 11:
     class BaseStage(models.AbstractModel):
         _name = 'base.stage'
 
