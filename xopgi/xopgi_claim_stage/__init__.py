@@ -21,7 +21,7 @@ except ImportError:
     from odoo import models
 
 
-if ODOO_VERSION_INFO < (9, 0):
+if ODOO_VERSION_INFO[0] in (8, 9, 10):
     class CrmClaimStage(models.Model):
         _inherit = ['crm.claim.stage', 'base.stage']
         _name = 'crm.claim.stage'
