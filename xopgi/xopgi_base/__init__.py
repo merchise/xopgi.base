@@ -102,14 +102,10 @@ be showed only once with internal list of each concrete object.
 
 from __future__ import absolute_import
 
-try:
-    from openerp.release import version_info as ODOO_VERSION_INFO
-except ImportError:
-    # This is Odoo 10+, but let's be able to get the ODOO_VERSION_INFO
-    from odoo.release import version_info as ODOO_VERSION_INFO
+from xoeuf.odoo.release import version_info as ODOO_VERSION_INFO
 
 
-if ODOO_VERSION_INFO < (9, 0):
+if ODOO_VERSION_INFO[0] == 8:
     # MIGRATION POLICY: All addons are not included until someone work on them
     # and upgrade them.
 

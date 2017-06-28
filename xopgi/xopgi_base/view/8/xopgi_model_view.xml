@@ -7,8 +7,8 @@
       <field name="model">ir.model.fields</field>
       <field name="inherit_id" ref="base.view_model_fields_form"/>
       <field name="arch" type="xml">
-        <xpath expr="//field[@name='groups']" position="replace">
-          <field name="groups"/>
+        <xpath expr="//field[@name='groups']" position="attributes">
+          <attribute name="invisible">0</attribute>
         </xpath>
       </field>
     </record>
