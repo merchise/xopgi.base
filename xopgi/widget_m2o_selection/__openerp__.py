@@ -1,11 +1,6 @@
 {
     'name': 'Many2One Selection Widget',
     'category': 'Hidden',
-    'description': """
-Many2One Selection Widget.
-==========================
-
-""",
     'version': '2.0',
     'depends': ['web'],
     'data': [
