@@ -15,10 +15,7 @@
     'name': 'Vigilant Base',
     'version': '1.0',
     'category': 'Hidden',
-    'description': """
-Create bases to allow system event management.
-
-    """, "author": "Merchise Autrement",
+    "author": "Merchise Autrement",
     "website": "http://xhg.ca.merchise.org/addons/xopgi_cdr",
     'depends': ['base', 'xopgi_recurrence'],
     'data': [

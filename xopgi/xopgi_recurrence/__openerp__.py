@@ -13,12 +13,7 @@
 
 {
     'name': "xopgi_recurrence",
-    'summary': """
-        Basic definition for recurrence""",
-
-    'description': """
-        Basic definition for recurrence
-    """,
+    'summary': """Basic definition for recurrence""",
     'category': 'Hidden',
     "author": "Merchise Autrement",
     "website": "http://xhg.ca.merchise.org/addons/xopgi_recurrence",

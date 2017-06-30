@@ -15,10 +15,7 @@
     'name': 'Web Notifications',
     'version': '1.0',
     'category': 'Hidden',
-    'description': """
-Create a basic web notification system.
-
-    """, "author": "Merchise Autrement",
+    "author": "Merchise Autrement",
     "website": "http://xhg.ca.merchise.org/addons/xopgi_web_notification",
     'depends': ['web', 'bus'],
     'data': [

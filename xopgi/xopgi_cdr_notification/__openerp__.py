@@ -15,10 +15,6 @@
     'name': 'Vigilant Notifications handler',
     'version': '1.0',
     'category': 'Hidden',
-    'description': """
-Create a basic event based notification system.
-
-    """,
     "author": "Merchise Autrement",
     "website": "http://xhg.ca.merchise.org/addons/xopgi_cdr_notification",
     'depends': ['web', 'xopgi_cdr', 'im_chat', 'xopgi_web_notification'],

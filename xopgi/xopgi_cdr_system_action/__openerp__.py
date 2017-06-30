@@ -15,10 +15,7 @@
     'name': 'Vigilant Server Action handler',
     'version': '1.0',
     'category': 'Hidden',
-    'description': """
-Allow to create cdr event handlers to execute server actions.
-
-    """, "author": "Merchise Autrement",
+    "author": "Merchise Autrement",
     "website": "http://xhg.ca.merchise.org/addons/xopgi_cdr_system_action",
     'depends': ['xopgi_cdr'],
     'data': [
