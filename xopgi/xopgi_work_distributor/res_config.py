@@ -21,7 +21,11 @@ from xoutil import logger
 
 from xoeuf import signals
 from xoeuf.ui import RELOAD_UI
-from openerp import api, models, fields
+
+try:
+    from odoo import api, models, fields
+except ImportError:
+    from openerp import api, models, fields
 
 from .work_distributor import WORKDIST_MODELNAME
 
@@ -50,7 +54,7 @@ class WorkDistributionSettings(models.TransientModel):
 @signals.receiver(signals.post_fields_view_get)
 def post_fields_view_get(self, **kwargs):
     result = kwargs['result']
-    if WORKDIST_MODELNAME not in self.pool or kwargs['view_type'] != 'form':
+    if WORKDIST_MODELNAME not in self.env or kwargs['view_type'] != 'form':
         return kwargs['result']
     if not self.user_has_groups(
             'xopgi_work_distributor.group_distributor_manager,'

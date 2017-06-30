@@ -17,12 +17,17 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
+try:
+    from odoo import models, _, api, fields
+    from odoo.exceptions import ValidationError, Warning
+    from odoo.tools.safe_eval import safe_eval
+except ImportError:
+    from openerp import models, _, api, fields
+    from openerp.exceptions import ValidationError, Warning
+    from openerp.tools.safe_eval import safe_eval
+
 from datetime import timedelta
 from xoutil import logger
-
-from openerp import models, _, api, fields
-from openerp.exceptions import ValidationError, Warning
-from openerp.tools.safe_eval import safe_eval
 
 from xoeuf import signals
 from xoeuf.osv.orm import LINK_RELATED, REPLACEWITH_RELATED
@@ -91,12 +96,6 @@ WORKDIST_MODELNAME = 'work.distribution.model'
 class WorkDistributionModel(models.Model):
     _name = WORKDIST_MODELNAME
 
-    def _get_models(self):
-        return [
-            (m.model, m.name)
-            for m in self.env['ir.model'].search([('osv_memory', '=', False)])
-        ]
-
     model = fields.Many2one(
         'ir.model', required=True,
         help='Model where Work Distribution Strategies will be applied.')
@@ -140,6 +139,10 @@ class WorkDistributionModel(models.Model):
 
     @api.onchange('use_domain_builder')
     def onchange_use_domain_builder(self):
+        ''' If the domain constructor changes it assigns default values ​​to the
+        domain. By default use_domain_builder is 'True'.
+
+        '''
         if self.use_domain_builder:
             self.build_domain = ''
             self.domain = ''
@@ -148,6 +151,10 @@ class WorkDistributionModel(models.Model):
 
     @api.constrains('other_fields')
     def _check_other_fields(self):
+        ''' Validates that the field names defined in the 'other_field'
+        dictionary are among the names of the fields defined for the selected
+        strategy. And that the defined fields are in some existing model.
+        '''
         for model in self:
             fields_name = model.strategy_ids.get_fields_name()
             if fields_name:
@@ -157,7 +164,7 @@ class WorkDistributionModel(models.Model):
                     raise ValidationError(
                         _('Other fields must define all fields used on '
                           'selected strategies.'))
-                obj = self.pool.get(model.model.model)
+                obj = self.env[model.model.model]
                 for field in other_fields.itervalues():
                     if not obj or not obj._fields.get(field, False):
                         raise ValidationError(
@@ -167,6 +174,10 @@ class WorkDistributionModel(models.Model):
 
     @api.constrains('strategy_ids')
     def _check_strategy_ids(self):
+        '''Validate that when no group field is defined, only one strategy
+        can be selected.
+
+        '''
         for model in self:
             if not model.group_field and len(model.strategy_ids) > 1:
                 raise ValidationError(
@@ -177,6 +188,10 @@ class WorkDistributionModel(models.Model):
     @api.model
     @api.onchange('strategy_ids')
     def onchange_strategy_ids(self):
+        ''' When the selected strategies change, it is validated that the
+        field 'Other field' maintains the structure of a dictionary that its
+        values ​​are valid.
+        '''
         warning = False
         try:
             other_fields = safe_eval(self.other_fields or '{}')
@@ -195,6 +210,10 @@ class WorkDistributionModel(models.Model):
     @api.model
     @api.onchange('strategy_by_group')
     def onchange_strategy_by_group(self):
+        ''' If the field 'Strategy by group' is not selected the field
+        'Group field' is assigned a false value and is hidden.
+
+        '''
         if not self.strategy_by_group:
             self.group_field = False
 
@@ -490,7 +509,7 @@ class WorkDistributionStrategy(models.Model):
         """Detect the next corresponding domain id and update values with it.
 
         """
-        table = self.pool[dist_model.model.model]._table
+        table = self.env[dist_model.model.model]._table
         if dist_model.group_field:
             query = ("SELECT %s FROM %s WHERE %s = %%s ORDER BY id DESC" %
                      (dist_model.destination_field.name, table,
