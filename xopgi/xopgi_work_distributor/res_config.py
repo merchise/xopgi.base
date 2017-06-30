@@ -17,17 +17,14 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
-from xoutil import logger
-
-from xoeuf import signals
+from xoeuf import signals, api, models, fields
 from xoeuf.ui import RELOAD_UI
 
-try:
-    from odoo import api, models, fields
-except ImportError:
-    from openerp import api, models, fields
-
 from .work_distributor import WORKDIST_MODELNAME
+
+import logging
+logger = logging.getLogger(__name__)
+del logging
 
 
 class WorkDistributionSettings(models.TransientModel):

@@ -24,7 +24,7 @@ Set start and stop flow fields to crm.claim.stage model.
 
     # MIGRATION POLICY: All addons are not included until someone work on them
     # and upgrade them.
-    'installable': (8, 0) <= ODOO_VERSION_INFO < (9, 0),   # noqa
+    'installable': 8 <= ODOO_VERSION_INFO[0] < 11,  # noqa
 
     'auto_install': True,
 }

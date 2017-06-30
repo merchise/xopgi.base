@@ -19,6 +19,10 @@ from __future__ import (division as _py3_division,
                         unicode_literals as _py3_unicode,
                         absolute_import as _absolute_import)
 
+from xoeuf import ODOO_VERSION_INFO
+assert ODOO_VERSION_INFO[0] == 8
+
+
 from openerp.osv.orm import Model
 import openerp.addons.base.res
 

@@ -17,21 +17,19 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
-try:
-    from odoo import models, _, api, fields
-    from odoo.exceptions import ValidationError, Warning
-    from odoo.tools.safe_eval import safe_eval
-except ImportError:
-    from openerp import models, _, api, fields
-    from openerp.exceptions import ValidationError, Warning
-    from openerp.tools.safe_eval import safe_eval
-
 from datetime import timedelta
-from xoutil import logger
 
-from xoeuf import signals
+from xoeuf import signals, models, api, fields
+from xoeuf.odoo import _
+from xoeuf.odoo.exceptions import ValidationError, Warning
+from xoeuf.odoo.tools.safe_eval import safe_eval
+
 from xoeuf.osv.orm import LINK_RELATED, REPLACEWITH_RELATED
 from xoeuf.tools import date2str, dt2str, normalize_datetime
+
+import logging
+logger = logging.getLogger(__name__)
+del logging
 
 
 FIELD_NAME_TO_SHOW_ON_WIZARD = \
