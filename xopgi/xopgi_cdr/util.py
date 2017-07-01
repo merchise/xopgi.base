@@ -17,7 +17,7 @@ from __future__ import (division as _py3_division,
 
 import ast
 
-from openerp.tools.safe_eval import safe_eval
+from xoeuf.odoo.tools.safe_eval import safe_eval
 
 
 def get_free_names(expr, debug=False):

@@ -15,8 +15,8 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
-from openerp import api, models
-from openerp.jobs import DeferredType, queue
+from xoeuf.odoo import api, models
+from xoeuf.odoo.jobs import DeferredType, queue
 from xoeuf.signals import Signal
 from xoutil import logger
 

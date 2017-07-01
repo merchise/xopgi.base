@@ -16,7 +16,7 @@ from __future__ import (division as _py3_division,
                         absolute_import as _py3_abs_import)
 
 from datetime import timedelta, datetime
-from openerp import api, exceptions, fields, models, _
+from xoeuf.odoo import api, exceptions, fields, models, _
 from xoeuf.tools import str2dt
 from xoutil import logger
 from .cdr_agent import EVENT_SIGNALS
@@ -196,14 +196,14 @@ class BasicEvent(models.Model):
 class RecurrentEvent(models.Model):
     _name = 'cdr.recurrent.event'
     _description = "Recurrent CDR event"
-
-    _inherits = {'cdr.system.event': 'event_id'}
+    _inherits = {'cdr.system.event': 'event_id',
+                 'recurrent.model': 'recurrence'}
 
     event_id = fields.Many2one('cdr.system.event',
                                required=True, ondelete='cascade')
     time = fields.Float()
     recurrence = fields.Many2one('recurrent.model', required=True,
-                                 delegate=True, ondelete='cascade')
+                                 ondelete='cascade')
 
     def update_event(self, value):
         next_call = self.recurrence.next_date(self.recurrence.rrule)
