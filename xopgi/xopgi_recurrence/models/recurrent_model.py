@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # ----------------------------------------------------------------------
-# xopgi_recurrence.models.recurrent_model
+# xopgi_recurrence.models.RecurrentModel
 # ----------------------------------------------------------------------
 # Copyright (c) 2013-2017 Merchise Autrement [~º/~] and Contributors
 # All rights reserved.
@@ -17,7 +17,7 @@ from __future__ import (division as _py3_division,
 import operator
 from operator import itemgetter
 
-from xoeuf.odoo import api, models, fields, exceptions, SUPERUSER_ID, _
+from xoeuf.odoo import api, models, fields, exceptions, _
 from dateutil import rrule
 from datetime import datetime, timedelta
 
@@ -26,7 +26,7 @@ from xoutil.types import is_collection
 
 from xoeuf.osv import datetime_user_to_server_tz
 from xoeuf.tools import normalize_datetime as normalize_dt
-from xoeuf.tools import normalize_date as normalize_date
+from xoeuf.tools import normalize_date
 from xoeuf.tools import normalize_datetimestr as normalize_dt_str
 from xoeuf.tools import normalize_datestr as normalize_d_str
 
@@ -62,98 +62,148 @@ def _required_field(field='A field'):
     raise exceptions.except_orm(_('Error!'), field + _(' is required.'))
 
 
-class recurrent_model(models.Model):
+class RecurrentModel(models.Model):
+    '''Model for recurrent things (in time).
+
+    It's very similar of recurrence in the calendar module, with some
+    adjustments.
+
+    ``recurrent.model`` defines fields use to define the conditions in a
+    timeline and the recurrence rules (to see module :mod:`dateutil.rrule`) in
+    which a given activity can occur.
+
+    You can declare a recurrence in a time interval -'Repeat every' for example:
+
+    Recurrent pattern:
+    Repeat every: 1  (Days/Week/Month/Year)
+
+    You can also state how often, days of the week, days of the month or at
+    what time of year the recurrence may occur, for example:
+
+    class MyMeeting(Model):
+        _name = 'my.meeting'
+        _inherit = [_name, 'recurrent.model']
+
+    >>> Meeting = self.env['my.meeting']
+
+    # Case 1:Repeat once every day
+    >>> meeting = Meeting.create(interval=1, freq='daily', end_type='no_end_date')
+
+    # Case 2:Repeat each week on Mondays and Fridays
+    >>> meeting = Meeting.create(interval=1, freq='weekly', monday=True,
+                                 friday=True, end_type='no_end_date')
+
+    :attr monday:  Set this True to indicate that this event happen on Mondays.
+    Attributes 'tuesday' and other week day names are similar to `monday`.
+
+    # Case 3:Repeat each month the nth days Mondays and Fridays':
+    >>> meeting = Meeting.create(interval=1, freq='monthly', days_option='week_day',
+                                 monday=True, friday=True, end_type='no_end_date')
+
+
+    # Case 4:Repeat each month the cardinal days of month:
+    >>> meeting = Meeting.create(interval=1, freq='monthly',days_option='month_day',
+                                 monthly_day=5, end_type='no_end_date',
+                                 end_type='no_end_date')
+
+    :attr monthly_day: Refers to the cardinal days of the month.
+
+    # Repeat each year, similar to case three specifying that month of the year.
+       >>> meeting = Meeting.create(interval=1, freq='yearly',days_option='month_day',
+                                 monthly_day=5, months=1, end_type='no_end_date')
+    :attr months: specify year month.
+
+    # Repeat each year specifying number of days from western easter sunday.
+       >>> meeting = Meeting.create(interval=1, freq='yearly',is_easterly=True,
+                                 byeaster_day=-2, end_type='no_end_date')
+    :attr byeaster: Number of days from western easter sunday by default is 0.
+
+    # Recurrent Termination
+    One recurrent by default is end_type='no_end_date' but this can to take other
+    values:
+    E.g. Value1: until='2017-03-04'
+         Value2: count=5  Repeat recurrent event by x=5 times.
+
+    '''
+
     _name = 'recurrent.model'
     _description = 'Recurrent model'
 
     @api.multi
-    def _get_date(self, field, arg):
-        ''' Get the init datetime of recurrent object of given ids,
-            using the user timezone.
+    def _get_viewable_date(self):
+        '''Get the values for the compute 'date' field of the recurrent object
+        using the user timezone.This is calculated with the field 'date_from'.
+
         '''
-        _date = lambda date: (datetime_user_to_server_tz(date, self._context.get('tz')))
-        result = {}
+
+        _date = lambda date: datetime_user_to_server_tz(
+            self._cr, self._uid, date, self._context.get('tz'))
         for item in self:
-            # más una hora para evitar el problema con el horario de verano.
+            # Plus an hour to avoid the problem with daylight saving time.
             date_from = normalize_dt(item.date_from) + timedelta(hours=1)
-            result[item.id] = normalize_dt_str(_date(date_from))
-        return result
+            item.viewable_date = normalize_dt_str(_date(date_from))
 
-    def _date_search(self, obj, name, args):
-        """Get the domain args to search the real and virtual occurrences
-        related with the original args.
+    def _date_viewable_search(self, operator, value):
+        """Get the domain to search for 'date'.
 
-        First: change the 'date' field to 'date_from'
+        We simply translate it to search by 'date_from'.
 
-        Second: On recurrent instances no apply condition 'date' > or >=
-        on a date
         """
-        new_arg = args[0]
-        res = []
-        if new_arg and len(new_arg) > 2:
-            if new_arg[1] in ['>', '>=']:
-                res.extend(['|', ('is_recurrent', '=', 1)])
-            res.append(('date_from', new_arg[1], new_arg[2]))
-        return res
+        value = normalize_date(value)
+        return [('date_from', operator, value)]
 
     @api.multi
-    def _get_duration(self, field, arg):
-        ''' Get the duration on hours of recurrent object of given ids.
+    def _get_duration(self):
+        '''Get the values on hours to the compute field 'calendar_duration'  of
+        recurrent object.
 
         '''
-        result = {}
-        # Menos 2 para evitar problemas con el horario de verano esto
-        # permite tener instancias desde la 1AM hasta las 11PM en caso
-        # de cambio de uso horario sigue viendose en el mismo día.
+        # Minus 2 to avoid problems with summer time. This allows to have
+        # instances from 1AM to 11PM in case change of use schedule is still
+        # on the same day.
         _duration_hours = lambda days: (days * _DAY_HOURS - 2)
         for item in self:
+            # By default 'duration = 1 day'
             if item.duration:
-                result[item.id] = _duration_hours(item.duration)
+                item.calendar_duration = _duration_hours(item.duration)
             elif item.date_to:
                 df = normalize_date(item.date_from)
                 dt = normalize_date(item.date_to)
-                result[item.id] = (dt - df).total_seconds() / _HOUR_SECONDS
+                item.calendar_duration = (dt - df).total_seconds() / _HOUR_SECONDS
             else:
-                result[item.id] = 1
-        return result
+                item.calendar_duration = 1
 
     # Basic datas.
-    name = fields.Char(
-        'Name',
-        size=254
-    )
-
     date_from = fields.Date(
         'Init date',
         required=True,
         default=normalize_d_str(datetime.today()),
-        help='Date to be init.'
+        help='Date to be init of recurrence'
     )
 
-    date = fields.Datetime(
-        compute='_get_date',
+    viewable_date = fields.Datetime(
+        compute=_get_viewable_date,
         method=True,
-        string='Date and time to be init.',
-        fnct_search=_date_search,
-        help='Init date and time on user time zone.'
+        string='Date and time for representation in calendar views',
+        search=_date_viewable_search
     )
 
     date_to = fields.Date(
         'End date',
-        help='Date to be end.'
+        help='Date to be end the recurrence'
     )
 
     duration = fields.Integer(
         'Duration',
         default=1,
-        help='Duration on days.'
+        help='Duration on days of the recurrence'
     )
 
     calendar_duration = fields.Float(
         compute='_get_duration',
         method=True,
         string='Duration',
-        help='Get the duration on hours of recurrent object'
+        help='Get the duration on hours of the recurrence'
     )
 
     allday = fields.Boolean(
@@ -161,13 +211,10 @@ class recurrent_model(models.Model):
         default=True
     )
 
-    description = fields.Text(
-        'Description'
-    )
-
     active = fields.Boolean(
         'Active',
-        defautl=True
+        default=True,
+        help='Indicate if recurrent object is active or not'
     )
 
     # General recurrence data.
@@ -181,47 +228,67 @@ class recurrent_model(models.Model):
         'RRULE',
         size=124,
         readonly=True,
-        default=''
+        default='',
+        help='This field is update after to creates or to update the recurrent'
+             ' model by the function  _update_rrule. By default it is taken'
+             ' value but then it is calculated and takes a similar value.'
+             ' E.g. rrule=FREQ=WEEKLY;INTERVAL=1;BYDAY=TU,MO'
     )
 
     freq = fields.Selection(
         FREQ,
         'Frequency type',
         default='daily',
+        help='Frecuency type (Daily/Weekly/Monthly/Yearly)'
     )
 
     interval = fields.Integer(
         'Repeat Every',
         default=1,
-        help="Repeat every (Days/Week/Month/Year)"
+        help='Repeat every (Days/Week/Month/Year)'
     )
 
     # Recurrence by week data.
     mo = fields.Boolean(
-        'Monday'
+        'Monday',
+        help="Indicate if the week's day 'Monday' is include or not for the"
+             " recurrence pattern"
     )
 
     tu = fields.Boolean(
-        'Tuesday'
+        'Tuesday',
+        help="Indicate if the week's day 'Tuesday' is include or not for the"
+             " recurrence pattern"
     )
 
     we = fields.Boolean(
-        'Wednesday'
+        'Wednesday',
+        help="Indicate if the week's day 'Wednesday' is include for the"
+             " recurrence pattern"
     )
 
     th = fields.Boolean(
-        'Thursday'
+        'Thursday',
+        help="Indicate if the week's day 'Thursday' is include for the"
+             " recurrence pattern"
     )
+
     fr = fields.Boolean(
-        'Friday'
+        'Friday',
+        help="Indicate if the week's day 'Friday' is include for the"
+             " recurrence pattern"
     )
 
     sa = fields.Boolean(
-        'Saturday'
+        'Saturday',
+        help="Indicate if the week's day 'Saturday' is include for the"
+             " recurrence pattern"
     )
 
     su = fields.Boolean(
-        'Sunday'
+        'Sunday',
+        help="Indicate if the week's day 'Sunday' is include for the"
+             " recurrence pattern"
     )
 
     # Recurrence by month data.
@@ -229,7 +296,9 @@ class recurrent_model(models.Model):
         ('week_day', 'By week day'),
         ('month_day', 'By month day')],
         'Option',
-        default='month_day'
+        default='month_day',
+        help='Indicates the days of the week: E.g.(Mo, Tu, We, Th, Fr, Sa, Su) or'
+             ' indicates the days of the month'
     )
 
     monthly_day = fields.Integer(
@@ -240,14 +309,17 @@ class recurrent_model(models.Model):
     by_week_day = fields.Selection(
         BYWEEKDAY,
         'Reference',
-        default='n'
+        default='n',
+        help="Selection by week's days E.g.(Every, The First, The Second, The Third,"
+             " The Fourth, The Fifth, The Last)"
     )
 
     # Recurrence by year data.
     months = fields.Selection(
         MONTHS,
         'Month',
-        deafault=str(datetime.today().month)
+        deafault=str(datetime.today().month),
+        help='Allow to select month of year'
     )
 
     is_easterly = fields.Boolean(
@@ -265,17 +337,19 @@ class recurrent_model(models.Model):
     end_type = fields.Selection(
         END_TYPE,
         'Recurrence Termination',
-        default='no_end_date'
+        default='no_end_date',
+        help='Selection by recurrence termination'
     )
 
     count = fields.Integer(
         'Repeat',
         default=5,
-        help="Repeat x times"
+        help='Repeat recurrent event by x times'
     )
 
     until = fields.Date(
-        'Repeat Until'
+        'Repeat Until',
+        help='Date end for the recurrent termination'
     )
 
     @staticmethod
@@ -287,16 +361,21 @@ class recurrent_model(models.Model):
         return end_date_new.strftime(_V_DATE_FORMAT)
 
     def _compute_rule_string(self, data):
-        """Compute rule string according to value type RECUR of iCalendar
+        '''Compute rule string according to value type RECUR of iCalendar
         from the values given.
 
         @param data: dictionary of freq and interval value
 
         @return: string containing recurring rule (empty if no rule)
 
-        """
+        '''
         def get_BYDAY_string(freq, data):
-            '''Compose the 'BYDAY' param for rrule
+            '''Compose the 'BYDAY' and params for rrule.
+
+            If in BYDAY not is specificate 'n', means every  week's day. E.g.
+            BYDAY={}MO,{}TU If 'n' can take values(n,1..5,-1).
+            The First Monday and Tuesday is equal: E.g.BYDAY={1}MO,{1}TU
+            To see module :mod:`dateutil.rrule`
 
             '''
             weekdays = ['mo', 'tu', 'we', 'th', 'fr', 'sa', 'su']
@@ -306,15 +385,16 @@ class recurrent_model(models.Model):
                                    (freq == 'yearly' and
                                     day_option == 'week_day' and
                                     not data.get('is_easterly')):
-                by_week_day = (freq != 'weekly'
-                               and data.get('by_week_day', '') != ''
-                               and data.get('by_week_day', '') or '')
+                by_week_day = (freq != 'weekly' and
+                               data.get('by_week_day', '') != 'n' and
+                               data.get('by_week_day', '') or '')
                 byday = [by_week_day + weekday.upper()
                          for weekday, val in data.items()
                          if val and weekday in weekdays]
                 if byday:
                     return ';BYDAY=' + ','.join(byday)
                 _required_field('At least a weekday')
+
             return ''
 
         def get_BYMONTHDAY_string(freq, data):
@@ -346,14 +426,15 @@ class recurrent_model(models.Model):
                     if not (-365 <= int(byeaster) <= 365):
                         raise ValueError()
                     return ';BYEASTER=' + str(data.get('byeaster', '0'))
-                elif data.get('days_option', '') == 'month_day':
+                else:
                     if not data.get('months'):
                         _required_field('Month')
                     return ';BYMONTH=' + str(data.get('months')) or ''
             return ''
 
         def get_end_date(data):
-            '''Compose the 'UNTIL' or 'COUNT' param for rrule
+            '''Concatenate the string rule to the field 'rrule'. Compose the 'UNTIL'
+            or 'COUNT' param.
 
             '''
             end_type = data.get('end_type')
@@ -391,7 +472,7 @@ class recurrent_model(models.Model):
         for r_date in virtual_dates:
             pile = []
             for arg in args:
-                if arg[0] in ('date', 'date_from', 'date_to'):
+                if arg[0] in ('viewable_date', 'date_from', 'date_to'):
                     op = OPERATORS[arg[1]]
                     ok = op(r_date, normalize_dt(arg[2]))
                     pile.append(ok)
@@ -415,6 +496,7 @@ class recurrent_model(models.Model):
                 new_pile.append(res)
             if not any(True for val in new_pile if not val):
                 r_date_str = normalize_dt_str(r_date)
+                # Get virtual_id with id and date E.g. 19-20170830T230000
                 idval = self.real_id2virtual(data.get('id'), r_date_str)
                 result_data.append(dict(data, id=idval, date=r_date_str))
         return result_data
@@ -439,6 +521,7 @@ class recurrent_model(models.Model):
             return 0
         comparers = [(itemgetter(field), -1 if spec == 'desc' else 1) for
                      field, spec in order]
+        # Return virtual_id with order specify E.g.['19-20170830T230000'...]
         result = [r['id'] for r in sorted(data, cmp=comparer)]
         return result
 
@@ -448,9 +531,9 @@ class recurrent_model(models.Model):
 
         '''
         for arg in domain:
-            if arg[0] in ('date', 'date_from', 'date_to') and arg[1] in ['<', '<=']:
+            if arg[0] in ('viewable_date', 'date_from', 'date_to') and arg[1] in ['<', '<=']:
                 until = normalize_dt(arg[2])
-                until = datetime_user_to_server_tz(until,
+                until = datetime_user_to_server_tz(self._cr, self._uid, until,
                                                    tz_name=self._context.get('tz'))
                 until = normalize_d_str(until)
                 rule_str += ';UNTIL=' + self.parse_until_date(until)
@@ -460,16 +543,20 @@ class recurrent_model(models.Model):
 
     @api.multi
     def _get_virtuals_ids(self, domain, offset=0, limit=100):
-        """Gives virtual event ids for recurring events based on value of
-        Recurrence Rule
+        '''Gives virtual event ids for recurring events based on value of
+        Recurrence Rule.
+
+        Read the actual recurring models that you pass and according to the
+        'rrule' of each of them returns the virtual_ids.
+
         This method gives ids of dates that comes between start date and
         end date of calendar views
 
         @param limit: The Number of Results to Return
 
-        """
+        '''
         result_data = []
-        extra_fields = ['date', 'rrule', 'is_recurrent']
+        extra_fields = ['viewable_date', 'rrule', 'is_recurrent']
         order = self._context.get('order', None) or self._order
         order = order.split(',') if order else []
         order_specs = [
@@ -478,8 +565,7 @@ class recurrent_model(models.Model):
         ]
         order_fields = [field for field, _ in order_specs]
         fields = list(set(extra_fields + order_fields))
-        super_read = super(recurrent_model, self).read
-        for item in super_read(fields):
+        for item in self.read(fields):
             if not item['is_recurrent'] or isinstance(item['id'], string_types):
                 result_data.append(item)
                 rule_str = False
@@ -490,8 +576,10 @@ class recurrent_model(models.Model):
                 rule_str = item['rrule']
             if rule_str:
                 if rule_str.find('COUNT') < 0 and rule_str.find('UNTIL') < 0:
+                    # Add COUNT=100 for 'rule_str, if limit is not specify.
                     rule_str = self._set_end(rule_str, domain, offset, limit)
-                date = normalize_dt(item['date'])
+                date = normalize_dt(item['viewable_date'])
+                # Get recurrent dates E.g. [datetime.datetime(2017, 8, 29, 23, 0)]
                 recurrent_dates = self._get_recurrent_dates(str(rule_str),
                                                             startdate=date)
                 result_data.extend(self._check_dates(recurrent_dates, item,
@@ -505,7 +593,7 @@ class recurrent_model(models.Model):
         return result
 
     def _get_recurrent_dates(self, rrulestring, startdate=None):
-        '''call rrule.rrulestr for list of occurrences dates
+        '''Call rrule.rrulestr for list of occurrences dates
 
         :param rrulestring:
         :param startdate:
@@ -513,17 +601,18 @@ class recurrent_model(models.Model):
         '''
         if not startdate:
             startdate = datetime.now()
+        # Gets and verifies the rrule following RFC2445.
         result = rrule.rrulestr(str(rrulestring), dtstart=startdate,
                                 forceset=True)
         return list(result)
 
     def real_id2virtual(self, real_id, recurrent_date):
-        """ Convert a real id (type int) into a "virtual id" (type string).
+        ''' Convert a real id (type int) into a "virtual id" (type string).
 
         E.g. real event id is 1 and recurrent_date
         is set to 01-12-2009 10:00:00, so it will return 1-20091201100000.
 
-        """
+        '''
         if real_id and recurrent_date:
             recurrent_date = normalize_dt(recurrent_date)
             recurrent_date = recurrent_date.strftime(_V_DATE_FORMAT)
@@ -531,7 +620,7 @@ class recurrent_model(models.Model):
         return real_id
 
     def _virtual_id2real(self, virtual_id=None, with_date=False):
-        """ Convert a "virtual id" (type string) into a real id (type int).
+        ''' Convert a "virtual id" (type string) into a real id (type int).
 
         E.g. virtual/recurring event id is 4-20091201100000, so
         it will return 4.
@@ -541,7 +630,7 @@ class recurrent_model(models.Model):
 
         @return: real id or real id, date
 
-        """
+        '''
         if virtual_id and isinstance(virtual_id, (str, unicode)):
             res = virtual_id.split('-')
             if len(res) >= 2:
@@ -557,11 +646,15 @@ class recurrent_model(models.Model):
 
     @api.multi
     def _update_rrule(self):
+        '''Allow to call the calculation the string representing a rule:
+        'rrule' and update the value by each recurrent model.
+
+        '''
         res_rrules = self.get_rulestring()
         if not res_rrules:
             return False
         for item in self:
-            item.write({'rrule': res_rrules[item]})
+            item.write(res_rrules)
         return res_rrules
 
     @api.model
@@ -571,12 +664,12 @@ class recurrent_model(models.Model):
         :param ids:
         :return:
         '''
-        real_id_vs_virtual = map(lambda x: (x, self._virtual_id2real(x)), self._ids)
+        real_id_vs_virtual = map(lambda x: (x, self._virtual_id2real(x)), self.ids)
         real_ids = [real_id for virtual_id, real_id in real_id_vs_virtual]
-        if real_ids != self._ids:
+        if real_ids != self.ids:
             raise exceptions.except_orm(_('Error!'), _('An occurrence of an '
-                                                'recurrent rule can`t '
-                                                'be modify or deleted.'))
+                                                       'recurrent rule can`t be'
+                                                       'modify or deleted.'))
 
     @api.model
     def get_rulestring(self):
@@ -591,20 +684,20 @@ class recurrent_model(models.Model):
         result = {}
         # Browse these fields as SUPERUSER because if the record is
         # private a normal search could return False and raise an error.
-        for item in self.read(SUPERUSER_ID,[]):
+        for item in self.sudo().read():
             if item:
                 if not item.get('freq'):
                     _required_field('Frequency')
                 if (item['interval'] or 0) < 0:
                     raise exceptions.except_orm(_('Warning!'), _('Interval cannot '
-                                                          'be negative.'))
+                                                                 'be negative.'))
                 if (item['count'] or 0) <= 0:
                     raise exceptions.except_orm(_('Warning!'), _('Count cannot be '
-                                                          'negative or 0.'))
+                                                                 'negative or 0.'))
                 if item['is_recurrent']:
-                    result[item['id']] = self._compute_rule_string(item)
+                    result['rrule'] = self._compute_rule_string(item)
                 else:
-                    result[item['id']] = ''
+                    result['rrule'] = ''
         return result
 
     @api.multi
@@ -615,82 +708,99 @@ class recurrent_model(models.Model):
         :param ids: real ids where search
         :param day: date to search
         :return: True or False
+
         '''
-        day = datetime_user_to_server_tz(normalize_dt(day),
+        day = datetime_user_to_server_tz(self._cr, self._uid, normalize_dt(day),
                                          self._context.get('tz'))
         day_str = normalize_dt_str(day.replace(hour=23, minute=59))
-        res_ids = self.search([('id', 'in', self._ids),
-                                        ('date', '<=', day_str)])
-        for data in self.read(res_ids, ['date', 'calendar_duration']):
-            d_from = normalize_dt(data['date'])
+        res_ids = self.search([('id', 'in', self._ids), ('viewable_date', '<=', day_str)])
+        for data in res_ids.read(['viewable_date', 'calendar_duration']):
+            d_from = normalize_dt(data['viewable_date'])
             d_to = d_from + timedelta(hours=data.get('calendar_duration'))
             if d_from.date() <= day.date() <= d_to.date():
                 return True
         return False
 
-    @api.multi
+    @api.model
+    @api.returns(
+        'self',
+        downgrade=lambda self, value, args, offset=0, limit=None, order=None, count=False: list(value.ids) if not count else value
+    )
     def search(self, args, offset=0, limit=None, order=None, count=False):
         """If 'virtual_id' not in context or are False then normally
         search, else search virtual occurrences and return then.
 
         """
-        _super = super(recurrent_model, self).search
+        _super = super(RecurrentModel, self).search
         res = _super(args, offset=offset, limit=limit, order=order, count=False)
         if not res:
-            return []
+            return self.browse()
         if self._context.get('virtual_id', True):
-            res = self._get_virtuals_ids(res, args, offset, limit)
+            res = self.browse(res._get_virtuals_ids(args, offset, limit))
+        if limit:
+            res = res[offset:offset + limit]
         if count:
             return len(res)
-        elif limit:
-            return res[offset:offset + limit]
         return res
 
     @api.multi
     def read(self, fields=None, load='_classic_read'):
-        """Return the list of dict with the [fields].
-          if [ids] contain virtual ids read data from real ids and create
-          virtual copies to return
+        '''Return the list of dict with the [fields].
+        if [ids] contain virtual ids read data from real ids and create
+        virtual copies to return
 
-        """
-        _super = super(recurrent_model, self).read
+        If :param fields: have [viewable_date,date_from,date_to] return a list of dict
+        with this fields plus id. If :param calendar_duration: is include in
+        fields it will be add to the result else is exclude.
+        '''
+        _super = super(RecurrentModel, self).read
         if not self._context.get('virtual_id', True):
             return _super(fields, load=load)
+        if not fields:
+            fields = []
         fields2 = fields[:] if fields else []
-        targets = ('date', 'date_from', 'date_to')
+        targets = ('viewable_date', 'date_from', 'date_to')
         has_dates = any(field in fields for field in targets)
         if fields and 'calendar_duration' not in fields and has_dates:
             fields2.append('calendar_duration')
-        ids_index = {int(self._virtual_id2real(self.id)): record.id
+        ids_index = {record.id: int(self._virtual_id2real(record.id))
                      for record in self}
-        real_ids = ids_index.keys()
-        # XXX: super read may call _name_get, that in turns calls
-        # self.read leading to recursion... Pass virtual_id = False to
-        # bail out.
-        cpcontex = dict(self._context or {}, virtual_id=False)
-        real_data = _super(real_ids, fields2, context=cpcontex,
-                           load=load)
+        # If dict:ids_index have as keys virtual_ids:(str,unicode) the
+        # id_reals are dict.values() else the id_reals are dict.keys()
+        keys = ids_index.keys()
+        if keys:
+            if isinstance(keys[0], (str, unicode)):
+                real_ids = self.browse(ids_index.values())
+            elif keys and isinstance(keys[0], int):
+                real_ids = self.browse(keys)
+        else:
+            real_ids = self.browse()
+        real_data = super(RecurrentModel, real_ids.with_context(
+            virtual_id=False)).read(fields2)
         real_data = {row['id']: row for row in real_data}
         result = []
-        for real_id, virtual_id in ids_index.items():
+        for virtual_id, real_id in ids_index.items():
             res = real_data.get(real_id, {}).copy()
+            # If :param fields have (date,date_from or date_to)
             if has_dates:
                 ls = self._virtual_id2real(virtual_id,
                                            with_date=res.get(
                                                'calendar_duration') or 23)
+                # ls is a tuple E.g. (id, date_start,date_end)
                 if is_collection(ls) and len(ls) >= 2:
                     if res.get('date_from'):
                         res['date_from'] = normalize_d_str(ls[1])
-                    if res.get('date'):
-                        res['date'] = normalize_dt_str(ls[1])
+                    if res.get('viewable_date'):
+                        res['viewable_date'] = normalize_dt_str(ls[1])
                     if res.get('date_to'):
                         res['date_to'] = normalize_d_str(ls[2])
             res['id'] = virtual_id
             result.append(res)
+        # If calendar_duration not is in :param fields:,it's remove of result.
         if fields and 'calendar_duration' not in fields:
             for r in result:
                 r.pop('calendar_duration', None)
-        if not hasattr(self._ids, '__iter__'):
+        if not self._ids:
             return result[0] if result else []
         return result
 
@@ -699,24 +809,24 @@ class recurrent_model(models.Model):
         # TODO: implement the logic for rule exceptions and one occurrence
         # modifications.
         self._check_for_one_occurrency_change()
-        result = super(recurrent_model, self).unlink()
-        return result
+        return super(RecurrentModel, self).unlink()
 
     @api.multi
     def write(self, values):
         # TODO: implement the logic for rule exceptions and one occurrence
         # modifications.
         self._check_for_one_occurrency_change()
-        res = super(recurrent_model, self).write(values)
+        res = super(RecurrentModel, self).write(values)
         if 'no_update_rrule' not in self._context and not values.get('rrule'):
             self._update_rrule()
         return res
 
     @api.model
     def create(self, values):
-        id = super(recurrent_model, self).create(values)
-        self._update_rrule(id)
-        return id
+        recurrence = super(RecurrentModel, self).create(values)
+        if recurrence:
+            recurrence._update_rrule()
+        return recurrence
 
     def next_date(self, rrulestring, dt=False, include=False):
         """Returns the first recurrence after the given datetime instance.
