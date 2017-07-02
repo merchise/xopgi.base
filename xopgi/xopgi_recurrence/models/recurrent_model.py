@@ -17,16 +17,13 @@ from __future__ import (division as _py3_division,
 import operator
 from operator import itemgetter
 
-from openerp import SUPERUSER_ID
-from openerp.osv import osv, fields
-from openerp.tools.translate import _
-
+from xoeuf.odoo import api, models, fields, exceptions, SUPERUSER_ID, _
 from dateutil import rrule
 from datetime import datetime, timedelta
 
 from six import string_types
-
 from xoutil.types import is_collection
+
 from xoeuf.osv import datetime_user_to_server_tz
 from xoeuf.tools import normalize_datetime as normalize_dt
 from xoeuf.tools import normalize_date as normalize_date
@@ -62,31 +59,27 @@ _V_DATE_FORMAT = "%Y%m%dT%H%M%S"
 
 
 def _required_field(field='A field'):
-    raise osv.except_osv(_('Error!'), field + _(' is required.'))
+    raise exceptions.except_orm(_('Error!'), field + _(' is required.'))
 
 
-class recurrent_model(osv.osv):
+class recurrent_model(models.Model):
     _name = 'recurrent.model'
     _description = 'Recurrent model'
 
-    def _get_date(self, cr, uid, ids, field, arg, context=None):
+    @api.multi
+    def _get_date(self, field, arg):
         ''' Get the init datetime of recurrent object of given ids,
             using the user timezone.
         '''
-        if not context:
-            context = {}
+        _date = lambda date: (datetime_user_to_server_tz(date, self._context.get('tz')))
         result = {}
-        if not hasattr(ids, '__iter__'):
-            ids = [ids]
-        _date = lambda date: (datetime_user_to_server_tz(cr, uid, date,
-                                                         context.get('tz')))
-        for item in self.browse(cr, uid, ids, context=context):
+        for item in self:
             # más una hora para evitar el problema con el horario de verano.
             date_from = normalize_dt(item.date_from) + timedelta(hours=1)
             result[item.id] = normalize_dt_str(_date(date_from))
         return result
 
-    def _date_search(self, cr, uid, obj, name, args, context=None):
+    def _date_search(self, obj, name, args):
         """Get the domain args to search the real and virtual occurrences
         related with the original args.
 
@@ -103,18 +96,17 @@ class recurrent_model(osv.osv):
             res.append(('date_from', new_arg[1], new_arg[2]))
         return res
 
-    def _get_duration(self, cr, uid, ids, field, arg, context=None):
+    @api.multi
+    def _get_duration(self, field, arg):
         ''' Get the duration on hours of recurrent object of given ids.
 
         '''
         result = {}
-        if not hasattr(ids, '__iter__'):
-            ids = [ids]
         # Menos 2 para evitar problemas con el horario de verano esto
         # permite tener instancias desde la 1AM hasta las 11PM en caso
         # de cambio de uso horario sigue viendose en el mismo día.
         _duration_hours = lambda days: (days * _DAY_HOURS - 2)
-        for item in self.browse(cr, uid, ids, context=context):
+        for item in self:
             if item.duration:
                 result[item.id] = _duration_hours(item.duration)
             elif item.date_to:
@@ -125,85 +117,176 @@ class recurrent_model(osv.osv):
                 result[item.id] = 1
         return result
 
-    _columns = {
-        # Basic datas.
-        'name': fields.char('Name', size=254),
-        'date_from': fields.date('Init date', help='Date to be init.',
-                                 required=True),
-        'date': fields.function(_get_date, method=True,
-                                string='Date and time to be init.',
-                                type='datetime', fnct_search=_date_search,
-                                help='Init date and time on user time zone.'),
-        'date_to': fields.date('End date', help='Date to be end.'),
-        'duration': fields.integer('Duration', help='Duration on days.'),
-        'calendar_duration': fields.function(_get_duration, method=True,
-                                             string='Duration', type='float'),
-        'allday': fields.boolean('All Day'),
-        'description': fields.text('Description'),
-        'active': fields.boolean('Active'),
-        # General recurrence data.
-        'is_recurrent': fields.boolean('Is recurrent', help='Check if is '
-                                                            'recurrent.'),
-        'rrule': fields.char('RRULE', size=124, readonly=True),
-        'freq': fields.selection(FREQ, 'Frequency type'),
-        'interval': fields.integer('Repeat Every', help="Repeat every "
-                                                        "(Days/Week/Month/"
-                                                        "Year)"),
-        # Recurrence by week data.
-        'mo': fields.boolean('Monday'),
-        'tu': fields.boolean('Tuesday'),
-        'we': fields.boolean('Wednesday'),
-        'th': fields.boolean('Thursday'),
-        'fr': fields.boolean('Friday'),
-        'sa': fields.boolean('Saturday'),
-        'su': fields.boolean('Sunday'),
-        # Recurrence by month data.
-        'days_option': fields.selection([('week_day', 'By week day'),
-                                         ('month_day', 'By month day')],
-                                        'Option'),
-        'monthly_day': fields.integer('Days of month'),
-        'by_week_day': fields.selection(BYWEEKDAY, 'Reference'),
-        # Recurrence by year data.
-        'months': fields.selection(MONTHS, 'Month'),
-        'is_easterly': fields.boolean('By easter', help='A date from '
-                                                        'western easter '
-                                                        'sunday.'),
-        'byeaster': fields.integer('By easter', help='Number of days '
-                                                     'from western easter '
-                                                     'sunday.'),
-        # Ending data
-        'end_type': fields.selection(END_TYPE, 'Recurrence Termination'),
-        'count': fields.integer('Repeat', help="Repeat x times"),
-        'until': fields.date('Repeat Until'),
-    }
+    # Basic datas.
+    name = fields.Char(
+        'Name',
+        size=254
+    )
 
-    _defaults = {
-        'is_recurrent': True,
-        'rrule': '',
-        'freq': 'daily',
-        'interval': 1,
-        'days_option': 'month_day',
-        'by_week_day': 'n',
-        'months': str(datetime.today().month),
-        'monthly_day': datetime.today().day,
-        'date_from': normalize_d_str(datetime.today()),
-        'allday': True,
-        'duration': 1,
-        'end_type': 'no_end_date',
-        'count': 5,
-        'byeaster': 0,
-        'active': True,
-    }
+    date_from = fields.Date(
+        'Init date',
+        required=True,
+        default=normalize_d_str(datetime.today()),
+        help='Date to be init.'
+    )
+
+    date = fields.Datetime(
+        compute='_get_date',
+        method=True,
+        string='Date and time to be init.',
+        fnct_search=_date_search,
+        help='Init date and time on user time zone.'
+    )
+
+    date_to = fields.Date(
+        'End date',
+        help='Date to be end.'
+    )
+
+    duration = fields.Integer(
+        'Duration',
+        default=1,
+        help='Duration on days.'
+    )
+
+    calendar_duration = fields.Float(
+        compute='_get_duration',
+        method=True,
+        string='Duration',
+        help='Get the duration on hours of recurrent object'
+    )
+
+    allday = fields.Boolean(
+        'All Day',
+        default=True
+    )
+
+    description = fields.Text(
+        'Description'
+    )
+
+    active = fields.Boolean(
+        'Active',
+        defautl=True
+    )
+
+    # General recurrence data.
+    is_recurrent = fields.Boolean(
+        'Is recurrent',
+        default=True,
+        help='Check if is recurrent.'
+    )
+
+    rrule = fields.Char(
+        'RRULE',
+        size=124,
+        readonly=True,
+        default=''
+    )
+
+    freq = fields.Selection(
+        FREQ,
+        'Frequency type',
+        default='daily',
+    )
+
+    interval = fields.Integer(
+        'Repeat Every',
+        default=1,
+        help="Repeat every (Days/Week/Month/Year)"
+    )
+
+    # Recurrence by week data.
+    mo = fields.Boolean(
+        'Monday'
+    )
+
+    tu = fields.Boolean(
+        'Tuesday'
+    )
+
+    we = fields.Boolean(
+        'Wednesday'
+    )
+
+    th = fields.Boolean(
+        'Thursday'
+    )
+    fr = fields.Boolean(
+        'Friday'
+    )
+
+    sa = fields.Boolean(
+        'Saturday'
+    )
+
+    su = fields.Boolean(
+        'Sunday'
+    )
+
+    # Recurrence by month data.
+    days_option = fields.Selection([
+        ('week_day', 'By week day'),
+        ('month_day', 'By month day')],
+        'Option',
+        default='month_day'
+    )
+
+    monthly_day = fields.Integer(
+        'Days of month',
+        default=datetime.today().day
+    )
+
+    by_week_day = fields.Selection(
+        BYWEEKDAY,
+        'Reference',
+        default='n'
+    )
+
+    # Recurrence by year data.
+    months = fields.Selection(
+        MONTHS,
+        'Month',
+        deafault=str(datetime.today().month)
+    )
+
+    is_easterly = fields.Boolean(
+        'By easter',
+        help='A date from western easter sunday.'
+    )
+
+    byeaster = fields.Integer(
+        'By easter',
+        default=0,
+        help='Number of days from western easter sunday.'
+    )
+
+    # Ending data
+    end_type = fields.Selection(
+        END_TYPE,
+        'Recurrence Termination',
+        default='no_end_date'
+    )
+
+    count = fields.Integer(
+        'Repeat',
+        default=5,
+        help="Repeat x times"
+    )
+
+    until = fields.Date(
+        'Repeat Until'
+    )
 
     @staticmethod
-    def parse_until_date(until, context=None):
+    def parse_until_date(until):
         '''Set of 11PM hour of day on UTC
 
         '''
         end_date_new = normalize_dt(until).replace(hour=23)
         return end_date_new.strftime(_V_DATE_FORMAT)
 
-    def _compute_rule_string(self, data, context=None):
+    def _compute_rule_string(self, data):
         """Compute rule string according to value type RECUR of iCalendar
         from the values given.
 
@@ -278,7 +361,7 @@ class recurrent_model(osv.osv):
                 return ';COUNT=' + str(data.get('count')) or ''
             until = data.get('until')
             if until and end_type == 'until':
-                end_date = self.parse_until_date(until, context)
+                end_date = self.parse_until_date(until)
                 return ';UNTIL=' + end_date or ''
             return ''
 
@@ -359,24 +442,24 @@ class recurrent_model(osv.osv):
         result = [r['id'] for r in sorted(data, cmp=comparer)]
         return result
 
-    def _set_end(self, cr, uid, rule_str, domain, offset, limit, context=None):
+    @api.model
+    def _set_end(self, rule_str, domain, offset, limit):
         '''Force to end for non infinitive search.
 
         '''
-        context = context if context else {}
         for arg in domain:
             if arg[0] in ('date', 'date_from', 'date_to') and arg[1] in ['<', '<=']:
                 until = normalize_dt(arg[2])
-                until = datetime_user_to_server_tz(cr, uid, until,
-                                                   tz_name=context.get('tz'))
+                until = datetime_user_to_server_tz(until,
+                                                   tz_name=self._context.get('tz'))
                 until = normalize_d_str(until)
-                rule_str += ';UNTIL=' + self.parse_until_date(until, context)
+                rule_str += ';UNTIL=' + self.parse_until_date(until)
                 return rule_str
         rule_str += ';COUNT=' + str(offset + (limit or 100))
         return rule_str
 
-    def _get_virtuals_ids(self, cr, uid, ids, domain, offset=0, limit=100,
-                          context=None):
+    @api.multi
+    def _get_virtuals_ids(self, domain, offset=0, limit=100):
         """Gives virtual event ids for recurring events based on value of
         Recurrence Rule
         This method gives ids of dates that comes between start date and
@@ -385,12 +468,9 @@ class recurrent_model(osv.osv):
         @param limit: The Number of Results to Return
 
         """
-        from six import string_types
-        if not hasattr(ids, '__iter__'):
-            ids = [ids]
         result_data = []
         extra_fields = ['date', 'rrule', 'is_recurrent']
-        order = context.get('order', None) or self._order
+        order = self._context.get('order', None) or self._order
         order = order.split(',') if order else []
         order_specs = [
             (field.split()[0], field.split()[-1].lower())
@@ -399,21 +479,18 @@ class recurrent_model(osv.osv):
         order_fields = [field for field, _ in order_specs]
         fields = list(set(extra_fields + order_fields))
         super_read = super(recurrent_model, self).read
-        for item in super_read(cr, uid, ids, fields, context=context):
+        for item in super_read(fields):
             if not item['is_recurrent'] or isinstance(item['id'], string_types):
                 result_data.append(item)
                 rule_str = False
             elif not item['rrule']:
-                rule_str = self._get_rulestring(cr, uid, item['id'],
-                                                context=context)
+                rule_str = self._get_rulestring(item['id'])
                 rule_str = rule_str[item['id']]
             else:
                 rule_str = item['rrule']
             if rule_str:
                 if rule_str.find('COUNT') < 0 and rule_str.find('UNTIL') < 0:
-                    rule_str = self._set_end(cr, uid, rule_str, domain,
-                                             offset, limit,
-                                             context=context)
+                    rule_str = self._set_end(rule_str, domain, offset, limit)
                 date = normalize_dt(item['date'])
                 recurrent_dates = self._get_recurrent_dates(str(rule_str),
                                                             startdate=date)
@@ -478,33 +555,31 @@ class recurrent_model(osv.osv):
                 return int(real_id), start, end
         return virtual_id
 
-    def _update_rrule(self, cr, uid, ids, context=None):
-        res_rrules = self.get_rulestring(cr, uid, ids, context=context)
+    @api.multi
+    def _update_rrule(self):
+        res_rrules = self.get_rulestring()
         if not res_rrules:
             return False
-        if not hasattr(ids, '__iter__'):
-            ids = [ids]
-        for i in ids:
-            self.write(cr, uid, i, {'rrule': res_rrules[i]}, context=context)
+        for item in self:
+            item.write({'rrule': res_rrules[item]})
         return res_rrules
 
-    def _check_for_one_occurrency_change(self, cr, uid, ids, context=None):
+    @api.model
+    def _check_for_one_occurrency_change(self):
         '''
-
-        :raise an except_osv if one of ids is virtual
+        :raise an except_orm if one of ids is virtual
         :param ids:
         :return:
         '''
-        if not hasattr(ids, '__iter__'):
-            ids = [ids]
-        real_id_vs_virtual = map(lambda x: (x, self._virtual_id2real(x)), ids)
+        real_id_vs_virtual = map(lambda x: (x, self._virtual_id2real(x)), self._ids)
         real_ids = [real_id for virtual_id, real_id in real_id_vs_virtual]
-        if real_ids != ids:
-            raise osv.except_osv(_('Error!'), _('An occurrence of an '
+        if real_ids != self._ids:
+            raise exceptions.except_orm(_('Error!'), _('An occurrence of an '
                                                 'recurrent rule can`t '
                                                 'be modify or deleted.'))
 
-    def get_rulestring(self, cr, uid, ids, context=None):
+    @api.model
+    def get_rulestring(self):
         """Gets Recurrence rule string according to value type RECUR of
         iCalendar from the values given.
 
@@ -514,29 +589,26 @@ class recurrent_model(osv.osv):
 
         """
         result = {}
-        if not hasattr(ids, '__iter__'):
-            ids = [ids]
         # Browse these fields as SUPERUSER because if the record is
         # private a normal search could return False and raise an error.
-        for item in osv.osv.read(self, cr, SUPERUSER_ID, ids, [],
-                                 context=context):
+        for item in self.read(SUPERUSER_ID,[]):
             if item:
                 if not item.get('freq'):
                     _required_field('Frequency')
                 if (item['interval'] or 0) < 0:
-                    raise osv.except_osv(_('Warning!'), _('Interval cannot '
+                    raise exceptions.except_orm(_('Warning!'), _('Interval cannot '
                                                           'be negative.'))
                 if (item['count'] or 0) <= 0:
-                    raise osv.except_osv(_('Warning!'), _('Count cannot be '
+                    raise exceptions.except_orm(_('Warning!'), _('Count cannot be '
                                                           'negative or 0.'))
                 if item['is_recurrent']:
-                    result[item['id']] = self._compute_rule_string(item,
-                                                                   context)
+                    result[item['id']] = self._compute_rule_string(item)
                 else:
                     result[item['id']] = ''
         return result
 
-    def is_occurrency(self, cr, uid, ids, day, context=None):
+    @api.multi
+    def is_occurrency(self, day):
         '''Get True if day(date) is on one of virtuals ocurrences of real
         [ids] else False
 
@@ -544,70 +616,59 @@ class recurrent_model(osv.osv):
         :param day: date to search
         :return: True or False
         '''
-        day = datetime_user_to_server_tz(cr, uid, normalize_dt(day),
-                                         context.get('tz'))
+        day = datetime_user_to_server_tz(normalize_dt(day),
+                                         self._context.get('tz'))
         day_str = normalize_dt_str(day.replace(hour=23, minute=59))
-        res_ids = self.search(cr, uid, [('id', 'in', ids),
-                                        ('date', '<=', day_str)],
-                              context=context)
-        for data in self.read(cr, uid, res_ids, ['date', 'calendar_duration'],
-                              context=context):
+        res_ids = self.search([('id', 'in', self._ids),
+                                        ('date', '<=', day_str)])
+        for data in self.read(res_ids, ['date', 'calendar_duration']):
             d_from = normalize_dt(data['date'])
             d_to = d_from + timedelta(hours=data.get('calendar_duration'))
             if d_from.date() <= day.date() <= d_to.date():
                 return True
         return False
 
-    def search(self, cr, uid, args, offset=0, limit=None, order=None,
-               context=None, count=False):
-        """if 'virtual_id' not in context or are False then normally
+    @api.multi
+    def search(self, args, offset=0, limit=None, order=None, count=False):
+        """If 'virtual_id' not in context or are False then normally
         search, else search virtual occurrences and return then.
 
         """
-        if context is None:
-            context = {}
         _super = super(recurrent_model, self).search
-        res = _super(cr, uid, args, offset=offset, limit=limit,
-                     order=order, context=context, count=False)
+        res = _super(args, offset=offset, limit=limit, order=order, count=False)
         if not res:
             return []
-        if context.get('virtual_id', True):
-            res = self._get_virtuals_ids(cr, uid, res, args, offset, limit,
-                                         context=context)
+        if self._context.get('virtual_id', True):
+            res = self._get_virtuals_ids(res, args, offset, limit)
         if count:
             return len(res)
         elif limit:
             return res[offset:offset + limit]
         return res
 
-    def read(self, cr, uid, ids, fields=None, context=None,
-             load='_classic_read'):
+    @api.multi
+    def read(self, fields=None, load='_classic_read'):
         """Return the list of dict with the [fields].
           if [ids] contain virtual ids read data from real ids and create
           virtual copies to return
 
         """
         _super = super(recurrent_model, self).read
-        if not context.get('virtual_id', True):
-            return _super(cr, uid, ids, fields,
-                          context=context,
-                          load=load)
-        if not ids:
-            return []
-        w_ids = ids if is_collection(ids) else [ids]
+        if not self._context.get('virtual_id', True):
+            return _super(fields, load=load)
         fields2 = fields[:] if fields else []
         targets = ('date', 'date_from', 'date_to')
         has_dates = any(field in fields for field in targets)
         if fields and 'calendar_duration' not in fields and has_dates:
             fields2.append('calendar_duration')
-        ids_index = {int(self._virtual_id2real(id)): id
-                     for id in w_ids if id}
+        ids_index = {int(self._virtual_id2real(self.id)): record.id
+                     for record in self}
         real_ids = ids_index.keys()
         # XXX: super read may call _name_get, that in turns calls
         # self.read leading to recursion... Pass virtual_id = False to
         # bail out.
-        cpcontex = dict(context or {}, virtual_id=False)
-        real_data = _super(cr, uid, real_ids, fields2, context=cpcontex,
+        cpcontex = dict(self._context or {}, virtual_id=False)
+        real_data = _super(real_ids, fields2, context=cpcontex,
                            load=load)
         real_data = {row['id']: row for row in real_data}
         result = []
@@ -629,34 +690,32 @@ class recurrent_model(osv.osv):
         if fields and 'calendar_duration' not in fields:
             for r in result:
                 r.pop('calendar_duration', None)
-        if not hasattr(ids, '__iter__'):
+        if not hasattr(self._ids, '__iter__'):
             return result[0] if result else []
         return result
 
-    def unlink(self, cr, uid, ids, context=None):
+    @api.multi
+    def unlink(self):
         # TODO: implement the logic for rule exceptions and one occurrence
         # modifications.
-        self._check_for_one_occurrency_change(cr, uid, ids, context)
-
-        result = super(recurrent_model, self).unlink(cr, uid, ids,
-                                                     context=context)
+        self._check_for_one_occurrency_change()
+        result = super(recurrent_model, self).unlink()
         return result
 
-    def write(self, cr, uid, ids, values, context=None):
+    @api.multi
+    def write(self, values):
         # TODO: implement the logic for rule exceptions and one occurrence
         # modifications.
-        context = context or {}
-        self._check_for_one_occurrency_change(cr, uid, ids, context)
-        res = super(recurrent_model, self).write(cr, uid, ids, values,
-                                                 context=context)
-        if 'no_update_rrule' not in context and not values.get('rrule'):
-            self._update_rrule(cr, uid, ids, context=context)
+        self._check_for_one_occurrency_change()
+        res = super(recurrent_model, self).write(values)
+        if 'no_update_rrule' not in self._context and not values.get('rrule'):
+            self._update_rrule()
         return res
 
-    def create(self, cr, uid, values, context=None):
-        id = super(recurrent_model, self).create(cr, uid, values,
-                                                 context=context)
-        self._update_rrule(cr, uid, id, context=context)
+    @api.model
+    def create(self, values):
+        id = super(recurrent_model, self).create(values)
+        self._update_rrule(id)
         return id
 
     def next_date(self, rrulestring, dt=False, include=False):
