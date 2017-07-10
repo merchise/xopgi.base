@@ -179,10 +179,11 @@ class BasicEvent(models.Model):
     def evaluate(self, cycle):
         try:
             value = self.event_id._evaluate()
-        except Exception as e:
-            logger.exception('Error evaluating event %s defined as: ',
-                             (self.name, self.definition))
-            logger.exception(e)
+        except:
+            logger.exception(
+                'Error evaluating event %s defined as: ',
+                self.name, self.definition
+            )
             return None
         else:
             self.update_event(value, cycle)
@@ -210,10 +211,11 @@ class RecurrentEvent(models.Model):
     def evaluate(self, cycle):
         try:
             value = self.event_id._evaluate()
-        except Exception as e:
-            logger.exception('Error evaluating event %s defined as: ',
-                             (self.name, self.definition))
-            logger.exception(e)
+        except:
+            logger.exception(
+                'Error evaluating event %s defined as: ',
+                self.name, self.definition
+            )
             return None
         else:
             self.update_event(value)
