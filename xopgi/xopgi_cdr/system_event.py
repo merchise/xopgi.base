@@ -94,8 +94,7 @@ class SystemEvent(models.Model):
         evidences = self.env['cdr.evidence']
         for event in self:
             if event.active and event.definition:
-                domain = [
-                    ('name', 'in', tuple(get_free_names(event.definition)))]
+                domain = [('name', 'in', tuple(get_free_names(event.definition)))]
                 event.evidences = evidences.search(domain)
             else:
                 event.evidences = evidences
@@ -142,14 +141,20 @@ class BasicEvent(models.Model):
 
     _inherits = {'cdr.system.event': 'event_id'}
 
-    event_id = fields.Many2one('cdr.system.event',
-                               required=True, ondelete='cascade')
-    interval = fields.Float(required=True,
-                            help="Time (in hours:minutes format) between "
-                                 "evaluations.")
+    event_id = fields.Many2one(
+        'cdr.system.event',
+        required=True,
+        ondelete='cascade'
+    )
+    interval = fields.Float(
+        required=True,
+        help="Time (in hours:minutes format) between evaluations."
+    )
     time_to_wait = fields.Float(
-        required=True, help="Time (in hours:minutes format) getting "
-                            "consecutive positive evaluations before raise.")
+        required=True,
+        help=("Time (in hours:minutes format) getting "
+              "consecutive positive evaluations before raise.")
+    )
     times_to_raise = fields.Integer()
 
     @api.depends('interval')
@@ -159,8 +164,7 @@ class BasicEvent(models.Model):
         '''
         for event in self:
             if event.active and event.interval:
-                event.next_call = datetime.now() + timedelta(
-                    hours=event.interval)
+                event.next_call = datetime.now() + timedelta(hours=event.interval)
             else:
                 event.next_call = False
 
