@@ -17,13 +17,14 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
-from xoutil import logger
-
-from xoeuf import signals
+from xoeuf import signals, api, models, fields
 from xoeuf.ui import RELOAD_UI
-from openerp import api, models, fields
 
 from .work_distributor import WORKDIST_MODELNAME
+
+import logging
+logger = logging.getLogger(__name__)
+del logging
 
 
 class WorkDistributionSettings(models.TransientModel):
@@ -50,7 +51,7 @@ class WorkDistributionSettings(models.TransientModel):
 @signals.receiver(signals.post_fields_view_get)
 def post_fields_view_get(self, **kwargs):
     result = kwargs['result']
-    if WORKDIST_MODELNAME not in self.pool or kwargs['view_type'] != 'form':
+    if WORKDIST_MODELNAME not in self.env or kwargs['view_type'] != 'form':
         return kwargs['result']
     if not self.user_has_groups(
             'xopgi_work_distributor.group_distributor_manager,'

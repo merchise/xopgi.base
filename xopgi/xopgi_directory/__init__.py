@@ -14,6 +14,8 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
-# This only have models of our own, not extensions to Odoo's models.  So
-# no conflict in any version so far.
-from . import partner_classification  # noqa
+
+from xoeuf import ODOO_VERSION_INFO
+
+if 8 <= ODOO_VERSION_INFO[0] < 11:
+    from . import partner_classification  # noqa
