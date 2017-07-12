@@ -15,9 +15,10 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
-from openerp import api, exceptions, fields, models, _
-from openerp.addons.xopgi_cdr.cdr_agent import EVENT_SIGNALS
-from openerp.addons.xopgi_cdr.util import evaluate
+from xoeuf.odoo import api, fields, models, _
+from xoeuf.odoo.exceptions import ValidationError
+from xoeuf.odoo.addons.xopgi_cdr.cdr_agent import EVENT_SIGNALS
+from xoeuf.odoo.addons.xopgi_cdr.util import evaluate
 from xoeuf import signals
 
 PRIORITIES = [('info', 'Information'), ('alert', 'Alert'), ('alarm', 'Alarm')]
@@ -34,26 +35,86 @@ get_method = lambda action: ACTIONS[action]['action']
 
 
 class EventHandler(models.Model):
+    '''This model allows you to configure an notification when a certain event
+    occurs.
+
+    '''
     _name = 'cdr.event.basic.handler'
 
-    name = fields.Char(translate=True, required=True)
-    priority = fields.Selection(PRIORITIES, default=PRIORITIES[0][0],
-                                required=True)
-    subscribed_events = fields.Many2many('cdr.system.event')
-    action = fields.Selection([(k, v['name']) for k, v in ACTIONS.items()])
-    recipients = fields.Many2many('res.users', compute='get_recipients')
-    use_domain_builder = fields.Boolean(default=True)
-    domain = fields.Text(help='Odoo domain to search recipients.')
-    build_domain = fields.Char(help='Odoo domain to search recipients.',
-                               string='Domain')
-    notification_text = fields.Text(translate=True, required=True)
-    buttons = fields.Many2many('cdr.notification.button')
-    active = fields.Boolean(default=True)
-    event_raise = fields.Boolean(default=True)
-    continue_raising = fields.Boolean(default=True)
+    name = fields.Char(
+        translate=True,
+        required=True,
+        help='Name of handler basic event'
+    )
+
+    priority = fields.Selection(
+        PRIORITIES,
+        default=PRIORITIES[0][0],
+        required=True,
+        help='Select to specify the priority of the notification'
+    )
+
+    subscribed_events = fields.Many2many(
+        'cdr.system.event'
+    )
+
+    action = fields.Selection(
+        [(k, v['name']) for k, v in ACTIONS.items()],
+        help='Select to specify the medium by which the notification'
+             ' is to be displayed'
+    )
+
+    recipients = fields.Many2many(
+        'res.users',
+        compute='get_recipients',
+        help='Recipients under the result of the domain'
+
+    )
+
+    use_domain_builder = fields.Boolean(
+        default=True,
+        help='Use or not builder domain'
+    )
+
+    domain = fields.Text(
+        help='Odoo domain to search recipients.'
+    )
+
+    build_domain = fields.Char(
+        string='Domain',
+        help='Odoo domain to search recipients.'
+    )
+
+    notification_text = fields.Text(
+        translate=True,
+        required=True,
+        help='Text of the notification'
+    )
+
+    buttons = fields.Many2many(
+        'cdr.notification.button',
+        help='Buttons that will be displayed on the alert to trigger certain actions'
+    )
+
+    active = fields.Boolean(
+        default=True
+    )
+
+    event_raise = fields.Boolean(
+        default=True
+    )
+
+    continue_raising = fields.Boolean(
+        default=True
+    )
+
     stop_raising = fields.Boolean()
 
     def get_domain(self):
+        '''It is used as an evaluation alternative to parse the odoo domain defined
+        string in the fields 'domain' or 'build_domain'
+
+        '''
         domain = self.domain or self.build_domain
         try:
             if not domain or all(l.strip().startswith('#')
@@ -71,6 +132,11 @@ class EventHandler(models.Model):
 
     @api.onchange('use_domain_builder')
     def onchange_use_domain_builder(self):
+        '''If use_domain_builder changes an is True, parse the domain and save
+        it as a string. If it is false it defaults the value of build_domain
+        or  sets one by default.
+
+        '''
         if self.use_domain_builder:
             domain = self.get_domain()
             domain = (str(domain) if domain else '')
@@ -88,6 +154,10 @@ class EventHandler(models.Model):
 
     @api.onchange('build_domain')
     def onchange_build_domain(self):
+        '''If the build_domain changes, it parses the domain-defined string
+        and assigns it to field domain.
+
+        '''
         if self.build_domain:
             domain = self.get_domain()
             domain = (str(domain) if domain else '')
@@ -96,6 +166,9 @@ class EventHandler(models.Model):
     @api.onchange('build_domain', 'domain')
     @api.depends('build_domain', 'domain')
     def get_recipients(self):
+        '''Gets recipients that match a defined domain.
+
+        '''
         for handler in self:
             domain = handler.get_domain()
             if domain:
@@ -105,18 +178,27 @@ class EventHandler(models.Model):
 
     @api.constrains('domain', 'build_domain')
     def _check_recipients(self):
+        '''Restrict the use of at least one recipient.These recipients are the
+        result of the defined domain.
+
+        '''
         if not all(handler.recipients for handler in self):
-            raise exceptions.ValidationError(
+            raise ValidationError(
                 _('At least one recipient is necessary.'))
 
     @api.constrains('event_raise', 'continue_raising', 'stop_raising')
     def _check_signals(self):
+        '''Check that there is at least some signal.
+
+        '''
         if not all(h.event_raise or h.continue_raising or h.stop_raising
                    for h in self):
-            raise exceptions.ValidationError(
-                _('At least one signal must be checked.'))
+            raise ValidationError(_('At least one signal must be checked.'))
 
     def do_chat_notify(self):
+        '''Notify by vigilant user by sending a message through the chat of odoo.
+
+        '''
         vigilant = self.env.ref('xopgi_cdr_notification.vigilant_user')
         session_ids = self.env['im_chat.session'].search(
             [('user_ids', '=', vigilant.id)])
@@ -135,6 +217,10 @@ class EventHandler(models.Model):
                                              'meta', notification_text)
 
     def do_js_notify(self):
+        '''Notifies all the recipients through the concept of channels of the
+        odoo bus. Use the channels 'notify' and 'warn'.
+
+        '''
         notification = self.env['xopgi.web.notification']
         title = u"""
         <span class="e_cdr_{priority}">
@@ -169,34 +255,67 @@ class EventHandler(models.Model):
 
 
 class NotificationButton(models.Model):
+    '''Represents the buttons that will be displayed in the alert to trigger
+    actions.
+
+    '''
+
     _name = 'cdr.notification.button'
 
-    title = fields.Char(translate=True, required=True)
-    action_id = fields.Char()
-    action_dict = fields.Text()
+    title = fields.Char(
+        translate=True,
+        required=True,
+        help=''
+    )
+
+    action_id = fields.Char(
+        help='Id of action'
+    )
+
+    action_dict = fields.Text(
+        help='Action dict specification a python code that return a dict on result'
+             ' variable'
+    )
 
     @api.constrains('action_id', 'action_dict')
     def check_action(self):
+        '''Verify that the action_id is a valid id of the ir.actions.actions
+        model or a valid xml_id. Validates that the action_dict is correctly
+        evaluated as a dictionary in python code.
+
+        '''
         if not (self.action_id or self.action_dict):
-            raise exceptions.ValidationError(
-                _('Action id or Action dict must be define.'))
+            raise ValidationError(_('Action id or Action dict must be define.'))
         if self.action_id:
             try:
-                assert self.env['ir.actions.actions'].browse(int(self.action_id))
+                action = self.env['ir.actions.actions'].browse(int(self.action_id))
+                if not action.exists():
+                    raise ValidationError('There is no action created with this action_id')
             except ValueError:
                 try:
+                    # Return the record corresponding to the given ``xml_id``
+                    # in this case the xml_id is ``action_id``
                     action = self.env.ref(self.action_id)
-                    assert action._name.startswith('ir.actions.')
+                    action._name.startswith('ir.actions.')
                 except Exception as e:
-                    raise exceptions.ValidationError(e.message)
+                    raise ValidationError(
+                        'There is no action created with '
+                        'this xml_id, remember the structure to invoke '
+                        'it is addons.xml_id'
+                    )
         if self.action_dict:
             try:
                 evaluate(self.action_dict or 'result={}',
                          mode='exec', env=self.env)
             except Exception as e:
-                raise exceptions.ValidationError(e.message)
+                raise ValidationError(e.message)
 
     def get_action(self):
+        '''If action id is defined corresponding openerp action will be update
+        with action dict and executed, else action dict must be a valid openerp
+        action dict.
+
+        '''
         result = []
         for item in self:
             res = dict(title=item.title)
