@@ -17,18 +17,23 @@
     'category': 'Hidden',
     "author": "Merchise Autrement",
     "website": "http://xhg.ca.merchise.org/addons/xopgi_cdr_notification",
-    'depends': ['web', 'xopgi_cdr', 'im_chat', 'xopgi_web_notification'],
+    'depends': ['web',
+                'xopgi_cdr',
+                'im_chat' if MAJOR_ODOO_VERSION <= 8 else 'mail', # noqa
+                'xopgi_web_notification'
+    ],
     'data': [
         'data/vigilant_user.xml',
         'security/security.xml',
-        'views/event_handler_views.xml',
+        'views/%d/assets.xml' % MAJOR_ODOO_VERSION, # noqa
+        'views/%d/event_handler_views.xml' % MAJOR_ODOO_VERSION, # noqa
         'views/res_users_views.xml',
     ],
     'qweb': [],
 
     # MIGRATION POLICY: All addons are not included until someone work on them
     # and upgrade them.
-    'installable': (8, 0) <= ODOO_VERSION_INFO < (9, 0),   # noqa
+    'installable': 8 <= MAJOR_ODOO_VERSION < 11,   # noqa
 
     'auto_install': True,
 }

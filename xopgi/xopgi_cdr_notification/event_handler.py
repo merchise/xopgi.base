@@ -19,9 +19,16 @@ from xoeuf.odoo import api, fields, models, _
 from xoeuf.odoo.exceptions import ValidationError
 from xoeuf.odoo.addons.xopgi_cdr.cdr_agent import EVENT_SIGNALS
 from xoeuf.odoo.addons.xopgi_cdr.util import evaluate
+
 from xoeuf import signals
 
-PRIORITIES = [('info', 'Information'), ('alert', 'Alert'), ('alarm', 'Alarm')]
+DEFAULT_PRIORITY = 'info'
+PRIORITIES = dict(
+    info='Information',
+    alert='Alert',
+    alarm='Alarm'
+)
+
 
 ACTIONS = {
     'js': dict(
@@ -35,8 +42,7 @@ get_method = lambda action: ACTIONS[action]['action']
 
 
 class EventHandler(models.Model):
-    '''This model allows you to configure an notification when a certain event
-    occurs.
+    '''Allows to configure an notification when the events occur.
 
     '''
     _name = 'cdr.event.basic.handler'
@@ -48,14 +54,14 @@ class EventHandler(models.Model):
     )
 
     priority = fields.Selection(
-        PRIORITIES,
-        default=PRIORITIES[0][0],
+        PRIORITIES.items(),
+        default=DEFAULT_PRIORITY,
         required=True,
         help='Select to specify the priority of the notification'
     )
 
     subscribed_events = fields.Many2many(
-        'cdr.system.event'
+        'cdr.system.event',
     )
 
     action = fields.Selection(
@@ -195,26 +201,12 @@ class EventHandler(models.Model):
                    for h in self):
             raise ValidationError(_('At least one signal must be checked.'))
 
-    def do_chat_notify(self):
-        '''Notify by vigilant user by sending a message through the chat of odoo.
-
-        '''
-        vigilant = self.env.ref('xopgi_cdr_notification.vigilant_user')
-        session_ids = self.env['im_chat.session'].search(
-            [('user_ids', '=', vigilant.id)])
-        for recipient in self.recipients:
-            # override self to get recipient right lang translation
-            self = self.with_context(lang=recipient.lang)
-            session_id = session_ids.filtered(
-                lambda s: recipient in s.user_ids and len(s.user_ids) == 2)
-            if not session_id:
-                session_id = self.env['im_chat.session'].create(
-                    {'user_ids': [(6, 0, (recipient.id, vigilant.id))]})
-            notification_text = "%s: \n%s" % (
-                _({k: v for k, v in PRIORITIES}[self.priority]),
-                self.notification_text)
-            self.env['im_chat.message'].post(vigilant.id, session_id[0].uuid,
-                                             'meta', notification_text)
+    @property
+    def prioritized_notification_text(self):
+        return "%s: \n%s" % (
+            _(PRIORITIES[self.priority]),
+            self.notification_text
+        )
 
     def do_js_notify(self):
         '''Notifies all the recipients through the concept of channels of the
@@ -234,7 +226,7 @@ class EventHandler(models.Model):
                 id='cdr_handler_%s' % self.id,
                 title=title.format(
                     priority=self.priority,
-                    label=_({k: v for k, v in PRIORITIES}[self.priority]),
+                    label=_(PRIORITIES[self.priority]),
                     name=self.name),
                 body=self.notification_text,
                 type_notify=self.priority,
@@ -265,7 +257,7 @@ class NotificationButton(models.Model):
     title = fields.Char(
         translate=True,
         required=True,
-        help=''
+        help='Title of button'
     )
 
     action_id = fields.Char(
@@ -273,8 +265,10 @@ class NotificationButton(models.Model):
     )
 
     action_dict = fields.Text(
-        help='Action dict specification a python code that return a dict on result'
-             ' variable'
+        help="Action dict specification a python code that return a dict on\n"
+             "result variable. If action id is defined corresponding openerp\n"
+             "action will be update with action dict and executed, else\n"
+             "action dict must be a valid opener action dict.\n"
     )
 
     @api.constrains('action_id', 'action_dict')
