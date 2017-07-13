@@ -51,7 +51,7 @@ class WorkDistributionSettings(models.TransientModel):
 @signals.receiver(signals.post_fields_view_get)
 def post_fields_view_get(self, **kwargs):
     result = kwargs['result']
-    if WORKDIST_MODELNAME not in self.env or kwargs['view_type'] != 'form':
+    if kwargs['view_type'] != 'form':
         return kwargs['result']
     if not self.user_has_groups(
             'xopgi_work_distributor.group_distributor_manager,'
