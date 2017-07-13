@@ -15,8 +15,8 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
-from openerp import api, exceptions, fields, models, _
-from openerp.addons.xopgi_cdr.cdr_agent import EVENT_SIGNALS
+from xoeuf.odoo import api, exceptions, fields, models, _
+from xoeuf.odoo.addons.xopgi_cdr.cdr_agent import EVENT_SIGNALS
 from xoeuf import signals
 
 
@@ -24,14 +24,38 @@ ACTION_SERVER_MODEL_NAME = 'ir.actions.server'
 
 
 class EventHandler(models.Model):
+    '''Allow to create cdr event handlers to execute server actions.
+
+    '''
     _name = 'cdr.event.action.handler'
 
-    name = fields.Char(translate=True, required=True)
-    subscribed_events = fields.Many2many('cdr.system.event')
-    action = fields.Many2one('ir.actions.server', required=True)
-    active = fields.Boolean(default=True)
-    event_raise = fields.Boolean(default=True)
-    continue_raising = fields.Boolean(default=True)
+    name = fields.Char(
+        translate=True,
+        required=True,
+        help='Name of handler action event'
+    )
+
+    subscribed_events = fields.Many2many(
+        'cdr.system.event'
+    )
+
+    action = fields.Many2one(
+        'ir.actions.server',
+        required=True
+    )
+
+    active = fields.Boolean(
+        default=True
+    )
+
+    event_raise = fields.Boolean(
+        default=True
+    )
+
+    continue_raising = fields.Boolean(
+        default=True
+    )
+
     stop_raising = fields.Boolean()
 
     @signals.receiver(EVENT_SIGNALS.values())
@@ -50,6 +74,9 @@ class EventHandler(models.Model):
 
     @api.constrains('event_raise', 'continue_raising', 'stop_raising')
     def _check_signals(self):
+        '''Verify that at least one sign must be checked.
+
+        '''
         if not all(h.event_raise or h.continue_raising or h.stop_raising
                    for h in self):
             raise exceptions.ValidationError(
