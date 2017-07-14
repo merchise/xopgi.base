@@ -19,11 +19,26 @@ from xoeuf.odoo import fields, models
 
 
 class CDRHistory(models.Model):
+    '''History of control variable, evidences and your values in evaluation cycles.
+
+    '''
     _name = 'cdr.history'
 
     _order = 'cycle desc'
 
-    identifier = fields.Many2one('cdr.identifier', required=True,
-                                 ondelete='cascade')
-    cycle = fields.Many2one('cdr.evaluation.cycle', required=True)
-    value = fields.Char()
+    identifier = fields.Many2one(
+        'cdr.identifier',
+        required=True,
+        ondelete='cascade',
+        help='Available python identifier. This can be a variable or evidences '
+    )
+
+    cycle = fields.Many2one(
+        'cdr.evaluation.cycle',
+        required=True,
+        help='<CDR_evaluation_cycle>'
+    )
+
+    value = fields.Char(
+        help='Value of the evaluation'
+    )

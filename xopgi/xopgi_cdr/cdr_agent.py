@@ -87,6 +87,7 @@ class EvaluationCycle(models.Model):
         :param evidences_to_evaluate: cdr.evidences recordset to evaluate
 
         '''
+
         res = super(EvaluationCycle, self).create({})
         if vars_to_evaluate or evidences_to_evaluate:
             if vars_to_evaluate:
@@ -98,6 +99,11 @@ class EvaluationCycle(models.Model):
                     evidence.control_vars.filtered(valid_var).evaluate(res)
                 evidences_to_evaluate.evaluate(res)
         else:
+            # Look for events that have the next_call less than the same as
+            # the creation date of the last cycle that was created. The
+            # next_call of events is updated when an event is evaluated.
+            # To see function evaluate for BasicEvent and RecurrentEvent.
+            # --The next_call conditions events to be evaluated or not!!.
             events = self.env['cdr.system.event'].search(
                 [('next_call', '<=', res.create_date)]
             )

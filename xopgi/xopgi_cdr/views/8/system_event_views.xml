@@ -4,8 +4,25 @@
     <record id="view_cdr_system_event_tree" model="ir.ui.view">
       <field name="name">cdr.system.event.tree</field>
       <field name="model">cdr.system.event</field>
+      <field name="priority">100</field>
       <field name="arch" type="xml">
         <tree string="System Events" create="false" edit="false"
+              duplicate="false">
+          <field name="name"/>
+          <field name="specific_event"/>
+          <field name="priority"/>
+          <field name="state"/>
+          <field name="action"/>
+          <field name="next_call"/>
+        </tree>
+      </field>
+    </record>
+
+    <record id="view_cdr_system_event_tree_editable" model="ir.ui.view">
+      <field name="name">cdr.system.event.tree</field>
+      <field name="model">cdr.system.event</field>
+      <field name="arch" type="xml">
+        <tree string="System Events" edit="false"
               duplicate="false">
           <field name="name"/>
           <field name="specific_event"/>
@@ -66,6 +83,7 @@
       <field name="view_type">form</field>
       <field name="view_mode">tree,form</field>
       <field name="search_view_id" ref="view_cdr_system_event_search"/>
+      <field name="view_id" ref="view_cdr_system_event_tree"/>
       <field name="domain">[]</field>
       <field name="context">{}</field>
     </record>

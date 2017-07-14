@@ -49,38 +49,87 @@ def _get_candidates(value):
 
 
 class Evidence(models.Model):
+    '''The `evidences` are predicates over several `control variables`.
+
+    They test conditions which are *undesired* regarding those variables.
+    For example, having defined the 'liquidity' and 'current liabilities'
+    variables we may defined a 'low liquidity' evidence via the predicate.
+
+    '''
     _name = 'cdr.evidence'
     _inherits = {'cdr.identifier': 'identifier_id'}
 
-    identifier_id = fields.Many2one('cdr.identifier', required=True,
-                                    ondelete='cascade')
-    description = fields.Char(translate=True)
-    definition = fields.Char(
-        required=True, help="Python expression combining controls "
-                            "variables operators and literal values.\n"
-                            "Eg: var1 - var2 * (var3 or 400) \n"
-                            "The result must be able to be in an expression like: \n"
-                            "(result operator operand) resulting a boolean value.")
-    operator = fields.Selection([(k, v[0]) for k, v in OPERATORS.items()],
-                                required=True)
-    operand = fields.Char(help="Python literal.\n"
-                               "Eg: 1000, False, 0.5, 'Some text'\n"
-                               "It must be able to be in an expression like: \n"
-                               "(result operator operand) resulting a boolean value.",
-                          required=True)
-    bool_value = fields.Boolean()
-    control_vars = fields.Many2many('cdr.control.variable',
-                                    'evidence_control_variable_rel',
-                                    'evidence_id', 'var_id',
-                                    compute='get_vars', store=True)
-    active = fields.Boolean(default=True)
-    cycle = fields.Many2one('cdr.evaluation.cycle')
+    identifier_id = fields.Many2one(
+        'cdr.identifier',
+        required=True,
+        ondelete='cascade',
+        help='Identifier the evidence: name, value, evaluations'
+    )
 
-    variable = fields.Many2one('cdr.control.variable')
-    expression = fields.Char()
+    description = fields.Char(
+        translate=True,
+        help='Description of the evidence'
+    )
+
+    definition = fields.Char(
+        required=True,
+        help='Python expression combining controls '
+             'variables operators and literal values.\n'
+             'Eg: var1 - var2 * (var3 or 400) \n'
+             'The result must be able to be in an expression like: \n'
+             '(result operator operand) resulting a boolean value.'
+    )
+
+    operator = fields.Selection(
+        [(k, v[0]) for k, v in OPERATORS.items()],
+        required=True,
+        help='Operator of mathematical language'
+    )
+
+    operand = fields.Char(
+        required=True,
+        help="Python literal.\n"
+             "Eg: 1000, False, 0.5, 'Some text'\n"
+             "It must be able to be in an expression like: \n"
+             "(result operator operand) resulting a boolean value."
+    )
+
+    bool_value = fields.Boolean(
+        help='Result of your predicate'
+    )
+
+    control_vars = fields.Many2many(
+        'cdr.control.variable',
+        'evidence_control_variable_rel',
+        'evidence_id', 'var_id',
+        compute='get_vars',
+        store=True
+    )
+
+    active = fields.Boolean(
+        default=True
+    )
+
+    cycle = fields.Many2one(
+        'cdr.evaluation.cycle',
+        help='<CDR_evaluation_cycle>'
+    )
+
+    variable = fields.Many2one(
+        'cdr.control.variable'
+    )
+
+    expression = fields.Char(
+        help="Expression's evidence on shape of chain"
+    )
+
     key = fields.Char()
+
     candidates = fields.Char()
-    result = fields.Char()
+
+    result = fields.Char(
+        help='Result of the referred expression'
+    )
 
     def _get_result(self):
         if self.expression:
@@ -91,6 +140,10 @@ class Evidence(models.Model):
 
     @api.onchange('variable')
     def onchange_variable(self):
+        '''Calculate the values to determine the expression's evidence when a
+        variable is selected.
+
+        '''
         if self.variable:
             self.expression = self.variable.name
             result = self._get_result()
@@ -123,6 +176,10 @@ class Evidence(models.Model):
 
     @api.depends('active', 'definition')
     def get_vars(self):
+        '''Get the control variables for an evidence if it has definition and
+        is active.
+
+        '''
         control_vars = self.env['cdr.control.variable']
         if self.active and self.definition:
             domain = [('name', 'in', tuple(get_free_names(self.definition)))]
@@ -131,17 +188,26 @@ class Evidence(models.Model):
             self.control_vars = control_vars
 
     def get_bool_value(self):
+        '''Return a dict with the evidences and the result of your predicate.
+
+        '''
         return {e.name: e.bool_value for e in self}
 
     def _evaluate(self):
         return evaluate(self.definition, **self.control_vars.get_value())
 
     def evaluate_bool_expresion(self, definition_result):
+        '''Evaluate the predicate's evidence as boolean expression.
+
+        '''
         op_funct = OPERATORS[self.operator][1]
         return bool(op_funct(definition_result, safe_eval(self.operand)))
 
     @api.constrains('definition', 'operand', 'operator')
     def check_definition(self):
+        '''Evaluate and verify the definition of an evidence.
+
+        '''
         try:
             definition_res = self._evaluate()
             self.evaluate_bool_expresion(definition_res)
@@ -150,6 +216,9 @@ class Evidence(models.Model):
                 _("Wrong definition: %s") % e.message)
 
     def evaluate(self, cycle):
+        '''Evaluate the evidences in a evaluation cycle.
+
+        '''
         for evidence in self:
             try:
                 value = evidence._evaluate()
@@ -160,11 +229,14 @@ class Evidence(models.Model):
                 logger.exception(e)
             else:
                 evidence.write(dict(
-                    value=str(value), bool_value=bool_value, cycle=cycle.id,
-                    evaluations=[CREATE_RELATED(**dict(value=str(value),
-                                                       cycle=cycle.id)),
-                                 CREATE_RELATED(**dict(value=str(bool_value),
-                                                       cycle=cycle.id))]))
+                    value=repr(value),
+                    bool_value=bool_value,
+                    cycle=cycle.id,
+                    evaluations=[
+                        CREATE_RELATED(**dict(value=repr(value), cycle=cycle.id)),
+                        CREATE_RELATED(**dict(value=repr(bool_value), cycle=cycle.id))
+                    ])
+                )
 
     @api.model
     @api.returns('self', lambda value: value.id)

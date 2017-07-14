@@ -151,6 +151,7 @@ class EventHandler(models.Model):
                     label=_({k: v for k, v in PRIORITIES}[self.priority]),
                     name=self.name),
                 body=self.notification_text,
+                type_notify=self.priority,
                 actions=self.buttons.get_action())
 
     @signals.receiver(EVENT_SIGNALS.values())
