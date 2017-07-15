@@ -1,51 +1,50 @@
-openerp.xopgi_web_notification = function (instance) {
+odoo.define('xopgi.base.WebNotification', function (require) {
+    'use strict';
 
-    var QWeb = openerp.qweb;
+    var WebClient = require('web.WebClient');
+    var core = require('web.core');
+    var bus = require('bus.bus').bus;
+    var QWeb = core.qweb;
 
-    instance.web.WebClient = instance.web.WebClient.extend({
-
-        init: function (parent, options) {
-            this._super(parent);
-            this.options = _.clone(options) || {};
-
-            var bus = this.notification_bus = openerp.bus.bus;
+    WebClient.include({
+        start: function () {
+            var self = this;
+            var res = this._super.apply(this, arguments);
             bus.on('notification', this, this.on_notification);
+            return res;
         },
 
         on_notification: function (notifications) {
             var self = this;
             _.each(notifications, function (notification) {
-                var channel = notification[0];
+                var channel = notification[0][1];
                 var message = notification[1];
-
-                if (Array.isArray(channel) && (channel[1] === 'res_user_notify' || channel[1] === 'res_user_warn')) {
-                    self.received_message(channel[1], message);
-                }
+                if(channel && channel === 'res_user_notify' || channel === 'res_user_warn')
+                    self.received_message(channel, message);
             });
         },
 
         received_message: function (channel, message) {
             var self = this,
-                a,
                 notif_box = $.find(".e_web_id_" + message.id);
             if (notif_box.length) {
-                self.get_web_notif_box(notif_box).remove();
+                var msg = self.get_web_notif_box(notif_box).remove();
             }
-            var title = QWeb.render('web_notify_title', {
+            var title = QWeb.render('WebNotifications.web_notify_title', {
                 'title': message.title,
                 'id': message.id
             });
-            var body = QWeb.render('web_notify_body', {
+            var body = QWeb.render('WebNotifications.web_notify_body', {
                 'message': message.body,
                 'actions': message.actions
             });
-            if (channel == 'res_user_notify') {
-                a = openerp.client.do_notify(title, body, true);
+            if (channel == 'res_user_notify' && message.type_notify != 'alarm') {
+                self.do_notify(title, body, true);
             }
             else {
-                a = openerp.client.do_warn(title, body, true);
+                self.do_warn(title, body, true);
             }
-            a.element.find(".web_notification_action").on('click', function (ev) {
+            this.$el.find(".web_notification_action").on('click', function (ev) {
                 var $target = $(ev.currentTarget),
                     action = JSON.parse($target.attr('action') || {}),
                     def = $.Deferred();
@@ -64,15 +63,21 @@ openerp.xopgi_web_notification = function (instance) {
                 }
                 else
                     def.resolve();
-                $.when(def)
-                    .then(function () {
-                        self.action_manager.do_action(action);
-                    });
+                $.when(def).then(function(){
+                    self.action_manager.do_action(action);
+                });
             });
         },
 
         get_web_notif_box: function (me) {
             return $(me).closest(".ui-notify-message-style");
         }
+
     });
-};
+
+
+});
+
+// Local Variables:
+// indent-tabs-mode: nil
+// End:

@@ -1,5 +1,7 @@
+xopgi_web_notification (Web Notifications)
+==========================================
+
 What is this module?
-====================
 
 This module provide a way to send web notifications_ to a some users. This
 notifications shows like calendar reminder and allow put buttons_.

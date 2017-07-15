@@ -19,13 +19,15 @@
     "website": "http://xhg.ca.merchise.org/addons/xopgi_web_notification",
     'depends': ['web', 'bus'],
     'data': [
-        'view.xml',
+        'views/%d/assets.xml' % MAJOR_ODOO_VERSION, # noqa
     ],
-    'qweb': ['static/src/xml/xopgi_web_notification.xml'],
+    'qweb': [
+        'static/src/xml/%d/xopgi_web_notification.xml' % MAJOR_ODOO_VERSION, # noqa
+    ],
 
     # MIGRATION POLICY: All addons are not included until someone work on them
     # and upgrade them.
-    'installable': (8, 0) <= ODOO_VERSION_INFO < (9, 0),   # noqa
+    'installable': 8 <= MAJOR_ODOO_VERSION < 11,   # noqa
 
     'auto_install': True,
 }
