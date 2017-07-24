@@ -12,15 +12,10 @@
 # @created: 2015-10-29
 
 from __future__ import absolute_import as _py3_abs_imports
-
-try:
-    from openerp.release import version_info as ODOO_VERSION_INFO
-except ImportError:
-    # This is Odoo 10+, but let's be able to get the ODOO_VERSION_INFO
-    from odoo.release import version_info as ODOO_VERSION_INFO
+from xoeuf import MAJOR_ODOO_VERSION
 
 
-if ODOO_VERSION_INFO < (9, 0):
+if MAJOR_ODOO_VERSION < 9:
     # MIGRATION POLICY: All addons are not included until someone work on them
     # and upgrade them.
 
@@ -31,6 +26,8 @@ if ODOO_VERSION_INFO < (9, 0):
     from . import res_currency  # noqa
     from . import res_group  # noqa
     from . import ir_ui_menu  # noqa
+
+    from .res_config import BoardValue  # noqa: public API
 
 
 def get_var_value(self, xml_id, module):
