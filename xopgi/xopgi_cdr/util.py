@@ -20,7 +20,7 @@ import ast
 from openerp.tools.safe_eval import safe_eval
 
 
-def get_free_names(expr, debug=False):
+def get_free_names(expr):
     '''Detect the names (variable) that are `used free`__ in the 'expr'.
 
     :param expr: A string representing a Python expression.
