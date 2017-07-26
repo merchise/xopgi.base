@@ -157,7 +157,6 @@ class Evidence(models.Model):
             except Exception as e:
                 logger.exception('Error evaluating evidence %s defined as: '
                                  '%s', (self.name, self.definition))
-                logger.exception(e)
             else:
                 evidence.write(dict(
                     value=str(value), bool_value=bool_value, cycle=cycle.id,
