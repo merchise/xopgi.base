@@ -104,9 +104,8 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
-from xoeuf import ODOO_VERSION_INFO
+from xoeuf import MAJOR_ODOO_VERSION
 
-
-if ODOO_VERSION_INFO[0] == 8:
-    # MIGRATED, but only needed in Odoo 8.
-    from . import res_users  # noqa
+from . import res_users  # noqa
+if MAJOR_ODOO_VERSION == 8:
+    from . import res_users_v8  # noqa

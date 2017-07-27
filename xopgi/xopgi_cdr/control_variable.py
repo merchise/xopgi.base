@@ -142,9 +142,10 @@ class ControlVariableTemplate(models.Model):
 
     name = fields.Char(translate=True)
     reusable = fields.Boolean(default=True)
-    definition = fields.Text(help="Python code string. Allow format string "
-                                  "arguments in it.")
-    args_need = fields.Boolean(help="Marc if definition need to be formatted.")
+    definition = fields.Text(
+        help="Python code string. Allow format string arguments in it."
+    )
+    args_need = fields.Boolean(help="Mark if definition need to be formatted.")
     eval_mode = fields.Selection([('eval', 'Eval'), ('exec', 'Execute')],
                                  default='eval')
 

@@ -23,7 +23,7 @@ def read_terpfile():
         content = fh.read()
         # Odoo version doesn't really matter here.  But we need to provide a
         # fake one for the `eval` to succeed.
-        fake = {'ODOO_VERSION_INFO': (7, 0)}
+        fake = {'ODOO_VERSION_INFO': (7, 0), 'MAJOR_ODOO_VERSION': 7}
         return eval(content, fake, {})
 
 _TERP = read_terpfile()

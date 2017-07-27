@@ -16,18 +16,13 @@
 
 from __future__ import (division as _py3_division,
                         print_function as _py3_print,
-                        unicode_literals as _py3_unicode,
                         absolute_import as _absolute_import)
 
-from xoeuf import ODOO_VERSION_INFO
-assert ODOO_VERSION_INFO[0] == 8
+from xoeuf import api
+from xoeuf.models import Model
 
 
-from openerp.osv.orm import Model
-import openerp.addons.base.res
-
-
-class res_users(Model):
+class User(Model):
     '''User class that extend `OpenERP` implementation.
 
     ``res.users`` inherits from ``res.partner``.  The partner model is used to
@@ -39,50 +34,18 @@ class res_users(Model):
 
     '''
 
-    _name = openerp.addons.base.res.res_users.res_users._name
+    _name = 'res.users'
     _inherit = _name
 
-    def create(self, cr, uid, vals, context=None):
-        '''Create a new user record.
-
-        .. note:: See :py:meth:`~osv.orm.Model.create` method for more
-           details.
-
-        In `OpenERP`, if a user is created without using ``auth_crypt``, when
-        you install this module, all passwords remains uncrypted until next
-        time ``check_credentials`` is used.
-
-        '''
-        password = vals.pop('password', False)
-        user_id = super(res_users, self).create(cr, uid, vals, context=context)
-        if password:
-            self.write(cr, uid, user_id, {'password': password}, context=context)
-        return user_id
-
-    def deactivate(self, cr, uid, ids, context=None):
+    @api.multi
+    def deactivate(self):
         '''Deactivate users and all related partners.
-
-        :param cr: database cursor
-
-        :param uid: current user id
-
-        :type user: integer
-
-        :param ids: user ids to be deactivated
-
-        :param context: (optional) context arguments
-
-        :type context: dictionary
 
         '''
         # TODO: [med] This method is only used in migration tools, maybe its
         # functionality must be moved outside add-ons code.  Programmed by
         # ~Yurdik.
-        if isinstance(ids, (int, long)):
-            ids = [ids]
         vals = {'active': False}
-        res = self.write(cr, uid, ids, vals, context=context)
-        pids = [u.partner_id.id for u in self.browse(cr, uid, ids, context=context)]
-        partner_obj = self.pool['res.partner']
-        partner_obj.write(cr, uid, pids, vals, context=context)
-        return res
+        res = self.write(vals)
+        partners = self.mapped('partner_id').exists()
+        partners.write(vals)

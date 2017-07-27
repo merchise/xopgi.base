@@ -34,13 +34,13 @@ for all XOPGI's dependant components.
 """,
     "depends": ['base'],
     "data": [
-        'view/%d/xopgi_security.xml' % ODOO_VERSION_INFO[0],
-        'view/%d/xopgi_model_view.xml' % ODOO_VERSION_INFO[0],
+        'view/%d/xopgi_security.xml' % MAJOR_ODOO_VERSION,  # noqa
+        'view/%d/xopgi_model_view.xml' % MAJOR_ODOO_VERSION,  # noqa
     ],
     "demo_xml": [],
     "application": False,
 
     # MIGRATION POLICY: All addons are not included until someone work on them
     # and upgrade them.
-    'installable': 8 <= ODOO_VERSION_INFO[0] < 11,   # noqa
+    'installable': 8 <= MAJOR_ODOO_VERSION < 11,   # noqa
 }
