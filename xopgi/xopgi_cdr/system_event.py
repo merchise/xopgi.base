@@ -28,6 +28,13 @@ EVENT_STATES = [
 ]
 
 
+EVENT_ACTIONS_SELECTION = [('do_nothing', 'Do nothing')]
+EVENT_ACTIONS_SELECTION[0:0] = [
+    (k, k.replace('_', ' ').capitalize())
+    for k in EVENT_SIGNALS.keys()
+]
+
+
 class SystemEvent(models.Model):
     ''' Generic cdr event definition. For specifics cdr events
     implementations just need to inherit by delegation of this model and
@@ -46,22 +53,31 @@ class SystemEvent(models.Model):
     name = fields.Char(translate=True)
     definition = fields.Char(
         required=True,
-        help="Boolean expression combining evidences and operators.\n"
-             "Eg: evidence1 or evidence2 and evidence3")
-    next_call = fields.Datetime(default=fields.Datetime.now())
-    priority = fields.Integer(default=10)
+        help=("Boolean expression combining evidences and operators.  "
+              "For example: evidence1 or evidence2 and evidence3")
+    )
+    next_call = fields.Datetime(
+        default=fields.Datetime.now(),
+        help=("The date and time at which this event will be checked again.  "
+              "This is when the evidences and its variables will be computed "
+              "again.")
+    )
+    priority = fields.Integer(default=10)  # TODO: Document
     active = fields.Boolean(default=True)
-    evidences = fields.Many2many('cdr.evidence',
-                                 'event_evidence_rel',
-                                 'event_id',
-                                 'evidence_id',
-                                 compute='get_evidences', store=True)
+    evidences = fields.Many2many(
+        'cdr.evidence',
+        'event_evidence_rel',
+        'event_id',
+        'evidence_id',
+        compute='get_evidences',
+        store=True,
+    )
     specific_event = fields.Reference([], compute='_get_specific_event')
     state = fields.Selection(EVENT_STATES)
-    action = fields.Selection([(k, k.replace('_', ' ').capitalize())
-                               for k in EVENT_SIGNALS.keys()] +
-                              [('do_nothing', 'Do nothing')],
-                              string="Last action")
+    action = fields.Selection(
+        EVENT_ACTIONS_SELECTION,
+        string="Last action"
+    )
 
     def get_specific_event_models(self):
         '''Get models that look like specific event.
