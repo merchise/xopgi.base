@@ -15,26 +15,23 @@
     'name': 'Vigilant Base',
     'version': '1.0',
     'category': 'Hidden',
-    'description': """
-Create bases to allow system event management.
-
-    """, "author": "Merchise Autrement",
+    "author": "Merchise Autrement",
     "website": "http://xhg.ca.merchise.org/addons/xopgi_cdr",
     'depends': ['base', 'xopgi_recurrence'],
     'data': [
         'security/security.xml',
         'data/cron.xml',
         'data/templates.xml',
-        'views/control_variable_views.xml',
+        'views/%d/control_variable_views.xml' % MAJOR_ODOO_VERSION,  # noqa
         'views/evidence_views.xml',
-        'views/system_event_views.xml',
+        'views/%d/system_event_views.xml' % MAJOR_ODOO_VERSION,  # noqa
         'views/cdr_history_views.xml',
-        'wizard/new_event_views.xml',
+        'wizard/new_event_views.xml'
     ],
 
     # MIGRATION POLICY: All addons are not included until someone work on them
     # and upgrade them.
-    'installable': (8, 0) <= ODOO_VERSION_INFO < (9, 0),   # noqa
+    'installable': 8 <= MAJOR_ODOO_VERSION < 11,   # noqa
 
     'auto_install': False,
 }

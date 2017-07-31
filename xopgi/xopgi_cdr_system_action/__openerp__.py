@@ -15,10 +15,7 @@
     'name': 'Vigilant Server Action handler',
     'version': '1.0',
     'category': 'Hidden',
-    'description': """
-Allow to create cdr event handlers to execute server actions.
-
-    """, "author": "Merchise Autrement",
+    "author": "Merchise Autrement",
     "website": "http://xhg.ca.merchise.org/addons/xopgi_cdr_system_action",
     'depends': ['xopgi_cdr'],
     'data': [
@@ -28,5 +25,5 @@ Allow to create cdr event handlers to execute server actions.
 
     # MIGRATION POLICY: All addons are not included until someone work on them
     # and upgrade them.
-    'installable': (8, 0) <= ODOO_VERSION_INFO < (9, 0),   # noqa
+    'installable': 8 <= MAJOR_ODOO_VERSION < 11,  # noqa
 }

@@ -1,38 +1,38 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <openerp>
-    <data>
-      <record id="view_cdr_new_event_form" model="ir.ui.view">
-        <field name="name">cdr.new.event.form</field>
-        <field name="model">cdr.new.event</field>
-        <field name="arch" type="xml">
-          <form string="New Event" version="7.0">
-            <sheet>
-              <group>
-                <field name="event_type"/>
-              </group>
-            </sheet>
-            <footer>
-              <button string="Create Event" type="object"
-                      name="create_event" class="oe_highlight"/>
-              or
-              <button string="Cancel" class="oe_link" special="cancel"/>
-            </footer>
-          </form>
-        </field>
-      </record>
+  <data>
+    <record id="view_cdr_new_event_form" model="ir.ui.view">
+      <field name="name">cdr.new.event.form</field>
+      <field name="model">cdr.new.event</field>
+      <field name="arch" type="xml">
+	<form string="New Event" version="7.0">
+	  <sheet>
+	    <group>
+	      <field name="event_type"/>
+	    </group>
+	  </sheet>
+	  <footer>
+	    <button string="Create Event" type="object"
+		    name="create_event" class="oe_highlight"/>
+	    or
+	    <button string="Cancel" class="oe_link" special="cancel"/>
+	  </footer>
+	</form>
+      </field>
+    </record>
 
-      <record model="ir.actions.act_window" id="act_open_cdr_new_event_view">
-        <field name="name">New Event</field>
-        <field name="type">ir.actions.act_window</field>
-        <field name="res_model">cdr.new.event</field>
-        <field name="view_type">form</field>
-        <field name="view_mode">form</field>
-        <field name="target">new</field>
-      </record>
+    <record model="ir.actions.act_window" id="act_open_cdr_new_event_view">
+      <field name="name">New Event</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">cdr.new.event</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">form</field>
+      <field name="target">new</field>
+    </record>
 
-      <menuitem id="menu_cdr_new_event"
-                parent="cdr_menu"
-                sequence="35"
-                action="act_open_cdr_new_event_view"/>
-    </data>
+    <menuitem id="menu_cdr_new_event"
+	      parent="cdr_menu"
+	      sequence="35"
+	      action="act_open_cdr_new_event_view"/>
+  </data>
 </openerp>

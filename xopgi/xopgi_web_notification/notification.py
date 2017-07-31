@@ -15,14 +15,18 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
-from openerp import models
-from openerp.addons.bus import bus
-from openerp.http import request
+from xoeuf.odoo import models
+from xoeuf.odoo.http import request
+
+try:
+    from xoeuf.odoo.addons.bus.bus import Controller
+except:
+    from xoeuf.odoo.addons.bus.controllers.main import BusController as Controller
 
 CHANNELS = {'notify': 'res_user_notify', 'warn': 'res_user_warn'}
 
 
-class Controller(bus.Controller):
+class Controller(Controller):
     def _poll(self, dbname, channels, last, options):
         if request.session.uid:
             channels = channels + [(request.db, channel, request.uid)

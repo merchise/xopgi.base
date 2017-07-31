@@ -15,15 +15,15 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
-from openerp import api, exceptions, fields, models, _
-from openerp.tools.safe_eval import safe_eval
+from xoeuf.odoo import api, exceptions, fields, models, _
+from xoeuf.odoo.tools.safe_eval import safe_eval
 from xoeuf.osv.orm import CREATE_RELATED
 from xoutil import logger
 from .util import evaluate
 
 
 def check_identifier(identifier):
-    """ check identifier is a correct python identifier and not shadow a
+    """ Check identifier is a correct python identifier and not shadow a
     global builtin.
 
     """
@@ -41,43 +41,91 @@ def check_identifier(identifier):
 class CDRIdentifier(models.Model):
     _name = 'cdr.identifier'
 
-    name = fields.Char(required=True,
-                       help="Must be a available python identifier.\n"
-                            "Just letters, digit (never in first position) "
-                            "and underscore are allowed.")
+    name = fields.Char(
+        required=True,
+        help="Must be a available python identifier.\n"
+             "Just letters, digit (never in first position) "
+             "and underscore are allowed."
+    )
+
     value = fields.Char()
-    evaluations = fields.One2many('cdr.history', 'identifier')
+
+    evaluations = fields.One2many(
+        'cdr.history',
+        'identifier'
+    )
     _sql_constraints = [
         ('identifier_name_unique', 'unique(name)', 'Name already exists')
     ]
 
     @api.constrains('name')
     def check_name(self):
+        '''Check name of a CDRIdentifier
+
+        '''
         if not check_identifier(self.name):
             raise exceptions.ValidationError(
                 _("Name must be a available python identifier"))
 
 
 class ControlVariable(models.Model):
+    '''The `control variables` define basic mostly numeric evaluations of a
+    single basic indicator. For instance, you may define 'the total amount of
+    liquidity' you have available.
+
+    '''
     _name = 'cdr.control.variable'
     _inherits = {'cdr.identifier': 'identifier_id'}
 
-    identifier_id = fields.Many2one('cdr.identifier',
-                                    required=True, ondelete='cascade')
-    description = fields.Char(translate=True)
-    template = fields.Many2one('cdr.control.variable.template',
-                               required=True, ondelete='restrict')
-    args_need = fields.Boolean(related='template.args_need')
+    identifier_id = fields.Many2one(
+        'cdr.identifier',
+        required=True,
+        ondelete='cascade',
+        help='Identifier the control variable: name, value, evaluations'
+    )
+
+    description = fields.Char(
+        translate=True,
+        help='Description of control variable'
+    )
+
+    template = fields.Many2one(
+        'cdr.control.variable.template',
+        required=True,
+        ondelete='restrict',
+        help='The template is the key for get a value in a control variable'
+    )
+
+    args_need = fields.Boolean(
+        related='template.args_need'
+    )
+
     args = fields.Text(
-        help="Python dictionary with arguments that template expect.")
-    evidences = fields.Many2many('cdr.evidence',
-                                 'evidence_control_variable_rel', 'var_id',
-                                 'evidence_id', ondelete='restrict')
-    active = fields.Boolean(default=True)
-    cycle = fields.Many2one('cdr.evaluation.cycle')
+        help="Python dictionary with arguments that template expect."
+    )
+
+    evidences = fields.Many2many(
+        'cdr.evidence',
+        'evidence_control_variable_rel',
+        'var_id',
+        'evidence_id',
+        ondelete='restrict',
+        help='Are predicates over several control variables'
+    )
+
+    active = fields.Boolean(
+        default=True
+    )
+
+    cycle = fields.Many2one(
+        'cdr.evaluation.cycle',
+        help='The control variable are evaluate in evaluation cycle'
+    )
 
     @api.onchange('template', 'template', 'args_need')
     def onchange_template(self):
+        '''Take values of
+        '''
         if self.template and self.args_need:
             args = [
                 "\n\t'%s': " % arg
@@ -95,14 +143,27 @@ class ControlVariable(models.Model):
         return {v.name: v._value() for v in self}
 
     def _value(self):
-        return safe_eval(self.value) if self.value else None
+        '''If value: Verify that the value of control variable is evaluated as
+        python code else return None.
+
+        '''
+        return safe_eval(repr(self.value)) if self.value else None
 
     def _evaluate(self, now=None):
-        return self.template.eval(now or fields.Datetime.now(),
-                                  self.args if self.template.args_need else {})
+        '''Allow to make python expression for 'args' in the template. The
+        field 'args' represent a string of type text.
+
+        '''
+        return self.template.eval(
+            now or fields.Datetime.now(),
+            self.args if self.template.args_need else {}
+        )
 
     @api.constrains('template', 'args')
     def check_definition(self):
+        '''Check the control variable definition.
+
+        '''
         try:
             self._evaluate()
         except Exception as e:
@@ -110,6 +171,9 @@ class ControlVariable(models.Model):
                                              e.message)
 
     def evaluate(self, cycle):
+        '''Evaluate the control variables in a evaluation cycle.
+
+        '''
         from celery.exceptions import SoftTimeLimitExceeded
         for var in self:
             try:
@@ -138,16 +202,34 @@ class ControlVariable(models.Model):
 
 
 class ControlVariableTemplate(models.Model):
+    '''The template is the key for get a value in a control variable: E.g.
+
+    env['{model}'].browse({instance}).{field} -> One instance field value
+
+    '''
     _name = 'cdr.control.variable.template'
 
-    name = fields.Char(translate=True)
-    reusable = fields.Boolean(default=True)
+    name = fields.Char(
+        translate=True
+    )
+
+    reusable = fields.Boolean(
+        default=True
+    )
+
     definition = fields.Text(
         help="Python code string. Allow format string arguments in it."
     )
-    args_need = fields.Boolean(help="Mark if definition need to be formatted.")
-    eval_mode = fields.Selection([('eval', 'Eval'), ('exec', 'Execute')],
-                                 default='eval')
+
+    args_need = fields.Boolean(
+        help="Marc if definition need to be formatted."
+    )
+
+    eval_mode = fields.Selection(
+        [('eval', 'Eval'),
+         ('exec', 'Execute')],
+        default='eval'
+    )
 
     @api.onchange('reusable')
     def onchange_reusable(self):

@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<openerp>
+    <data>
+      <!-- This Menu Item Must have a parent -->
+      <menuitem id="cdr_menu" name="CDR" parent="base.menu_administration"
+                sequence="2"/>
+
+      <record id="view_cdr_control_variable_tree" model="ir.ui.view">
+        <field name="name">cdr.control.variable.tree</field>
+        <field name="model">cdr.control.variable</field>
+        <field name="arch" type="xml">
+          <tree string="Control Variables">
+            <field name="name"/>
+            <field name="description"/>
+            <field name="template"/>
+            <field name="value"/>
+          </tree>
+        </field>
+      </record>
+
+      <record id="view_cdr_control_variable_form" model="ir.ui.view">
+        <field name="name">cdr.control.variable.form</field>
+        <field name="model">cdr.control.variable</field>
+        <field name="arch" type="xml">
+	  <form string="Control Variables" version="7.0">
+	    <sheet>
+	      <div class="oe_title">
+		<label for="name" class="oe_edit_only"/>
+		<label string="( " class="oe_inline"/>
+		<field name="active" class="oe_inline"/>
+		<label for="active" class="oe_inline" string="Active )"/>
+		<h1>
+		  <field name="name"/>
+		</h1>
+	      </div>
+	      <group>
+		<field name="description"/>
+		<field name="template" domain="[('reusable','=', True)]"
+		       context="{'default_reusable': False, 'default_name': description, 'handled': True}"
+		       required="0"/>
+		<field name="args"
+		       attrs="{
+			      'required': [('template','=', True), ('args_need','=', True)],
+			      'invisible': ['|', ('template','=', True), ('args_need','!=', True)]
+			      }"/>
+		<newline/>
+		<field name="value"
+		       attrs="{'invisible': [('value','=', False)]
+			      }"/>
+		<newline/>
+		<label for="evidences"/>
+		<field name="evidences" nolabel="1" readonly="1"/>
+		<field name="args_need" invisible="1"/>
+	      </group>
+	    </sheet>
+	  </form>
+	</field>
+      </record>
+
+      <record id="view_cdr_control_variable_search" model="ir.ui.view">
+        <field name="name">cdr.control.variable.search</field>
+        <field name="model">cdr.control.variable</field>
+        <field name="arch" type="xml">
+          <search string="Control Variables">
+            <field name="name" select="True"/>
+          </search>
+        </field>
+      </record>
+
+      <record model="ir.actions.act_window"
+              id="act_open_cdr_control_variable_view">
+        <field name="name">Control Variables</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">cdr.control.variable</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_cdr_control_variable_search"/>
+      </record>
+
+      <menuitem id="menu_cdr_control_variable"
+                parent="cdr_menu"
+                sequence="20"
+                action="act_open_cdr_control_variable_view"/>
+
+      <record id="view_cdr_control_variable_template_tree" model="ir.ui.view">
+        <field name="name">cdr.control.variable.template.tree</field>
+        <field name="model">cdr.control.variable.template</field>
+        <field name="arch" type="xml">
+          <tree string="Templates">
+            <field name="name"/>
+            <field name="eval_mode"/>
+          </tree>
+        </field>
+      </record>
+
+      <record id="view_cdr_control_variable_template_form" model="ir.ui.view">
+        <field name="name">cdr.control.variable.template.form</field>
+        <field name="model">cdr.control.variable.template</field>
+        <field name="arch" type="xml">
+          <form string="Templates" version="7.0">
+            <sheet>
+              <div class="oe_title">
+                <label for="name" class="oe_edit_only"/>
+                <label string="( " class="oe_inline"/>
+                <field name="reusable" class="oe_inline"
+                       readonly="not context.get('handled', False)"/>
+                <label for="reusable" class="oe_inline" string="Reusable )"/>
+                <h1>
+                  <field name="name" required="1"/>
+                </h1>
+	      </div>
+	      <label for="definition" colspan="4"/>
+                <field name="definition" nolabel="1" colspan="4" required="1"/>
+              <group colspan="4" col="4">
+                <field name="args_need"
+                       attrs="{'invisible': [('reusable','!=', True)]}"/>
+                <field name="eval_mode" required="1"/>
+              </group>
+            </sheet>
+          </form>
+        </field>
+      </record>
+
+      <record id="view_cdr_control_variable_template_search"
+              model="ir.ui.view">
+        <field name="name">cdr.control.variable.template.search</field>
+        <field name="model">cdr.control.variable.template</field>
+        <field name="arch" type="xml">
+          <search string="Templates">
+            <field name="name" select="True"/>
+            <filter name="reusable" string="Reusable"
+                    domain="[('reusable','=', True)]"/>
+          </search>
+        </field>
+      </record>
+
+      <record model="ir.actions.act_window"
+              id="act_open_cdr_control_variable_template_view">
+        <field name="name">Control Variables Templates</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">cdr.control.variable.template</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id"
+               ref="view_cdr_control_variable_template_search"/>
+        <field name="context">{'search_default_reusable': 1}</field>
+      </record>
+
+      <menuitem id="menu_cdr_control_variable_template"
+                parent="cdr_menu"
+                sequence="10"
+                action="act_open_cdr_control_variable_template_view"/>
+    </data>
+</openerp>
