@@ -223,9 +223,9 @@ class Evidence(models.Model):
             try:
                 value = evidence._evaluate()
                 bool_value = evidence.evaluate_bool_expresion(value)
-            except Exception as e:
+            except Exception:
                 logger.exception('Error evaluating evidence %s defined as: '
-                                 '%s', (self.name, self.definition))
+                                 '%s', (evidence.name, evidence.definition))
             else:
                 evidence.write(dict(
                     value=repr(value),
