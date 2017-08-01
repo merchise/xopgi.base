@@ -130,7 +130,7 @@ class RecurrentModel(models.Model):
     _description = 'Recurrent model'
 
     @api.multi
-    def _get_viewable_date(self):
+    def _get_date(self):
         '''Get the values for the compute 'date' field of the recurrent object
         using the user timezone.This is calculated with the field 'date_from'.
 
@@ -141,9 +141,9 @@ class RecurrentModel(models.Model):
         for item in self:
             # Plus an hour to avoid the problem with daylight saving time.
             date_from = normalize_dt(item.date_from) + timedelta(hours=1)
-            item.viewable_date = normalize_dt_str(_date(date_from))
+            item.date = normalize_dt_str(_date(date_from))
 
-    def _date_viewable_search(self, operator, value):
+    def _search_date(self, operator, value):
         """Get the domain to search for 'date'.
 
         We simply translate it to search by 'date_from'.
@@ -175,21 +175,21 @@ class RecurrentModel(models.Model):
 
     # Basic datas.
     date_from = fields.Date(
-        'Init date',
+        'Initial date',
         required=True,
         default=normalize_d_str(datetime.today()),
         help='Date to be init of recurrence'
     )
 
-    viewable_date = fields.Datetime(
-        compute=_get_viewable_date,
+    date = fields.Datetime(
+        compute=_get_date,
+        search=_search_date,
         method=True,
         string='Date and time for representation in calendar views',
-        search=_date_viewable_search
     )
 
     date_to = fields.Date(
-        'End date',
+        'Final date',
         help='Date to be end the recurrence'
     )
 
@@ -472,7 +472,7 @@ class RecurrentModel(models.Model):
         for r_date in virtual_dates:
             pile = []
             for arg in args:
-                if arg[0] in ('viewable_date', 'date_from', 'date_to'):
+                if arg[0] in ('date', 'date_from', 'date_to'):
                     op = OPERATORS[arg[1]]
                     ok = op(r_date, normalize_dt(arg[2]))
                     pile.append(ok)
@@ -531,7 +531,7 @@ class RecurrentModel(models.Model):
 
         '''
         for arg in domain:
-            if arg[0] in ('viewable_date', 'date_from', 'date_to') and arg[1] in ['<', '<=']:
+            if arg[0] in ('date', 'date_from', 'date_to') and arg[1] in ['<', '<=']:
                 until = normalize_dt(arg[2])
                 until = datetime_user_to_server_tz(self._cr, self._uid, until,
                                                    tz_name=self._context.get('tz'))
@@ -556,7 +556,7 @@ class RecurrentModel(models.Model):
 
         '''
         result_data = []
-        extra_fields = ['viewable_date', 'rrule', 'is_recurrent']
+        extra_fields = ['date', 'rrule', 'is_recurrent']
         order = self._context.get('order', None) or self._order
         order = order.split(',') if order else []
         order_specs = [
@@ -578,7 +578,7 @@ class RecurrentModel(models.Model):
                 if rule_str.find('COUNT') < 0 and rule_str.find('UNTIL') < 0:
                     # Add COUNT=100 for 'rule_str, if limit is not specify.
                     rule_str = self._set_end(rule_str, domain, offset, limit)
-                date = normalize_dt(item['viewable_date'])
+                date = normalize_dt(item['date'])
                 # Get recurrent dates E.g. [datetime.datetime(2017, 8, 29, 23, 0)]
                 recurrent_dates = self._get_recurrent_dates(str(rule_str),
                                                             startdate=date)
@@ -713,9 +713,9 @@ class RecurrentModel(models.Model):
         day = datetime_user_to_server_tz(self._cr, self._uid, normalize_dt(day),
                                          self._context.get('tz'))
         day_str = normalize_dt_str(day.replace(hour=23, minute=59))
-        res_ids = self.search([('id', 'in', self._ids), ('viewable_date', '<=', day_str)])
-        for data in res_ids.read(['viewable_date', 'calendar_duration']):
-            d_from = normalize_dt(data['viewable_date'])
+        res_ids = self.search([('id', 'in', self._ids), ('date', '<=', day_str)])
+        for data in res_ids.read(['date', 'calendar_duration']):
+            d_from = normalize_dt(data['date'])
             d_to = d_from + timedelta(hours=data.get('calendar_duration'))
             if d_from.date() <= day.date() <= d_to.date():
                 return True
@@ -749,7 +749,7 @@ class RecurrentModel(models.Model):
         if [ids] contain virtual ids read data from real ids and create
         virtual copies to return
 
-        If :param fields: have [viewable_date,date_from,date_to] return a list of dict
+        If :param fields: have [date, date_from, date_to] return a list of dict
         with this fields plus id. If :param calendar_duration: is include in
         fields it will be add to the result else is exclude.
         '''
@@ -759,7 +759,7 @@ class RecurrentModel(models.Model):
         if not fields:
             fields = []
         fields2 = fields[:] if fields else []
-        targets = ('viewable_date', 'date_from', 'date_to')
+        targets = ('date', 'date_from', 'date_to')
         has_dates = any(field in fields for field in targets)
         if fields and 'calendar_duration' not in fields and has_dates:
             fields2.append('calendar_duration')
@@ -790,8 +790,8 @@ class RecurrentModel(models.Model):
                 if is_collection(ls) and len(ls) >= 2:
                     if res.get('date_from'):
                         res['date_from'] = normalize_d_str(ls[1])
-                    if res.get('viewable_date'):
-                        res['viewable_date'] = normalize_dt_str(ls[1])
+                    if res.get('date'):
+                        res['date'] = normalize_dt_str(ls[1])
                     if res.get('date_to'):
                         res['date_to'] = normalize_d_str(ls[2])
             res['id'] = virtual_id
