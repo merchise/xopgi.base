@@ -239,7 +239,9 @@ class RecurrentModel(models.Model):
         FREQ,
         'Frequency type',
         default='daily',
-        help='Frecuency type (Daily/Weekly/Monthly/Yearly)'
+        # XXX: Don't put this, because there's an error in the JS client that
+        # messes up with the invisible toggling we have there.
+        # help='Frecuency type (Daily/Weekly/Monthly/Yearly)'
     )
 
     interval = fields.Integer(
