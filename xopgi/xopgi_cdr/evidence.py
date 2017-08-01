@@ -40,6 +40,10 @@ OPERATORS = {
 
 
 def _get_candidates(value):
+    '''Returns the keys of a dictionary or the values ​​of a tuple, set or list
+    as candidate variables.
+
+    '''
     if isinstance(value, dict):
         return value.keys()
     elif isinstance(value, (list, set, tuple)):
@@ -119,19 +123,31 @@ class Evidence(models.Model):
         'cdr.control.variable'
     )
 
+    # Fields for the user interface (wizard)
     expression = fields.Char(
         help="Expression's evidence on shape of chain"
     )
 
-    key = fields.Char()
+    key = fields.Char(
+        help='Index used to access the result of a evidence when the result is'
+             'a list or dictionary.'
+    )
 
-    candidates = fields.Char()
+    candidates = fields.Char(
+        help='Values ​​that the key field can take when the result'
+             ' of an evidence is expressed in a dictionary, tuple, set or list'
+    )
 
     result = fields.Char(
         help='Result of the referred expression'
     )
 
     def _get_result(self):
+        '''Evaluate the expression with the value of the control variable and
+        return the result. If the expression exists it returns the result else
+        returns an empty string.
+
+        '''
         if self.expression:
             res = evaluate(self.expression, **self.variable.get_value())
         else:
@@ -157,6 +173,10 @@ class Evidence(models.Model):
 
     @api.onchange('key')
     def onchange_key(self):
+        '''If the key field changes, update the representation of the field
+        expression with its new values.
+
+        '''
         if self.key:
             expression = self.expression
             res = self._get_result()

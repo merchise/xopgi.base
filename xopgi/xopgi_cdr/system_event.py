@@ -68,9 +68,10 @@ class SystemEvent(models.Model):
     )
 
     priority = fields.Integer(
-        # TODO: Document
         default=10,
-        help='Priority of the event'
+        help=("Priority in which events are to be evaluated in an evaluation "
+              "cycle. When you run a search they will come sorted according "
+              "to your priority.")
     )
 
     active = fields.Boolean(
@@ -197,7 +198,10 @@ class BasicEvent(models.Model):
              'consecutive positive evaluations before raise.'
     )
 
-    times_to_raise = fields.Integer()
+    times_to_raise = fields.Integer(
+        help='Waiting time to launch an event while an evidence is true in a '
+             'time interval'
+    )
 
     @api.depends('interval')
     def get_next_call(self):
@@ -212,6 +216,7 @@ class BasicEvent(models.Model):
 
     def update_event(self, value, cycle):
         '''Update the fields next call, state and action for an event.
+        When an event is evaluated is necessary to update its values.
 
         '''
         next_call = str2dt(cycle.create_date) + timedelta(hours=self.interval)
@@ -267,6 +272,10 @@ class RecurrentEvent(models.Model):
     )
 
     def update_event(self, value):
+        '''Update the fields next call, state and action for an event.
+        When an event is evaluated is necessary to update its values.
+
+        '''
         next_call = self.recurrence.next_date(self.recurrence.rrule)
         state = 'raising' if value else 'not_raising'
         action = 'raise' if state == 'raising' else 'do_nothing'
