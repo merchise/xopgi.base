@@ -53,8 +53,9 @@ MONTHS = [('1', 'January'), ('2', 'February'), ('3', 'March'), ('4', 'April'),
           ('5', 'May'), ('6', 'June'), ('7', 'July'), ('8', 'August'),
           ('9', 'September'), ('10', 'October'), ('11', 'November'),
           ('12', 'December')]
-_DAY_HOURS = 24
-_HOUR_SECONDS = 3600
+
+_HOURS_PER_DAY = 24
+_SECS_PER_HOUR = 3600
 _V_DATE_FORMAT = "%Y%m%dT%H%M%S"
 
 
@@ -160,18 +161,17 @@ class RecurrentModel(models.Model):
         recurrent object.
 
         '''
-        # Minus 2 to avoid problems with summer time. This allows to have
-        # instances from 1AM to 11PM in case change of use schedule is still
-        # on the same day.
-        _duration_hours = lambda days: (days * _DAY_HOURS - 2)
         for item in self:
             # By default 'duration = 1 day'
             if item.duration:
-                item.calendar_duration = _duration_hours(item.duration)
+                # Minus 2 to avoid problems with daylight savings. This allows
+                # to have instances from 1AM to 11PM in case change of use
+                # schedule is still on the same day.
+                item.calendar_duration = item.duration * _HOURS_PER_DAY - 2
             elif item.date_to:
                 df = normalize_date(item.date_from)
                 dt = normalize_date(item.date_to)
-                item.calendar_duration = (dt - df).total_seconds() / _HOUR_SECONDS
+                item.calendar_duration = (dt - df).total_seconds() / _SECS_PER_HOUR
             else:
                 item.calendar_duration = 1
 
@@ -478,7 +478,7 @@ class RecurrentModel(models.Model):
                     op = OPERATORS[arg[1]]
                     ok = op(r_date, normalize_dt(arg[2]))
                     pile.append(ok)
-                elif str(arg) == str('&') or str(arg) == str('|'):
+                elif str(arg) in ('&', '|'):
                     pile.append(arg)
                 else:
                     pile.append(True)
@@ -487,11 +487,11 @@ class RecurrentModel(models.Model):
             for val in pile:
                 if not isinstance(val, string_types):
                     res = val
-                elif str(val) == str('&'):
+                elif str(val) == '&':
                     first = new_pile.pop()
                     second = new_pile.pop()
                     res = first and second
-                elif str(val) == str('|'):
+                elif str(val) == '|':
                     first = new_pile.pop()
                     second = new_pile.pop()
                     res = first or second
