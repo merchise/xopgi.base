@@ -17,7 +17,8 @@ from __future__ import (division as _py3_division,
 
 from itertools import groupby
 
-from openerp import api, models, _
+from xoeuf import api, models
+from xoeuf.odoo import _
 
 import logging
 logger = logging.getLogger(__name__)
@@ -88,6 +89,9 @@ class XopgiBoard(models.Model):
 
     @api.model
     def get_board_widgets(self):
+        '''Gets data from all widgets and groups them by category
+
+        '''
         logger.debug(
             'Starting search widgets for user: %s' % self.env.user.login)
         lst = self.get_data()
@@ -96,6 +100,9 @@ class XopgiBoard(models.Model):
         return result
 
     def get_data(self):
+        '''Gets the data of all the widgets the user has access to.
+
+        '''
         return self.env['xopgi.board.widget'].get_widgets_dict()
 
     @api.model

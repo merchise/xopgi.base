@@ -16,7 +16,7 @@ from __future__ import (division as _py3_division,
 
 import simplejson as json
 
-from openerp import api, models
+from xoeuf import api, models
 
 
 class ResCurrency(models.Model):
@@ -24,7 +24,9 @@ class ResCurrency(models.Model):
 
     @api.model
     def get_format_currencies_js_function(self, return_type='float'):
-        """ Extend original function to allow return an integer value"""
+        '''Extend original function to allow return an integer value
+
+        '''
         format_number_str = "openerp.web.format_value(" \
                             "arguments[0], {type: 'integer'}, 0)"
         if return_type == 'float':
