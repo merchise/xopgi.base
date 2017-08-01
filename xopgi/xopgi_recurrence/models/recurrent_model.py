@@ -149,7 +149,9 @@ class RecurrentModel(models.Model):
         We simply translate it to search by 'date_from'.
 
         """
-        value = normalize_date(value)
+        if value not in (False, None):
+            # Some modules try to see if the date is not set by passing False.
+            value = normalize_date(value)
         return [('date_from', operator, value)]
 
     @api.multi
