@@ -140,17 +140,10 @@ class SystemEvent(models.Model):
                 event.evidences = evidences
 
     def _get_vars_to_evaluate(self):
-        res = self.env['cdr.control.variable']
-        for event in self:
-            for evidence in event.evidences:
-                res += evidence.control_vars
-        return res
+        return self.mapped('evidences.control_vars')
 
     def _get_evidences_to_evaluate(self):
-        res = self.env['cdr.evidence']
-        for event in self:
-            res += event.evidences
-        return res
+        return self.mapped('evidences')
 
     def evaluate_dependences(self, cycle):
         self._get_vars_to_evaluate().evaluate(cycle)
