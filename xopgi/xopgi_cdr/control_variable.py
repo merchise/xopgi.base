@@ -16,56 +16,9 @@ from __future__ import (division as _py3_division,
                         absolute_import as _py3_abs_import)
 
 from xoeuf.odoo import api, exceptions, fields, models, _
-from xoeuf.odoo.tools.safe_eval import safe_eval
 from xoeuf.osv.orm import CREATE_RELATED
 from xoutil import logger
 from .util import evaluate
-
-
-def check_identifier(identifier):
-    """ Check identifier is a correct python identifier and not shadow a
-    global builtin.
-
-    """
-    if not identifier[0].isalpha() and identifier[0] != '_':
-        return False
-    if identifier in globals().get('__builtins__', {}):
-        return False
-    if len(identifier) > 1:
-        for char in identifier[1:]:
-            if not char.isalnum() and char != '_':
-                return False
-    return True
-
-
-class CDRIdentifier(models.Model):
-    _name = 'cdr.identifier'
-
-    name = fields.Char(
-        required=True,
-        help="Must be a available python identifier.\n"
-             "Just letters, digit (never in first position) "
-             "and underscore are allowed."
-    )
-
-    value = fields.Char()
-
-    evaluations = fields.One2many(
-        'cdr.history',
-        'identifier'
-    )
-    _sql_constraints = [
-        ('identifier_name_unique', 'unique(name)', 'Name already exists')
-    ]
-
-    @api.constrains('name')
-    def check_name(self):
-        '''Check name of a CDRIdentifier
-
-        '''
-        if not check_identifier(self.name):
-            raise exceptions.ValidationError(
-                _("Name must be a available python identifier"))
 
 
 class ControlVariable(models.Model):
@@ -140,14 +93,17 @@ class ControlVariable(models.Model):
         '''Get name: value dictionary
 
         '''
-        return {v.name: v._value() for v in self}
+        return {v.name: v.result for v in self}
 
     def _value(self):
         '''If value: Verify that the value of control variable is evaluated as
         python code else return None.
 
         '''
-        return safe_eval(repr(self.value)) if self.value else None
+        import warnings
+        warnings.warn('The _value() method of control variables is '
+                      'deprecated.  Use the `result` property.')
+        return self.result
 
     def _evaluate(self, now=None):
         '''Allow to make python expression for 'args' in the template. The
@@ -187,10 +143,11 @@ class ControlVariable(models.Model):
                 )
             else:
                 var.write(dict(
-                    value=str(value),
+                    result=value,
                     cycle=cycle.id,
-                    evaluations=[CREATE_RELATED(
-                        **dict(value=str(value), cycle=cycle.id))]))
+                    evaluations=[CREATE_RELATED(result=value,
+                                                cycle=cycle.id)]
+                ))
 
     @api.model
     @api.returns('self', lambda value: value.id)

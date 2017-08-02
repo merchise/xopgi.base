@@ -22,9 +22,11 @@ if MAJOR_ODOO_VERSION in (8, 9, 10):
     # MIGRATION POLICY: All addons are not included until someone work on them
     # and upgrade them.
 
+    from . import values  # noqa
     from . import cdr_agent  # noqa
+    from . import identifiers  # noqa
+    from . import cdr_history  # noqa
     from . import control_variable  # noqa
     from . import evidence  # noqa
     from . import system_event  # noqa
-    from . import cdr_history  # noqa
     from . import wizard  # noqa

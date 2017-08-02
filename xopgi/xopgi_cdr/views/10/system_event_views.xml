@@ -153,9 +153,9 @@
             <notebook colspan="4">
               <page string="Recurrence">
                 <group colspan="6" col="6" string="Recurrence pattern">
-                  <group colspan="4" col="4">
-                  <field name="interval" colspan="2" required="1"/>
-                  <field name="freq" colspan="2" nolabel="1" required="1"/>
+                  <group colspan="6" col="6">
+                    <field name="interval" colspan="2" required="1"/>
+                    <field name="freq" colspan="4" nolabel="1" required="1"/>
                   </group>
                   <newline/>
                   <group attrs="{'invisible':

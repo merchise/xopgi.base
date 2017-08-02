@@ -23,7 +23,7 @@ class CDRHistory(models.Model):
 
     '''
     _name = 'cdr.history'
-
+    _inherit = ['cdr.value']
     _order = 'cycle desc'
 
     identifier = fields.Many2one(
@@ -37,8 +37,4 @@ class CDRHistory(models.Model):
         'cdr.evaluation.cycle',
         required=True,
         help='<CDR_evaluation_cycle>'
-    )
-
-    value = fields.Char(
-        help='Value of the evaluation'
     )
