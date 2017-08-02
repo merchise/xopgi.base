@@ -173,8 +173,9 @@ class Evidence(models.Model):
                     bool_value=bool_value,
                     cycle=cycle.id,
                     evaluations=[
-                        CREATE_RELATED(**dict(value=repr(value), cycle=cycle.id)),
-                        CREATE_RELATED(**dict(value=repr(bool_value), cycle=cycle.id))
+                        CREATE_RELATED(result=value, cycle=cycle.id),
+                        # TODO: WHY? is this set as well
+                        CREATE_RELATED(result=bool_value, cycle=cycle.id)
                     ])
                 )
 
