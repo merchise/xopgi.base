@@ -17,9 +17,6 @@
     'name': 'Xopgi Object Merger',
     'version': '1.0',
     'category': 'Tools',
-    'description': """
-    Generic merge option for any model
-    """,
     'depends': ['base'],
     'data': [
         "security/security.xml",
@@ -35,5 +32,5 @@
     # and upgrade them.
     'installable': (8, 0) <= ODOO_VERSION_INFO < (9, 0),   # noqa
 
-    'aplication': True,
+    'application': True,
 }
