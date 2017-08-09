@@ -96,18 +96,22 @@ class ir_model(orm.Model):
                           nocopy=True)
                 values.update(local_dict.get('result', {}))
             except:
-                logger.exception('An error happen trying to execute the General '
-                                 'Merge Way python code. for Model: %s, '
-                                 'Destination id: %s and Source ids: %s' %
-                                 (self.model, str(dst_id), str(src_ids)))
+                logger.exception(
+                    'An error happened trying to execute the General '
+                    'Merge Way python code for model %s, '
+                    'destination id: %s; and source ids: %r',
+                    self.model, dst_id, src_ids,
+                    extra=dict(code=self.general_merge_way)
+                )
         try:
             if values:
                 dst_obj.write(values)
         except:
             logger.exception(
-                'An error happen updating result object with: \n%s \n'
-                'For Model: %s, Destination id: %s and Source ids: %s' %
-                (str(values), self.model, str(dst_id), str(src_ids)))
+                'An error happened updating result object with values %r. \n'
+                'model: %s, destination id: %s; and source ids: %r',
+                values, self.model, dst_id, src_ids
+            )
 
 
 class InformalReference(orm.Model):
@@ -291,11 +295,12 @@ class FieldMergeWay(models.Model):
             return method(dst_obj, src_objs, field) if method else None
         except:
             logger.exception(
-                'An error happen trying to execute the Specific Merge '
+                'An error happened trying to execute the Specific Merge '
                 'Way python code for Model: %s, Field: %s,'
-                'Destination id: %s and Source ids: %s' %
-                (field.model, field.field_description, str(dst_obj.id),
-                 str(src_objs.ids)))
+                'Destination id: %s and Source ids: %s',
+                field.model, field.field_description, dst_obj.id,
+                src_objs.ids
+            )
 
     def add(self, dst_obj, src_objs, field):
         '''
