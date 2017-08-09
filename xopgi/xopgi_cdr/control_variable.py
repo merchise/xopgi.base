@@ -17,8 +17,11 @@ from __future__ import (division as _py3_division,
 
 from xoeuf.odoo import api, exceptions, fields, models, _
 from xoeuf.osv.orm import CREATE_RELATED
-from xoutil import logger
 from .util import evaluate
+
+import logging
+logger = logging.getLogger(__name__)
+del logging
 
 
 class ControlVariable(models.Model):

@@ -15,12 +15,15 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
-from xoutil import logger
-
 from openerp import api, fields, models
 from openerp.tools.safe_eval import safe_eval
 
 from xoeuf.tools import normalize_datetime
+
+import logging
+logger = logging.getLogger(__name__)
+del logging
+
 
 WIDGET_MODEL_NAME = 'xopgi.board.widget'
 WIDGET_REL_MODEL_NAME = 'xopgi.board.widget.rel'

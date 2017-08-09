@@ -18,7 +18,10 @@ from __future__ import (division as _py3_division,
 from xoeuf.odoo import api, models
 from xoeuf.odoo.jobs import DeferredType, queue
 from xoeuf.signals import Signal
-from xoutil import logger
+
+import logging
+logger = logging.getLogger(__name__)
+del logging
 
 
 # The CDR will use a dedicated queue (you should use a single worker).

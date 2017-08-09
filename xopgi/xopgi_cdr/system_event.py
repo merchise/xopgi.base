@@ -18,9 +18,13 @@ from __future__ import (division as _py3_division,
 from datetime import timedelta, datetime
 from xoeuf.odoo import api, exceptions, fields, models, _
 from xoeuf.tools import str2dt
-from xoutil import logger
 from .cdr_agent import EVENT_SIGNALS
 from .util import evaluate, get_free_names
+
+import logging
+logger = logging.getLogger(__name__)
+del logging
+
 
 EVENT_STATES = [
     ('raising', 'Raising'),
