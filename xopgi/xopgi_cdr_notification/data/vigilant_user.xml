@@ -1,11 +1,20 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <openerp>
   <data>
+    <record id="vigilant_partner" model="res.partner">
+      <field name="name">vigilant</field>
+      <field name="image" type="base64" file="base/static/img/public_user-image.png"/>
+      <field name="email">vigilant@security</field>
+    </record>
+
     <record id="vigilant_user" model="res.users">
       <field name="login">vigilant</field>
       <field name="name">vigilant</field>
+      <!--Only users with the following access level are currently allowed to do:-->
+      <!-- Settings in Document model: ir.module.module -->
+      <field name="groups_id" eval="[(4, ref('base.group_system'))]"/>
       <!--To avoid create a new partner (it crash)-->
-      <field name="partner_id" ref="base.public_partner"/>
+      <field name="partner_id" ref="vigilant_partner"/>
     </record>
   </data>
 </openerp>

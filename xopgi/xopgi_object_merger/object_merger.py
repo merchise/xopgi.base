@@ -26,10 +26,9 @@ from openerp.osv import orm, osv, fields
 from openerp.tools.translate import _
 
 from six import string_types
+from xoeuf.ui import CLOSE_WINDOW
 
 from .res_config import IS_MODEL_ID
-
-from xoeuf.ui import CLOSE_WINDOW
 
 
 def get_filters(data, except_field):
@@ -168,10 +167,9 @@ class object_merger(orm.TransientModel):
             cr, uid, context=context).search([('model', '=', active_model)])
         src_ids.remove(dst_id)
         ir_model.merge(dst_id, src_ids)
-        cr.commit()
+        # cr.commit()  # Why do we need to commit at this point?
         self._merge(cr, active_model, dst_id, src_ids, context=context)
-        # init a new transaction to check for references on alias_defaults.
-        cr.commit()
+        # cr.commit()  # and at this point also?
         self._check_on_alias_defaults(cr, dst_id, src_ids,
                                       active_model, context=context)
         thread = self.pool.get('mail.thread')

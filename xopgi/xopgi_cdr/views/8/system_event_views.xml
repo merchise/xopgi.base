@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<openerp>
+  <data>
+    <record id="view_cdr_system_event_tree" model="ir.ui.view">
+      <field name="name">cdr.system.event.tree</field>
+      <field name="model">cdr.system.event</field>
+      <field name="priority">100</field>
+      <field name="arch" type="xml">
+        <tree string="System Events" create="false" edit="false"
+              duplicate="false">
+          <field name="name"/>
+          <field name="specific_event"/>
+          <field name="priority"/>
+          <field name="state"/>
+          <field name="action"/>
+          <field name="next_call"/>
+        </tree>
+      </field>
+    </record>
+
+    <record id="view_cdr_system_event_tree_editable" model="ir.ui.view">
+      <field name="name">cdr.system.event.tree</field>
+      <field name="model">cdr.system.event</field>
+      <field name="arch" type="xml">
+        <tree string="System Events" edit="false"
+              duplicate="false">
+          <field name="name"/>
+          <field name="specific_event"/>
+          <field name="priority"/>
+          <field name="state"/>
+          <field name="action"/>
+          <field name="next_call"/>
+        </tree>
+      </field>
+    </record>
+
+    <record id="view_cdr_system_event_form" model="ir.ui.view">
+      <field name="name">cdr.system.event.form</field>
+      <field name="model">cdr.system.event</field>
+      <field name="arch" type="xml">
+        <form string="System Events" version="7.0" create="false"
+              edit="false" duplicate="false">
+          <sheet>
+            <div class="oe_title">
+              <label for="name" class="oe_edit_only"/>
+              <label string="( " class="oe_inline"/>
+              <field name="active" class="oe_inline"/>
+              <label for="active" class="oe_inline" string="Active )"/>
+              <h1 class="oe_inline">
+                <field name="name"/>
+              </h1>
+            </div>
+            <group colspan="4" col="4">
+              <field name="definition" colspan="4"/>
+              <field name="priority"/>
+              <field name="specific_event"/>
+              <label for="evidences"/>
+              <field name="evidences" colspan="4" nolabel="1"/>
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <record id="view_cdr_system_event_search" model="ir.ui.view">
+      <field name="name">cdr.system.event.search</field>
+      <field name="model">cdr.system.event</field>
+      <field name="arch" type="xml">
+        <search string="System Events">
+          <field name="name" select="True"/>
+          <field name="specific_event" select="True"/>
+          <field name="state" select="True"/>
+          <field name="action" select="True"/>
+        </search>
+      </field>
+    </record>
+
+    <record model="ir.actions.act_window"
+            id="act_open_cdr_system_event_view">
+      <field name="name">System Events</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">cdr.system.event</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">tree,form</field>
+      <field name="search_view_id" ref="view_cdr_system_event_search"/>
+      <field name="view_id" ref="view_cdr_system_event_tree"/>
+      <field name="domain">[]</field>
+      <field name="context">{}</field>
+    </record>
+
+    <menuitem id="menu_cdr_system_event"
+              parent="cdr_menu"
+              sequence="40"
+              action="act_open_cdr_system_event_view"/>
+
+    <record id="view_cdr_basic_event_form" model="ir.ui.view">
+      <field name="name">cdr.basic.event.form</field>
+      <field name="model">cdr.basic.event</field>
+      <field name="arch" type="xml">
+        <form string="Basic Events">
+          <sheet>
+            <div class="oe_title">
+              <label for="name" class="oe_edit_only"/>
+              <label string="( " class="oe_inline"/>
+              <field name="active" class="oe_inline"/>
+              <label for="active" class="oe_inline" string="Active )"/>
+              <h1 class="oe_inline">
+                <field name="name" required="1"/>
+              </h1>
+            </div>
+            <group colspan="6" col="6">
+              <field name="definition" colspan="6"/>
+              <separator colspan="1"/>
+              <label
+                  string="Boolean expression combining evidences and operators. Eg: evidence1 or evidence2 and evidence3"
+                  colspan="5"/>
+              <field name="priority" required="1"/>
+              <field name="interval" widget="float_time" required="1"/>
+              <field name="time_to_wait" widget="float_time" required="1"/>
+              <label for="evidences"/>
+              <field name="evidences" colspan="6" nolabel="1"/>
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <record id="view_cdr_recurrent_event_form" model="ir.ui.view">
+      <field name="name">cdr.recurrent.event.form</field>
+      <field name="model">cdr.recurrent.event</field>
+      <field name="arch" type="xml">
+        <form string="Recurrent Events">
+          <sheet>
+            <div class="oe_title">
+              <label for="name" class="oe_edit_only"/>
+              <label string="( " class="oe_inline"/>
+              <field name="active" class="oe_inline"/>
+              <label for="active" class="oe_inline" string="Active )"/>
+              <h1 class="oe_inline">
+                <field name="name" required="1"/>
+              </h1>
+            </div>
+            <group colspan="6" col="6">
+              <field name="definition" colspan="6"/>
+              <separator colspan="1"/>
+              <label
+                  string="Boolean expression combining evidences and operators. Eg: evidence1 or evidence2 and evidence3"
+                  colspan="5"/>
+              <field name="priority" required="1"/>
+              <field name="date_from" required="1"/>
+              <field name="time" widget="float_time" required="1"/>
+            </group>
+            <notebook colspan="4">
+              <page string="Recurrence">
+                <group col="6" colspan="6" string="Recurrence pattern">
+                  <field name="interval" colspan="1" required="1"/>
+                  <field name="freq" colspan="4" nolabel="1" required="1"/>
+                  <newline/>
+                  <group attrs="{'invisible':
+                                [('freq', '!=', 'yearly')]}"
+                         col="2"
+                         colspan="2">
+                    <field name="is_easterly" colspan="2"/>
+                    <field name="byeaster" colspan="2"
+                           attrs="{'invisible':
+                                  [('is_easterly', '=',
+                                  False)]}"
+                           placeholder="eg: 39 or -2"
+                           help="Count of days from easter, eg: 1(monday after easter) or -2(friday before easter)"/>
+                    <field name="months" colspan="2"
+                           attrs="{'invisible':
+                                  [('is_easterly', '=',
+                                  True)]}"/>
+                  </group>
+                  <group attrs="{'invisible':
+                                ['|',('freq', 'not in',
+                                ['monthly', 'yearly']),
+                                ('is_easterly', '=',
+                                True)]}" col="2"
+                         colspan="2">
+                    <field name="days_option" colspan="2"/>
+                    <newline/>
+                    <field name="by_week_day" colspan="2"
+                           attrs="{'invisible':
+                                  [('days_option', '!=',
+                                  'week_day')]}"/>
+                    <field name="monthly_day" colspan="2"
+                           attrs="{'invisible':
+                                  [('days_option', '!=',
+                                  'month_day')]}"
+                           placeholder="eg: 1 or -1 or 15"
+                           help="Days of month, eg: 1(first day) or -1(last day)"/>
+                  </group>
+                  <group attrs="{'invisible':[('freq', '!=',
+                                'weekly'), '|', ('freq', '!=',
+                                'monthly'), ('days_option', '!=',
+                                'week_day'),'|', '|', ('freq', '!=',
+                                'yearly'), ('days_option', '!=',
+                                'week_day'), ('is_easterly', '!=',
+                                False)]}" col="2"
+                         colspan="2">
+                    <field name="mo" colspan="2"/>
+                    <field name="tu" colspan="2"/>
+                    <field name="we" colspan="2"/>
+                    <field name="th" colspan="2"/>
+                    <field name="fr" colspan="2"/>
+                    <field name="sa" colspan="2"/>
+                    <field name="su" colspan="2"/>
+                  </group>
+                </group>
+                <group string="Range of recurrence">
+                  <field name="end_type" colspan="3"/>
+                  <newline/>
+                  <field name="count"
+                         attrs="{'invisible': [('end_type', '!=',
+                                'count')]}"/>
+                  <field name="until"
+                         attrs="{'invisible': [('end_type', '!=',
+                                'until')]}"/>
+                </group>
+              </page>
+              <page string="Evidences">
+                <field name="evidences"/>
+              </page>
+            </notebook>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+  </data>
+</openerp>
+
+<!-- Local Variables: -->
+<!-- indent-tabs-mode: nil -->
+<!-- End: -->

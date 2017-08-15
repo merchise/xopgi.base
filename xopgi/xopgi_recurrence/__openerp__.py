@@ -13,12 +13,7 @@
 
 {
     'name': "xopgi_recurrence",
-    'summary': """
-        Basic definition for recurrence""",
-
-    'description': """
-        Basic definition for recurrence
-    """,
+    'summary': """Basic definition for recurrence""",
     'category': 'Hidden',
     "author": "Merchise Autrement",
     "website": "http://xhg.ca.merchise.org/addons/xopgi_recurrence",
@@ -28,5 +23,5 @@
         'security/ir.model.access.csv',
     ],
 
-    'installable': (8, 0) <= ODOO_VERSION_INFO < (9, 0),  # noqa
+    'installable': 8 <= ODOO_VERSION_INFO[0] < 11,  # noqa
 }

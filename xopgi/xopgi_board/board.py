@@ -16,9 +16,12 @@ from __future__ import (division as _py3_division,
                         absolute_import as _py3_abs_import)
 
 from itertools import groupby
-from xoutil import logger
 
 from openerp import api, models, _
+
+import logging
+logger = logging.getLogger(__name__)
+del logging
 
 
 def lineal_color_scaling(value,  # 0-1 float

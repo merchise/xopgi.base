@@ -18,7 +18,10 @@ from __future__ import (division as _py3_division,
                         absolute_import as _py3_abs_import)
 
 from openerp import api, models
-from xoutil import logger as _logger
+
+import logging
+_logger = logging.getLogger(__name__)
+del logging
 
 
 class ResPartner(models.Model):

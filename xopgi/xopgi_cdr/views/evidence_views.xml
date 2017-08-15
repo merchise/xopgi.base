@@ -49,22 +49,6 @@
               <page string="Used Variables">
                 <field name="control_vars" readonly="1"/>
               </page>
-              <page string="Definition Build Wizard">
-                <group colspan="4" col="4">
-                  <field name="variable" colspan="4"
-                         options="{'no_open': True, 'no_create': True}"/>
-                  <div colspan="4"
-                       attrs="{'invisible': [('variable','=', False)]}">
-                    <field name="expression" class="oe_inline" readonly="1"/>
-                    [<field name="key" class="oe_inline"
-                           attrs="{'invisible': [('candidates','=', '')]}"/>] =
-                    <field name="result" class="oe_inline" readonly="1"/>
-                  </div>
-                  <newline/>
-                  <field name="candidates" colspan="4" readonly="1"
-                         attrs="{'invisible': [('candidates','=', '')]}"/>
-                </group>
-              </page>
             </notebook>
           </sheet>
         </form>

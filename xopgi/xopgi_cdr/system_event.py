@@ -16,11 +16,15 @@ from __future__ import (division as _py3_division,
                         absolute_import as _py3_abs_import)
 
 from datetime import timedelta, datetime
-from openerp import api, exceptions, fields, models, _
+from xoeuf.odoo import api, exceptions, fields, models, _
 from xoeuf.tools import str2dt
-from xoutil import logger
 from .cdr_agent import EVENT_SIGNALS
 from .util import evaluate, get_free_names
+
+import logging
+logger = logging.getLogger(__name__)
+del logging
+
 
 EVENT_STATES = [
     ('raising', 'Raising'),
@@ -50,30 +54,54 @@ class SystemEvent(models.Model):
 
     _order = 'priority'
 
-    name = fields.Char(translate=True)
+    name = fields.Char(
+        translate=True
+    )
+
     definition = fields.Char(
         required=True,
         help=("Boolean expression combining evidences and operators.  "
               "For example: evidence1 or evidence2 and evidence3")
     )
+
     next_call = fields.Datetime(
         default=fields.Datetime.now(),
         help=("The date and time at which this event will be checked again.  "
               "This is when the evidences and its variables will be computed "
               "again.")
     )
-    priority = fields.Integer(default=10)  # TODO: Document
-    active = fields.Boolean(default=True)
+
+    priority = fields.Integer(
+        default=10,
+        help=("Priority in which events are to be evaluated in an evaluation "
+              "cycle. When you run a search they will come sorted according "
+              "to your priority.")
+    )
+
+    active = fields.Boolean(
+        default=True
+    )
+
     evidences = fields.Many2many(
         'cdr.evidence',
         'event_evidence_rel',
         'event_id',
         'evidence_id',
         compute='get_evidences',
-        store=True,
+        store=True
     )
-    specific_event = fields.Reference([], compute='_get_specific_event')
-    state = fields.Selection(EVENT_STATES)
+
+    specific_event = fields.Reference(
+        [],
+        compute='_get_specific_event',
+        help='Reference at specific event: basic or recurrent event'
+    )
+
+    state = fields.Selection(
+        EVENT_STATES,
+        help='State of the event: Raising or Not raising'
+    )
+
     action = fields.Selection(
         EVENT_ACTIONS_SELECTION,
         string="Last action"
@@ -84,7 +112,7 @@ class SystemEvent(models.Model):
 
         '''
         result = []
-        for model_name in self.pool.obj_list():
+        for model_name in self.env.registry.keys():
             model = self.env[model_name]
             if 'cdr.system.event' in getattr(model, '_inherits', {}):
                 result.append(model)
@@ -116,17 +144,10 @@ class SystemEvent(models.Model):
                 event.evidences = evidences
 
     def _get_vars_to_evaluate(self):
-        res = self.env['cdr.control.variable']
-        for event in self:
-            for evidence in event.evidences:
-                res += evidence.control_vars
-        return res
+        return self.mapped('evidences.control_vars')
 
     def _get_evidences_to_evaluate(self):
-        res = self.env['cdr.evidence']
-        for event in self:
-            res += event.evidences
-        return res
+        return self.mapped('evidences')
 
     def evaluate_dependences(self, cycle):
         self._get_vars_to_evaluate().evaluate(cycle)
@@ -153,7 +174,7 @@ class SystemEvent(models.Model):
 
 class BasicEvent(models.Model):
     _name = 'cdr.basic.event'
-    _description = "Basic CDR event"
+    _description = 'Basic CDR event'
 
     _inherits = {'cdr.system.event': 'event_id'}
 
@@ -162,16 +183,22 @@ class BasicEvent(models.Model):
         required=True,
         ondelete='cascade'
     )
+
     interval = fields.Float(
         required=True,
-        help="Time (in hours:minutes format) between evaluations."
+        help='Time (in hours:minutes format) between evaluations.'
     )
+
     time_to_wait = fields.Float(
         required=True,
-        help=("Time (in hours:minutes format) getting "
-              "consecutive positive evaluations before raise.")
+        help='Time (in hours:minutes format) getting '
+             'consecutive positive evaluations before raise.'
     )
-    times_to_raise = fields.Integer()
+
+    times_to_raise = fields.Integer(
+        help='Waiting time to launch an event while an evidence is true in a '
+             'time interval'
+    )
 
     @api.depends('interval')
     def get_next_call(self):
@@ -185,9 +212,18 @@ class BasicEvent(models.Model):
                 event.next_call = False
 
     def update_event(self, value, cycle):
+        '''Update the fields next call, state and action for an event.
+        When an event is evaluated is necessary to update its values.
+
+        '''
         next_call = str2dt(cycle.create_date) + timedelta(hours=self.interval)
-        times_to_raise = ((self.time_to_wait / self.interval)
-                          if not value else self.times_to_raise - 1)
+        # If the interval is less or equal zero that means that the event does
+        # not wait any time to launch.
+        if self.interval <= 0:
+            times_to_raise = -1
+        else:
+            times_to_raise = ((self.time_to_wait / self.interval)
+                              if not value else self.times_to_raise - 1)
         state = 'raising' if value and times_to_raise < 1 else 'not_raising'
         if self.state == 'raising':
             action = 'continue_raising' if state == 'raising' else 'stop_raising'
@@ -197,6 +233,9 @@ class BasicEvent(models.Model):
         self.write(values)
 
     def evaluate(self, cycle):
+        '''Evaluate the basic event in a evaluation cycle.
+
+        '''
         try:
             value = self.event_id._evaluate()
         except:
@@ -212,16 +251,28 @@ class BasicEvent(models.Model):
 class RecurrentEvent(models.Model):
     _name = 'cdr.recurrent.event'
     _description = "Recurrent CDR event"
+    _inherits = {'cdr.system.event': 'event_id',
+                 'recurrent.model': 'recurrence'}
 
-    _inherits = {'cdr.system.event': 'event_id'}
+    event_id = fields.Many2one(
+        'cdr.system.event',
+        required=True,
+        ondelete='cascade'
+    )
 
-    event_id = fields.Many2one('cdr.system.event',
-                               required=True, ondelete='cascade')
     time = fields.Float()
-    recurrence = fields.Many2one('recurrent.model', required=True,
-                                 delegate=True, ondelete='cascade')
+
+    recurrence = fields.Many2one(
+        'recurrent.model',
+        required=True,
+        ondelete='cascade'
+    )
 
     def update_event(self, value):
+        '''Update the fields next call, state and action for an event.
+        When an event is evaluated is necessary to update its values.
+
+        '''
         next_call = self.recurrence.next_date(self.recurrence.rrule)
         state = 'raising' if value else 'not_raising'
         action = 'raise' if state == 'raising' else 'do_nothing'
@@ -229,6 +280,9 @@ class RecurrentEvent(models.Model):
         self.write(values)
 
     def evaluate(self, cycle):
+        '''Evaluate the recurrent event in a evaluation cycle.
+
+        '''
         try:
             value = self.event_id._evaluate()
         except:

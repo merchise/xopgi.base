@@ -16,20 +16,17 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
-try:
-    from openerp.release import version_info as ODOO_VERSION_INFO
-except ImportError:
-    # This is Odoo 10+, but let's be able to get the ODOO_VERSION_INFO
-    from odoo.release import version_info as ODOO_VERSION_INFO
+from xoeuf import MAJOR_ODOO_VERSION
 
-
-if ODOO_VERSION_INFO < (9, 0):
+if MAJOR_ODOO_VERSION in (8, 9, 10):
     # MIGRATION POLICY: All addons are not included until someone work on them
     # and upgrade them.
 
+    from . import values  # noqa
     from . import cdr_agent  # noqa
+    from . import identifiers  # noqa
+    from . import cdr_history  # noqa
     from . import control_variable  # noqa
     from . import evidence  # noqa
     from . import system_event  # noqa
-    from . import cdr_history  # noqa
     from . import wizard  # noqa
