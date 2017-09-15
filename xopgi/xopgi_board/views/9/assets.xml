@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+  <data>
+    <template id="assets_backend" name="xopgi_board assets"
+	      inherit_id="web.assets_backend">
+      <xpath expr="." position="inside">
+	<link rel="stylesheet"
+	      href="/xopgi_board/static/src/css/9/xopgi_board.css"/>
+	<script type="text/javascript"
+		src="/xopgi_board/static/src/js/9/xopgi_board.js"/>
+      </xpath>
+    </template>
+  </data>
+</openerp>

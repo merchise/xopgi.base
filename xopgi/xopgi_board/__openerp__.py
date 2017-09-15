@@ -20,20 +20,25 @@ Create dashboard employee functions oriented.
 
     """, "author": "Merchise Autrement",
     "website": "http://xhg.ca.merchise.org/addons/xopgi_board",
-    'depends': ['hr', 'web_calendar', 'xopgi_hr_contract'],
+    'depends': [
+        'hr',
+        'web_calendar',
+        'hr_contract',
+    ],
     'data': [
         'views/xopgi_board_view.xml',
-        'views/hr_job_view.xml',
         'views/res_group_view.xml',
-        'views/xopgi_board_widget_view.xml',
-        'views/res_config_view.xml',
-        'security/security.xml',
+        'views/%d/hr_job_view.xml' % MAJOR_ODOO_VERSION,  # noqa
+        'views/%d/xopgi_board_widget_view.xml' % MAJOR_ODOO_VERSION,  # noqa
+        'views/%d/res_config_view.xml' % MAJOR_ODOO_VERSION,  # noqa
+        'views/%d/assets.xml' % MAJOR_ODOO_VERSION,  # noqa
+        'security/%d/security.xml' % MAJOR_ODOO_VERSION,  # noqa
     ],
     'qweb': ['static/src/xml/xopgi_board.xml'],
 
     # MIGRATION POLICY: All addons are not included until someone work on them
     # and upgrade them.
-    'installable': (8, 0) <= ODOO_VERSION_INFO < (9, 0),   # noqa
+    'installable': 8 <= MAJOR_ODOO_VERSION < 11,   # noqa
 
     'auto_install': False,
 }
