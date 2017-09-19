@@ -15,14 +15,12 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
-from openerp import api, fields, models
-from openerp.tools.safe_eval import safe_eval
-
+from xoutil import logger
+import operator
+import itertools
+from xoeuf import api, fields, models
+from xoeuf.odoo.tools.safe_eval import safe_eval
 from xoeuf.tools import normalize_datetime
-
-import logging
-logger = logging.getLogger(__name__)
-del logging
 
 
 WIDGET_MODEL_NAME = 'xopgi.board.widget'
@@ -43,9 +41,16 @@ class XopgiBoardWidget(models.Model):
 
     @api.multi
     def name_get(self):
+        '''Returns a list with id, name of widgets or name's template
+
+        '''
         return [(item.id, item.name or item.template_name) for item in self]
 
     def get_widgets_dict(self):
+        '''Returns a dictionary list that represents the widgets that the user
+        has access to.
+
+        '''
         widgets = self.env[WIDGET_REL_MODEL_NAME].get_widgets()
         logger.debug(
             'Widgets to show %r' % [w['name'] for w in widgets])
@@ -55,6 +60,9 @@ class XopgiBoardWidget(models.Model):
         return widgets
 
     def _eval_python_code(self, widget, today):
+        '''Evaluate the python code of a widget
+
+        '''
         python_code = widget.get('python_code', '')
         if not python_code:
             return
@@ -84,15 +92,15 @@ class XopgiBoardWidgetRel(models.AbstractModel):
     priority = fields.Integer(default=1000)
 
     def get_widgets(self):
-        """ Get all widget dicts for uid.
+        """ Get all widget dicts for uid and sorts them by priority.
 
         """
         models = self.get_widget_capable_models()
-        widgets = []
-        for model in models:
-            widgets.extend(list(model.get_user_widgets()))
-        widgets = sorted(widgets, key=lambda item: item.priority)
+        widgets = sorted(itertools.chain(*[list(model.get_user_widgets())
+                                           for model in models]),
+                         key=operator.attrgetter('priority'))
         result = []
+        # Adding missing widget
         for widget in widgets:
             widget.get_set_widgets(result)
         return result
@@ -113,7 +121,7 @@ class XopgiBoardWidgetRel(models.AbstractModel):
         for model in self.env.registry.values():
             if hasattr(model, "get_user_widgets"):
                 if model._name != WIDGET_REL_MODEL_NAME:
-                    result.append(model._browse(self.env, ()))
+                    result.append(self.env[model._name])
         return result
 
     def get_set_widgets(self, result):

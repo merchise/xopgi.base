@@ -15,10 +15,15 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
-from openerp import fields, models
-from openerp.addons.base.res.res_users import res_groups
-from xoeuf.osv.orm import get_modelname
+from xoeuf import fields, models
+from xoeuf.models import get_modelname
 from .board_widget import WIDGET_REL_MODEL_NAME
+
+try:
+    from xoeuf.odoo.addons.base.res.res_users import Groups as res_groups
+except:
+    # odoo 8
+    from xoeuf.odoo.addons.base.res.res_users import res_groups
 
 
 class ResGroup(models.Model):
@@ -34,4 +39,7 @@ class ResGroupWidget(models.Model):
     group = fields.Many2one(get_modelname(res_groups), required=True)
 
     def get_user_widgets(self):
+        '''Returns the groups in which the current user is located
+
+        '''
         return self.search([('group.users', '=', self._uid)])

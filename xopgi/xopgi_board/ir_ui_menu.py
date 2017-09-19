@@ -15,10 +15,14 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
-from openerp import api, models, SUPERUSER_ID
-from openerp.addons.base.ir.ir_ui_menu import ir_ui_menu
-from xoeuf.osv.orm import get_modelname
+from xoeuf import api, models, SUPERUSER_ID
+from xoeuf.models import get_modelname
 from .board_widget import WIDGET_REL_MODEL_NAME
+
+try:
+    from xoeuf.odoo.addons.base.ir.ir_ui_menu import ir_ui_menu
+except:
+    from xoeuf.odoo.addons.base.ir.ir_ui_menu import IrUiMenu as ir_ui_menu
 
 
 class IrUiMenu(models.Model):

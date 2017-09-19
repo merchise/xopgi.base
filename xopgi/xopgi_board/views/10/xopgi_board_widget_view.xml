@@ -1,0 +1,97 @@
+<?xml version="1.0"?>
+<openerp>
+  <data>
+    <record id="view_board_widget_tree" model="ir.ui.view">
+      <field name="name">xopgi.board.widget.tree</field>
+      <field name="model">xopgi.board.widget</field>
+      <field name="arch" type="xml">
+	<tree string="Board Widgets">
+	  <field name="name"/>
+	  <field name="category"/>
+	  <field name="template_name" invisible="1"/>
+	</tree>
+      </field>
+    </record>
+
+    <record id="view_board_widget_form" model="ir.ui.view">
+      <field name="name">xopgi.board.widget.form</field>
+      <field name="model">xopgi.board.widget</field>
+      <field name="arch" type="xml">
+	<form string="Board Widget">
+	  <group colspan="4" col="4">
+	    <field name="name" required="1"/>
+	    <field name="template_name"/>
+	    <field name="category"/>
+	    <newline/>
+	    <label for="xml_template"/>
+	    <!-- When two fields are put using the 'ace' widget in the same -->
+	    <!-- container they are not displayed. For this is created this 'div' -->
+	    <div name='template_xml'>
+	      <field name="xml_template" widget="ace" options="{'mode': 'xml'}" nolabel="1" colspan="4"/>
+	    </div>
+	    <newline/>
+	    <label for="python_code"/>
+	    <newline/>
+	    <field name="python_code" widget="ace" options="{'mode': 'python'}" nolabel="1" colspan="4"/>
+	  </group>
+	</form>
+      </field>
+    </record>
+
+    <record id="view_board_widget_search" model="ir.ui.view">
+      <field name="name">xopgi.board.widget.search</field>
+      <field name="model">xopgi.board.widget</field>
+      <field name="type">search</field>
+      <field name="priority" eval="8"/>
+      <field name="arch" type="xml">
+	<search string="Board Widgets">
+	  <field name="name" select="True"/>
+	  <field name="template_name" select="True"/>
+	  <field name="category" select="True" widget="selection"/>
+	</search>
+      </field>
+    </record>
+
+    <record model="ir.actions.act_window"
+	    id="act_open_xopgi_board_widget_view">
+      <field name="name">Configure Preview</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">xopgi.board.widget</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="view_xopgi_hr_job_widget_tree" model="ir.ui.view">
+      <field name="name">hr.job.widget.tree</field>
+      <field name="model">hr.job.widget</field>
+      <field name="arch" type="xml">
+	<tree string="Widget - Job Position relation" editable="top">
+	  <field name="job_position"/>
+	  <field name="widget"/>
+	  <field name="priority"/>
+	</tree>
+      </field>
+    </record>
+
+    <record id="view_xopgi_hr_job_widget_search" model="ir.ui.view">
+      <field name="name">hr.job.widget.search</field>
+      <field name="model">hr.job.widget</field>
+      <field name="arch" type="xml">
+	<search string="Widget - Job Position relation">
+	  <field name="job_position" select="True"/>
+	  <field name="widget" select="True"/>
+	</search>
+      </field>
+    </record>
+
+    <record model="ir.actions.act_window"
+	    id="act_open_xopgi_hr_job_widget_view">
+      <field name="name">Widget - Job Position relation</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">hr.job.widget</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">tree</field>
+      <field name="search_view_id" ref="view_xopgi_hr_job_widget_search"/>
+    </record>
+  </data>
+</openerp>
