@@ -149,7 +149,7 @@ odoo.define('xopgi.base.Board', function (require) {
                 }
             });
             chart.options({
-                margin: {'left': 30, 'right': 30, 'top': 0, 'bottom': 0},
+                margin: {'left': 100, 'right': 30, 'top': 30, 'bottom': 30},
                 showYAxis: true,
                 showXAxis: true,
                 showLegend: true,
