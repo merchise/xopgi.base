@@ -24,6 +24,9 @@ class HrJob(models.Model):
 
     widgets = fields.One2many('hr.job.widget', 'job_position')
 
+    # The reverse of the job_id from hr.contract.
+    contract_ids = fields.One2many('hr.contract', 'job_id')
+
 
 class HrJobWidget(models.Model):
     _name = 'hr.job.widget'
@@ -33,5 +36,5 @@ class HrJobWidget(models.Model):
     job_position = fields.Many2one('hr.job', required=True)
 
     def get_user_widgets(self):
-        user_id = 'job_position.employee_ids.contract_ids.employee_id.user_id'
+        user_id = 'job_position.contract_ids.employee_id.user_id'
         return self.search([(user_id, '=', self._uid)])
