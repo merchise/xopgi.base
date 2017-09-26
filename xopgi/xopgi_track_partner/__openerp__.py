@@ -22,12 +22,16 @@ Define track visibility in res.partner fields.
     """,
     "author": "Merchise Autrement",
     "website": "http://xhg.ca.merchise.org/addons/xopgi_track_partner",
-    'depends': ['base', 'mail'],
-    'data': ['data/partner_data.xml'],
+    'depends': ['base', 'mail', 'account'],
+    'data': [
+        'data/partner_data.xml',
+        'view/%d/track_partner.xml' % MAJOR_ODOO_VERSION, # noqa
+        'view/%d/assets.xml' % MAJOR_ODOO_VERSION  # noqa
+    ],
 
     # MIGRATION POLICY: All addons are not included until someone work on them
     # and upgrade them.
-    'installable': (8, 0) <= ODOO_VERSION_INFO < (9, 0),   # noqa
+    'installable': 8 <= MAJOR_ODOO_VERSION < 11,   # noqa
 
     'auto_install': False,
 }
