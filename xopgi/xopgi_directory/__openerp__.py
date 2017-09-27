@@ -20,10 +20,11 @@
     "description": """
     Extension of res.partner to improve the contact management on odoo.
     """,
-    "depends": [
+    "depends": list(filter(bool, [
         'base',
         'mail',
-    ],
+        'contacts' if MAJOR_ODOO_VERSION != 9 else None,   # noqa
+    ])),
     "data": [
         'views/%d/res_partner_view.xml' % ODOO_VERSION_INFO[0],   # noqa
         'views/%d/res_partner_classification_view.xml' % ODOO_VERSION_INFO[0],   # noqa
