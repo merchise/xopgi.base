@@ -23,6 +23,7 @@
     "depends": [
         'base',
         'mail',
+        'contacts'
     ],
     "data": [
         'views/%d/res_partner_view.xml' % ODOO_VERSION_INFO[0],   # noqa
