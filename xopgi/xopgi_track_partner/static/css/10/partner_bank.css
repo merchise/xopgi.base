@@ -1,0 +1,4 @@
+/* Show block of messages in modal window */
+.modal .modal-dialog .o_form_view .oe_chatter {
+    display: block;
+}

@@ -24,33 +24,5 @@
       <field name="hidden" eval="True"/>
       <field name="description">Account number changed</field>
     </record>
-
-    <record id="mt_partner_bank_partner_id" model="mail.message.subtype">
-      <field name="name">Partner Bank Created</field>
-      <field name="sequence">11</field>
-      <field name="res_model">res.partner</field>
-      <field name="default" eval="False"/>
-      <field name="parent_id" eval="ref('mt_bank_partner_id')"/>
-      <field name="relation_field">partner_id</field>
-    </record>
-
-    <record id="mt_partner_bank_name" model="mail.message.subtype">
-      <field name="name">Bank Name Changed</field>
-      <field name="sequence">10</field>
-      <field name="res_model">res.partner</field>
-      <field name="default" eval="False"/>
-      <field name="parent_id" eval="ref('mt_bank_name')"/>
-      <field name="relation_field">partner_id</field>
-    </record>
-
-    <record id="mt_partner_bank_acc_number" model="mail.message.subtype">
-      <field name="name">Account Number Changed</field>
-      <field name="sequence">12</field>
-      <field name="res_model">res.partner</field>
-      <field name="default" eval="False"/>
-      <field name="parent_id" eval="ref('mt_bank_acc_number')"/>
-      <field name="relation_field">partner_id</field>
-    </record>
-
   </data>
 </openerp>
