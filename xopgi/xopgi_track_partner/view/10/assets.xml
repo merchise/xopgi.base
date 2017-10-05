@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data>
+    <template id="assets_backend"
+              name="xopgi track partner"
+              inherit_id="mail.assets_backend">
+      <xpath expr="." position="inside">
+        <link
+            rel="stylesheet"
+            href="/xopgi_track_partner/static/css/10/partner_bank.css"/>
+      </xpath>
+    </template>
+  </data>
+</openerp>
