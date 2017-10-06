@@ -17,11 +17,11 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
-from openerp.osv import fields, osv, orm
-from openerp.tools.safe_eval import safe_eval
-from openerp.tools.translate import _
-from operator import gt, lt
-from openerp import api, fields as new_api_fields, models, SUPERUSER_ID
+import operator
+
+from xoeuf import api, fields, models, MAJOR_ODOO_VERSION
+from xoeuf.odoo import _
+from xoeuf.models.proxy import IrModel
 
 import logging
 logger = logging.getLogger(__name__)
@@ -32,27 +32,14 @@ IS_MODEL_ID = '1'
 MODEL_FIELD_VALUE_SELECTION = [('0', 'Model Name'), (IS_MODEL_ID, 'Model Id')]
 
 
-class ir_model(orm.Model):
+if MAJOR_ODOO_VERSION < 9:
+    _NON_TRANSIENT_MODEL_DOMAIN = [('osv_memory', '=', False)]
+else:
+    _NON_TRANSIENT_MODEL_DOMAIN = [('transient', '=', False)]
+
+
+class ir_model(models.Model):
     _inherit = 'ir.model'
-
-    _columns = {
-        'object_merger_model':
-            fields.boolean('Object Merger', help='If checked, by default '
-                                                 'the Object Merger '
-                                                 'configuration will get this'
-                                                 ' module in the list'),
-        'merge_cyclic':
-            fields.boolean(string='Merge cyclic relations', type='boolean'),
-        'merge_limit':
-            fields.integer('Merge Limit', help='Limit quantity of objects to '
-                                               'allow merge at one time.'),
-        'field_merge_way_ids':
-            fields.one2many('field.merge.way.rel', 'model',
-                            string='Specific Merge Ways'),
-        'general_merge_way': fields.text('General Merge Way')
-    }
-
-    _defaults = {'merge_limit': 0}
 
     _sql_constraints = [
         ('positive_merge_limit', 'check (merge_limit >= 0)',
@@ -60,260 +47,206 @@ class ir_model(orm.Model):
          'positive number!'),
     ]
 
-    def fields_view_get(self, cr, uid, view_id=None, view_type='form',
-                        context=None, toolbar=False, submenu=False):
-        if (view_type == 'form' and
-                (context or {}).get('object_merger_settings', False)):
-            _, view_id = self.pool.get('ir.model.data').get_object_reference(
-                cr,
-                uid,
+    object_merger_model = fields.Boolean(
+        'Object Merger',
+        help=('If checked, by default the Object Merger configuration will '
+              'get this module in the list')
+    )
+    merge_cyclic = fields.Boolean(
+        string='Merge cyclic relations',
+        default=False,
+    )
+    merge_limit = fields.Integer(
+        'Merge Limit',
+        default=0,
+        help='Limit quantity of objects to allow merge at one time.'
+    )
+    field_merge_way_ids = fields.One2many(
+        'field.merge.way.rel',
+        'model',
+        string='Specific Merge Ways',
+        help='Specify how to merge the fields'
+    )
+
+    @api.model
+    def fields_view_get(self, view_id=None, view_type='form',
+                        toolbar=False, submenu=False):
+        if (view_type == 'form' and self._context.get('object_merger_settings', False)):
+            _, view_id = self.env['ir.model.data'].get_object_reference(
                 'xopgi_object_merger',
                 'view_ir_model_merge_form'
             )
         res = super(ir_model, self).fields_view_get(
-            cr,
-            uid,
             view_id=view_id,
             view_type=view_type,
-            context=context,
             toolbar=toolbar,
             submenu=submenu
         )
         return res
 
-    @api.one
-    @api.multi
-    def merge(self, dst_id, src_ids):
-        dst_obj = self.env[self.model].browse(dst_id)
-        src_objs = self.env[self.model].browse(src_ids)
-        values = (self.field_merge_way_ids.merge(dst_obj, src_objs)
-                  if bool(self.field_merge_way_ids) else {})
-        local_dict = locals()
-        local_dict.update(globals().get('__builtins__', {}))
-        if self.general_merge_way:
-            try:
-                safe_eval(self.general_merge_way, local_dict, mode='exec',
-                          nocopy=True)
-                values.update(local_dict.get('result', {}))
-            except:
-                logger.exception(
-                    'An error happened trying to execute the General '
-                    'Merge Way python code for model %s, '
-                    'destination id: %s; and source ids: %r',
-                    self.model, dst_id, src_ids,
-                    extra=dict(code=self.general_merge_way)
-                )
-        try:
-            if values:
-                dst_obj.write(values)
-        except:
-            logger.exception(
-                'An error happened updating result object with values %r. \n'
-                'model: %s, destination id: %s; and source ids: %r',
-                values, self.model, dst_id, src_ids
-            )
+    @api.requires_singleton
+    def _merge(self, sources, target):
+        if self.field_merge_way_ids:
+            values = self.field_merge_way_ids.meld(sources, target)
+        else:
+            values = {}
+        if values:
+            target.write(values)
 
 
-class InformalReference(orm.Model):
+class InformalReference(models.Model):
     _name = 'informal.reference'
 
-    _columns = {
-        'table_name':
-            fields.char('Table Name', size=128, required=True,
-                        help='Name of DB table where informal reference are.'),
-        'id_field_name':
-            fields.char('Id Field Name', size=128, required=True,
-                        help='Name of field where destination id are saved.'),
-        'model_field_name':
-            fields.char('Model Field Name', size=128, required=True,
-                        help='Name of field where destination model are saved.'),
-        'model_field_value':
-            fields.selection(MODEL_FIELD_VALUE_SELECTION, 'Model Field Value',
-                             required=True, help='How save destination '
-                                                 'model reference.'),
-    }
-
-    _defaults = {
-        'id_field_name': 'res_id',
-        'model_field_name': 'res_model',
-        'model_field_value': '0'
-    }
-
-    def get_all(self, cr, uid):
-        return self.browse(cr, uid, self.get_all_ids(cr, uid))
-
-    def get_all_ids(self, cr, uid):
-        return self.search(cr, uid, [])
-
-    def unlink_rest(self, cr, uid, no_unlink_ids):
-        unlink_ids = self.search(cr, uid, [('id', 'not in', no_unlink_ids)])
-        self.unlink(cr, uid, unlink_ids)
+    table_name = fields.Char('Table Name', size=128, required=True,
+                             help='Name of DB table where informal reference are.')
+    id_field_name = fields.Char('Id Field Name', size=128, required=True, default='res_id',
+                                help='Name of field where destination id are saved.')
+    model_field_name = fields.Char('Model Field Name', size=128,
+                                   required=True, default='res_model',
+                                   help='Name of field where destination model are saved.')
+    model_field_value = fields.Selection(MODEL_FIELD_VALUE_SELECTION, 'Model Field Value',
+                                         required=True, default='0', help='How save destination '
+                                         'model reference.')
 
 
-class object_merger_settings(osv.osv_memory):
+class object_merger_settings(models.Model):
     _name = 'object.merger.settings'
     _inherit = 'res.config.settings'
 
-    _columns = {
-        'models_ids':
-            fields.many2many(
-                'ir.model', 'object_merger_settings_model_rel',
-                'object_merger_id', 'model_id', 'Models',
-                domain=[('osv_memory', '=', False)],
-                context={'object_merger_settings': True}
-            ),
-        'informal_reference_ids':
-            fields.many2many('informal.reference',
-                             'object_merger_informal_reference_rel',
-                             'object_merger_id', 'informal_reference_id',
-                             'Informal References',
-                             help='Know cases of pair of field represented a '
-                                  'reference to an specific object from '
-                                  'especific model.'),
-    }
+    def _get_default_object_merger_models(self):
+        return IrModel.sudo().search([('object_merger_model', '=', True)])
 
-    def _get_default_object_merger_models(self, cr, uid, context=None):
-        return self.pool.get('ir.model').search(cr, uid, [
-            ('object_merger_model', '=', True)], context=context)
+    models_ids = fields.Many2many(
+        'ir.model',
+        'object_merger_settings_model_rel',
+        'object_merger_id',
+        'model_id',
+        string='Models',
+        domain=_NON_TRANSIENT_MODEL_DOMAIN,
+        context={'object_merger_settings': True},
+        default=_get_default_object_merger_models
+    )
 
-    _defaults = {
-        'models_ids': _get_default_object_merger_models,
-        'informal_reference_ids':
-            lambda s, c, u, cxt: s.pool['informal.reference'].get_all_ids(
-                c, u)
-    }
+    informal_reference_ids = fields.Many2many(
+        'informal.reference',
+        'object_merger_informal_reference_rel',
+        'object_merger_id',
+        'informal_reference_id',
+        'Informal References',
+        help='Know cases of pair of field represented a '
+             'reference to an specific object from '
+             'especific model.',
+        default=lambda s: s.env['informal.reference'].search([])
+    )
 
-    def update_field(self, cr, uid, vals, context=None):
-        if context is None:
-            context = {}
-        model_ids = []
-        model_obj = self.pool.get('ir.model')
-        action_obj = self.pool.get('ir.actions.act_window')
-        value_obj = self.pool.get('ir.values')
-        field_obj = self.pool.get('ir.model.fields')
-        template_action = self.pool['ir.model.data'].xmlid_to_res_id(
-            cr, SUPERUSER_ID, 'xopgi_object_merger.act_merge_template',
-            raise_if_not_found=False)
-        if not vals or not vals.get('models_ids', False):
-            return False
-        elif vals.get('models_ids') or model_ids[0][2]:
-            model_ids = vals.get('models_ids')
-            if isinstance(model_ids[0], (list)):
-                model_ids = model_ids[0][2]
-        # Unlink Previous Actions
-        unlink_ids = action_obj.search(
-            cr, uid, [('res_model', '=', 'object.merger'),
-                      ('id', '!=', template_action)], context=context)
-        for unlink_id in unlink_ids:
-            action_obj.unlink(cr, uid, unlink_id)
-            un_val_ids = value_obj.search(
-                cr, uid,
-                [('value', '=', "ir.actions.act_window," + str(unlink_id))],
-                context=context
-            )
-            value_obj.unlink(cr, uid, un_val_ids, context=context)
-        # Put all models which were selected before back to not an object_merger
-        model_not_merge_ids = model_obj.search(
-            cr,
-            uid,
-            [('id', 'not in', model_ids), ('object_merger_model', '=', True)],
-            context=context
+    @api.multi
+    def update_field(self):
+        model_obj = self.env['ir.model']
+        action_obj = self.env['ir.actions.act_window']
+        value_obj = self.env['ir.values']
+        field_obj = self.env['ir.model.fields']
+        template_action = self.sudo().env.ref(
+            'xopgi_object_merger.act_merge_template',
+            raise_if_not_found=False
         )
-        model_obj.write(cr, uid, model_not_merge_ids,
-                        {'object_merger_model': False}, context=context)
+        if not self:
+            return False
+        # Unlink Previous Actions
+        unlink_records = action_obj.search([
+            ('res_model', '=', 'object.merger'),
+            ('id', '!=', template_action.id)
+        ])
+        for unlink_id in unlink_records:
+            unlink_id.unlink()
+            un_val = value_obj.search([
+                ('value', '=', "ir.actions.act_window," + str(unlink_id.id))])
+            un_val.unlink()
+        # Put all models which were selected before back to not an object_merger
+        model_not_merge = model_obj.search([('id', 'not in', self.models_ids.ids),
+                                            ('object_merger_model', '=', True)])
+        model_not_merge.write({'object_merger_model': False})
         # Put all models which are selected to be an object_merger
-        model_obj.write(cr, uid, model_ids, {'object_merger_model': True},
-                        context=context)
-        object_merger_ids = model_obj.search(
-            cr, uid, [('model', '=', 'object.merger')], context=context)
-        for model in model_obj.browse(cr, uid, model_ids, context=context):
+        self.models_ids.write({'object_merger_model': True})
+        object_merger = self.models_ids.search([
+            ('model', '=', 'object.merger')], limit=1
+        )
+        for model in self.models_ids:
             field_name = 'x_' + model.model.replace('.', '_') + '_id'
             name = "Merge"
             default = {
                 'src_model': model.model,
                 'context': {'field_to_read': field_name}
             }
-            act_id = action_obj.copy(cr, uid, template_action,
-                                     default=default, context=context)
-            value_obj.create(
-                cr,
-                uid,
-                {'name': name,
-                 'model': model.model, 'key2': 'client_action_multi',
-                 'value': "ir.actions.act_window," + str(act_id), },
-                context=context
+            temp_acc = template_action.copy(default=default)
+            value_obj.create({
+                'name': name,
+                'model': model.model,
+                'key2': 'client_action_multi',
+                'value': "ir.actions.act_window," + str(temp_acc.id)
+            })
+            found = field_obj.search(
+                [('name', '=', field_name), ('model', '=', 'object.merger')]
             )
-            field_name = 'x_' + model.model.replace('.', '_') + '_id'
-            if not field_obj.search(cr, uid, [('name', '=', field_name), (
-                    'model', '=', 'object.merger')], context=context):
+            if not found:
                 field_data = {
                     'model': 'object.merger',
-                    'model_id': object_merger_ids and object_merger_ids[0] or False,
+                    'model_id': object_merger.id,
                     'name': field_name,
                     'relation': model.model,
                     'field_description': _('To keep'),
                     'state': 'manual',
                     'ttype': 'many2one',
                 }
-                field_obj.create(cr, SUPERUSER_ID, field_data, context=context)
+                field_obj.sudo().create(field_data)
         return True
 
-    def install(self, cr, uid, ids, context=None):
-        # Initialization of the configuration
-        if context is None:
-            context = {}
-        """ install method """
-        for vals in self.read(cr, uid, ids, context=context):
-            self.pool['informal.reference'].unlink_rest(
-                cr, uid, vals.get('informal_reference_ids', []))
-            self.update_field(cr, uid, vals, context=context)
+    @api.multi
+    def install(self):
+        self.update_field()
         return {'type': 'ir.actions.client', 'tag': 'reload', }
 
 
 class FieldMergeWay(models.Model):
     _name = 'field.merge.way'
 
-    name = new_api_fields.Char(required=True, translate=True)
-    predefine = new_api_fields.Boolean()
-    code = new_api_fields.Text(required=True, default='''
-        #  Python code to return on result var the value of active field
-        #  result = False
-        #  self, dst_obj, src_objs, field are able to use:
-        #  self => active strategy (on new api).
-        #  dst_obj => merge destination object.
-        #  src_objs => merge source objects without dst_obj.
-        #  field => field to apply merge way.
-        ''')
+    name = fields.Char(required=True, translate=True)
+    code = fields.Selection(
+        [('add', 'Add both fields'),
+         ('min', 'Keep the minimal'),
+         ('max', 'Keep the maximal'),
+         ('average', 'Find the average'),
+         ('sum', 'Find the sum')],
+        required=True,
+    )
 
     _sql_constraints = [
         ('name_unique', 'unique (name)', 'Strategy must be unique!')]
 
-    def apply(self, dst_obj, src_objs, field):
-        method = (
-            getattr(self, self.code, None) if self.predefine else self.custom)
+    def apply(self, sources, target, field):
+        method = getattr(self, 'apply_' + self.code, None)
         try:
-            return method(dst_obj, src_objs, field) if method else None
-        except:
+            if method:
+                return method(sources, target, field)
+            else:
+                return None
+        except:  # TODO: Which exceptions
             logger.exception(
                 'An error happened trying to execute the Specific Merge '
-                'Way python code for Model: %s, Field: %s,'
-                'Destination id: %s and Source ids: %s',
-                field.model, field.field_description, dst_obj.id,
-                src_objs.ids
+                'Way python code for Model: %s, Field: %s, '
+                'Target id: %s and Sources ids: %s',
+                field.model, field.field_description, target.id,
+                sources.ids
             )
 
-    def add(self, dst_obj, src_objs, field):
-        '''
-        not applicable to: selection, many2one, date, datetime
-        '''
-        result = getattr(dst_obj, field.name, None)
+    def apply_add(self, sources, target, field):
+        result = getattr(target, field.name, None)
         if field.ttype == 'char':
             union = ' '
         elif field.ttype == 'text':
             union = '\n ********************************************* \n'
         else:
             union = False
-        for obj in src_objs:
+        for obj in sources:
             temp = getattr(obj, field.name, None)
             if result and temp:
                 result += union + temp if union else temp
@@ -321,60 +254,64 @@ class FieldMergeWay(models.Model):
                 result = temp
         return result
 
-    def average(self, dst_obj, src_objs, field):
-        '''Applicable to: integer and float
-
-        '''
-        result = getattr(dst_obj, field.name, 0)
+    def apply_average(self, sources, target, field):
+        result = getattr(target, field.name, 0)
         count = 1 if result not in [False, None] else 0
-        for obj in src_objs:
+        for obj in sources:
             temp = getattr(obj, field.name, None)
             if not any(var in [False, None] for var in (result, temp)):
                 result += temp
                 count += 1
         return result / count if result and count else 0
 
-    def max(self, dst_obj, src_objs, field):
-        '''
-        not applicable to:
-        '''
-        return self._max_min(dst_obj, src_objs, field, gt)
+    def apply_sum(self, sources, target, field):
+        return self._reduce(
+            operator.add,
+            sources,
+            target,
+            field,
+            0
+        )
 
-    def min(self, dst_obj, src_objs, field):
-        '''
-        not applicable to:
-        '''
-        return self._max_min(dst_obj, src_objs, field, lt)
+    def apply_max(self, sources, target, field):
+        from xoutil.infinity import Infinity
+        return self._reduce(
+            operator.gt,
+            sources,
+            target,
+            field,
+            -Infinity
+        )
 
-    def _max_min(self, dst_obj, src_objs, field, operator):
-        result = getattr(dst_obj, field.name, None)
-        for obj in src_objs:
-            temp = getattr(obj, field.name, None)
-            if not any(var in [None, False] for var in [result, temp]):
-                result = temp if operator(temp, result) else result
-            elif not result and temp:
-                result = temp
+    def apply_min(self, sources, target, field):
+        from xoutil.infinity import Infinity
+        return self._reduce(
+            operator.lt,
+            sources,
+            target,
+            field,
+            -Infinity
+        )
+
+    def _reduce(self, f, sources, target, field, initial):
+        result = getattr(target, field.name, initial)
+        for temp in sources.mapped(field.name):
+            result = f(result, temp)
         return result
-
-    def custom(self, dst_obj, src_objs, field):
-        local_dict = locals()
-        local_dict.update(globals().get('__builtins__', {}))
-        safe_eval(self.code, local_dict, mode='exec', nocopy=True)
-        return local_dict['result']
 
 
 class FieldMergeWayRel(models.Model):
     _name = 'field.merge.way.rel'
 
-    name = new_api_fields.Many2one('ir.model.fields', required=True)
-    merge_way = new_api_fields.Many2one('field.merge.way', required=True)
-    model = new_api_fields.Many2one('ir.model', required=True)
+    name = fields.Many2one('ir.model.fields', required=True)
+    merge_way = fields.Many2one('field.merge.way', required=True)
+    model = fields.Many2one('ir.model', required=True)
 
     @api.multi
-    def merge(self, dst_obj, src_objs):
+    def meld(self, sources, target):
         res = {}
         for item in self:
-            val = item.merge_way.apply(dst_obj, src_objs, item.name)
+            val = item.merge_way.apply(sources, target, item.name)
             if val is not None:
                 res[item.name.name] = val
         return res
