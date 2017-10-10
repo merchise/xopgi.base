@@ -17,5 +17,4 @@ from __future__ import (division as _py3_division,
                         absolute_import as _py3_abs_import)
 
 
-
-from . import test_objectmerger  # noqa
+from . import models  # noqa

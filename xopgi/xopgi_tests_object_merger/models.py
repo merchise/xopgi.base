@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # ---------------------------------------------------------------------
-# __init__
+# test_module
 # ---------------------------------------------------------------------
 # Copyright (c) 2017 Merchise Autrement [~º/~] and Contributors
 # All rights reserved.
@@ -17,5 +17,20 @@ from __future__ import (division as _py3_division,
                         absolute_import as _py3_abs_import)
 
 
+from xoeuf import models, fields
 
-from . import test_objectmerger  # noqa
+
+class Checkfks(models.Model):
+    _name = 'test.merger.fks'
+
+    name = fields.Char()
+    description = fields.Text()
+    partner_id = fields.Many2one('res.partner', 'Contact')
+
+
+class InformalReference(models.Model):
+    _name = 'test.merger.reference'
+
+    subject = fields.Char()
+    body = fields.Text()
+    res_id = fields.Integer()

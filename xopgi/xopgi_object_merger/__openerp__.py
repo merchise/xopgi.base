@@ -17,7 +17,7 @@
     'name': 'Xopgi Object Merger',
     'version': '1.0',
     'category': 'Tools',
-    'depends': ['base'],
+    'depends': ['base', 'xopgi_tests_object_merger'],
     'data': [
         "security/security.xml",
         "view/res_config_view.xml",

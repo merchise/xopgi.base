@@ -25,7 +25,10 @@ class TestObjectMerger(TransactionCase):
         super(TestObjectMerger, self).setUp()
         self.objectmerger = self.env['object.merger']
         Partner = self.env['res.partner']
+        Test_fks = self.env['test.merger.fks']
+        self.ir_model_fields = self.env['ir.model.fields']
         self.irmodel = self.env['ir.model']
+        self.field = self.env['field.merge.way']
         self.target = Partner.create({'name': 'Etecsa',
                                       'email': 'etecsa@email.cu',
                                       'mobile': '523478'})
@@ -36,13 +39,19 @@ class TestObjectMerger(TransactionCase):
                                          'email': 'Copextelpinar@email.cu',
                                          'mobile': '048766229',
                                          'parent_id': self.sources.id})
+        self.partner_idfk = Test_fks.create({'name': 'Venta de laptop',
+                                             'description': 'Venta',
+                                             'partner_id': self.sources.id})
 
     def test_merger_partner(self):
-        partner = self.partner.search(['parent_id', '=', self.sources.id])
         self.objectmerger.merge(self.sources, self.target)
         self.assertFalse(self.sources.active)
-        self.assertEqual(
-            self.target.mobile,
-            (self.target.mobile + self.sources.mobile))
         if self.irmodel.merge_cyclic:
-            self.assertEqual(partner.parent_id.id, self.target.id)
+            self.assertEqual((self.parent_id.parent_id.id), self.target.id)
+        self.assertEqual((self.partner_idfk.partner_id.id), self.target.id)
+
+    def test_merger_fields(self):
+        field = self.ir_model_fields.search([('name', '=', 'mobile'),
+                                             ('model', '=', 'res.partner')])
+        self.field.apply_add(self.sources, self.target, field)
+        self.assertTrue(self.sources.mobile + self.target.mobile)
