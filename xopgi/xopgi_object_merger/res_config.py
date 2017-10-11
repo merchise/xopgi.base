@@ -52,10 +52,6 @@ class ir_model(models.Model):
         help=('If checked, by default the Object Merger configuration will '
               'get this module in the list')
     )
-    merge_cyclic = fields.Boolean(
-        string='Merge cyclic relations',
-        default=False,
-    )
     merge_limit = fields.Integer(
         'Merge Limit',
         default=0,

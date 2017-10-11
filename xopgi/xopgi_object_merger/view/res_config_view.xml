@@ -23,7 +23,6 @@
                     <field name="name"/>
                     <field name="model"/>
                     <field name="merge_limit"/>
-                    <field name="merge_cyclic"/>
                   </tree>
                 </field>
               </group>
@@ -65,7 +64,6 @@
                     <label string="(0 for no limit)"
                            class="oe_inline"/>
                   </div>
-                  <field name="merge_cyclic"/>
                 </group>
               </page>
               <page string="Specific Merge Ways for model fields">
