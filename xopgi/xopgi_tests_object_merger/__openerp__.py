@@ -16,7 +16,7 @@
     'name': 'test_merger',
     'author': 'Merchise Autrement [~º/~] and Contributors',
     'description': 'Test for the merge',
-    'depends': ['base', ],
+    'depends': ['base', 'xopgi_object_merger'],
     'installable': True,
     'auto_install': False,
 }

@@ -25,12 +25,41 @@ class Checkfks(models.Model):
 
     name = fields.Char()
     description = fields.Text()
-    partner_id = fields.Many2one('res.partner', 'Contact')
+    merger_id = fields.Many2one('test.merger.settings', 'Merge')
 
 
-class InformalReference(models.Model):
-    _name = 'test.merger.reference'
+class Test_merger_settings(models.Model):
+    _name = 'test.merger.settings'
 
-    subject = fields.Char()
-    body = fields.Text()
+    add_char = fields.Char()
+    add_text = fields.Text()
+    price_int = fields.Integer()
+    cost_float = fields.Float()
+    parent_id = fields.Many2one('test.merger.settings', 'Parent')
+
+
+class Test_many2many(models.Model):
+    _name = 'test.many2many'
+
+    name = fields.Char()
+    merge_settings_ids = fields.Many2many(
+        'test.merger.settings',
+        'test_many2many_merger_settings_rel',
+        'many2many_id',
+        'merger_id',
+        'Test_many2many'
+    )
+
+
+class Test_inherit(models.Model):
+    _inherit = 'test.merger.settigs'
+
+    name = fields.Char()
+
+
+class Test_reference(models.Model):
+    _name = 'test.reference'
+
+    name = fields.Char()
+    model = fields.Char()
     res_id = fields.Integer()

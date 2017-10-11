@@ -50,8 +50,26 @@ class TestObjectMerger(TransactionCase):
             self.assertEqual((self.parent_id.parent_id.id), self.target.id)
         self.assertEqual((self.partner_idfk.partner_id.id), self.target.id)
 
-    def test_merger_fields(self):
+    def test_add_fields(self):
         field = self.ir_model_fields.search([('name', '=', 'mobile'),
                                              ('model', '=', 'res.partner')])
-        self.field.apply_add(self.sources, self.target, field)
-        self.assertTrue(self.sources.mobile + self.target.mobile)
+        result = self.field.apply_add(self.sources, self.target, field)
+        self.assertEqual((self.sources.mobile + self.target.mobile), result)
+
+    def test_sum_fields(self):
+        field = self.ir_model_fields.search([('name', '=', 'mobile'),
+                                             ('model', '=', 'res.partner')])
+        result = self.field.apply_sum(self.sources, self.target, field)
+        self.assertEqual((self.sources.mobile + self.target.mobile), result)
+
+    def test_max_fields(self):
+        field = self.ir_model_fields.search([('name', '=', 'mobile'),
+                                             ('model', '=', 'res.partner')])
+        result = self.field.apply_max(self.sources, self.target, field)
+        self.assertTrue((self.sources.mobile) < result)
+
+    def test_min_fields(self):
+        field = self.ir_model_fields.search([('name', '=', 'mobile'),
+                                             ('model', '=', 'res.partner')])
+        result = self.field.apply_min(self.sources, self.target, field)
+        self.assertTrue((self.target.mobile) > result)
