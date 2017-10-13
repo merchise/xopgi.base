@@ -21,45 +21,28 @@ from xoeuf import models, fields
 
 
 class Checkfks(models.Model):
-    _name = 'test.merger.fks'
+    _name = 'model.b'
 
     name = fields.Char()
-    description = fields.Text()
-    merger_id = fields.Many2one('test.merger.settings', 'Merge')
+    modela_id = fields.Many2one('model.a', 'Merge')
+    melda_ids = fields.Many2many(comodel_name='model.a',
+                                 column1='meld_column1_id',
+                                 column2='meld_column2_id',
+                                 string='relation')
 
 
 class Test_merger_settings(models.Model):
-    _name = 'test.merger.settings'
+    _name = 'model.a'
 
     add_char = fields.Char()
     add_text = fields.Text()
     price_int = fields.Integer()
     cost_float = fields.Float()
-    parent_id = fields.Many2one('test.merger.settings', 'Parent')
-
-
-class Test_many2many(models.Model):
-    _name = 'test.many2many'
-
-    name = fields.Char()
-    merge_settings_ids = fields.Many2many(
-        'test.merger.settings',
-        'test_many2many_merger_settings_rel',
-        'many2many_id',
-        'merger_id',
-        'Test_many2many'
-    )
-
-
-class Test_inherit(models.Model):
-    _inherit = 'test.merger.settigs'
-
-    name = fields.Char()
-
-
-class Test_reference(models.Model):
-    _name = 'test.reference'
-
-    name = fields.Char()
-    model = fields.Char()
-    res_id = fields.Integer()
+    min_int = fields.Integer()
+    max_int = fields.Integer()
+    active = fields.Boolean(default=True)
+    parent_id = fields.Many2one('model.a', 'Parent')
+    meldb_ids = fields.Many2many(comodel_name='model.b',
+                                 column1='meld_column2_id',
+                                 column2='meld_column1_id',
+                                 string='relation')

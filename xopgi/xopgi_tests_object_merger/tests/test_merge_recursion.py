@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # ---------------------------------------------------------------------
-# __init__
+# test_object_merger
 # ---------------------------------------------------------------------
 # Copyright (c) 2017 Merchise Autrement [~º/~] and Contributors
 # All rights reserved.
@@ -16,7 +16,18 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
+from xoeuf.odoo.tests.common import TransactionCase
 
 
-from . import test_objectmerger  # noqa
-from . import test_merge_recursion  # noqa
+class TestObjectRecursion(TransactionCase):
+    def setUp(self):
+        super(TestObjectRecursion, self).setUp()
+        self.objectmerger = self.env['object.merger']
+        Model_a = self.env['model.a']
+        self.B = Model_a.create({'add_char': 'B'})
+        self.C = Model_a.create({'add_char': 'C', 'parent_id': self.B.id})
+        self.A = Model_a.create({'add_char': 'A', 'parent_id': self.C.id})
+
+    def test_merger_recursion(self):
+        self.objectmerger.merge(self.B, self.A)
+        self.assertFalse(self.A.parent_id)
