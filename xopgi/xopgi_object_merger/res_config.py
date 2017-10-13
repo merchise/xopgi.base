@@ -239,7 +239,7 @@ class FieldMergeWay(models.Model):
         if field.ttype == 'char':
             union = ' '
         elif field.ttype == 'text':
-            union = '\n ********************************************* \n'
+            union = ' '
         else:
             union = False
         for obj in sources:
@@ -272,7 +272,7 @@ class FieldMergeWay(models.Model):
     def apply_max(self, sources, target, field):
         from xoutil.infinity import Infinity
         return self._reduce(
-            operator.gt,
+            max,
             sources,
             target,
             field,
@@ -282,7 +282,7 @@ class FieldMergeWay(models.Model):
     def apply_min(self, sources, target, field):
         from xoutil.infinity import Infinity
         return self._reduce(
-            operator.lt,
+            min,
             sources,
             target,
             field,
