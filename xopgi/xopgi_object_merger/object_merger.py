@@ -241,10 +241,6 @@ class object_merger(models.TransientModel):
                            model='', subquery='{field} = {id}'):
         '''Check unique constraints.
 
-        Revisar si hay alguna fila que contenga los mismos valores que la que se
-        está intentando actualizar de forma que se viole alguna restricción de
-        tipo unique.
-
         :return: False if any violation detected else True
 
         '''
@@ -282,7 +278,7 @@ class object_merger(models.TransientModel):
             self._cr.execute(query.format(table=table, filters=query_filters))
 
     @api.model
-    def _check_fks(self, sources, target=None):
+    def _check_fks(self, sources, target):
         '''Get all relational field with active_model and send to update it.
         '''
         query = """
@@ -318,8 +314,8 @@ class object_merger(models.TransientModel):
                     table = model_name.replace('.', '_')
             elif ttype == 'many2many':
                 if MAJOR_ODOO_VERSION < 10:
-                    model_name = self.env[model_name]
-                    table, _x, field_name = field.column._sql_names(model_name)
+                    modelname = self.env[model_name]
+                    table, _x, field_name = field.column._sql_names(modelname)
                 else:
                     table, field_name = field.relation, field.column2
             else:
@@ -330,19 +326,19 @@ class object_merger(models.TransientModel):
                 sources=sources,
                 target=target
             )
-            if ttype == 'many2one' and records._check_recursion(field_name):
-                target[field_name] = False
-            elif ttype == 'many2many' and records._check_m2m_recursion(field_name):
-                raise UserError(_('Information!'),
-                                _('''There are recursive relationships in the
-                                   many2many fields please check those
-                                   relationships and retry the merge'''))
-            else:
-                assert False
+            if model_name == sources._name:
+                if ttype == 'many2one' and not records._check_recursion(parent=field_name):
+                    target[field_name] = False
+                elif ttype == 'many2many' and records._check_m2m_recursion(
+                        parent=field_name):
+                    raise UserError(_('Information!'),
+                                    _('''There are recursive relationships in the
+                                      many2many fields please check those
+                                      relationships'''))
 
     def _upd_fk(self, table, field, sources, target):
-        '''Update foreign key (field) to destination value (dst_id) where
-        actual field value are in merging object ids (src_ids).
+        '''Update foreign key (field) to destination value `target` where
+        actual field value are in merging object `sources`.
         if not constraint involve the field to update.
             Update all matching rows
         else
