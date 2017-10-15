@@ -25,10 +25,9 @@ class objectmerge_mail(models.TransientModel):
     _inherit = 'object.merger'
 
     def _check_on_alias_defaults(self, sources, target):
-        """Check if any of merged partner_ids are referenced on any mail.alias
-        and on this case update the references to the dst_partner_id.
+        """Check if any of merged sources are referenced on any mail.alias
+        and on this case update the references to the target.
         """
-        mail_alias = self.env['mail.alias']
         query = """SELECT id, alias_defaults FROM mail_alias
                          WHERE alias_model_id = {model_id}
                          AND (alias_defaults LIKE '%''{field}''%')"""
@@ -39,6 +38,7 @@ class objectmerge_mail(models.TransientModel):
         for field, model_id, ttype in read:
             self._cr.execute(query.format(model_id=model_id, field=field))
             for alias_id, defaults in self._cr.fetchall():
+                mail_alias = self.env['mail.alias'].browse(alias_id)
                 try:
                     defaults_dict = dict(eval(defaults))
                 except Exception:
@@ -47,28 +47,26 @@ class objectmerge_mail(models.TransientModel):
                 if not val:
                     continue
                 if ttype == 'many2one':
-                    if val in sources and val != target:
-                        defaults_dict[field] = target
+                    if val in sources.ids and val != target.id:
+                        defaults_dict[field] = target.id
                         mail_alias.sudo().write(
-                            {'_id': alias_id,
-                             'alias_defaults': repr(defaults_dict)}
+                            {'alias_defaults': repr(defaults_dict)}
                         )
                 else:
                     res_val = []
                     for rel_item in val:
                         rel_ids = rel_item[-1]
                         if isinstance(rel_ids, (tuple, list)):
-                            wo_partner_ids = [i for i in rel_ids if i not in sources]
+                            wo_partner_ids = [i for i in rel_ids if i not in sources.ids]
                             if wo_partner_ids != rel_ids:
-                                rel_ids = set(wo_partner_ids + [target])
-                        elif rel_ids in sources and val != target:
-                            rel_ids = target
+                                rel_ids = set(wo_partner_ids + [target.id])
+                        elif rel_ids in sources.ids and val != target.id:
+                            rel_ids = target.id
                             res_val.append(tuple(rel_item[:-1]) + (rel_ids,))
                     if val != res_val:
                         defaults_dict[field] = res_val
                         mail_alias.sudo().write(
-                            {'_id': alias_id,
-                             'alias_defaults': repr(defaults_dict)}
+                            {'alias_defaults': repr(defaults_dict)}
                         )
         return True
 
