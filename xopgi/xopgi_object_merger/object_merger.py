@@ -398,6 +398,7 @@ class object_merger(models.TransientModel):
                 field=field_name,
                 sources=sources,
                 target=target,
+                model=model_name
             )
         self._check_informal_reference(sources, target)
 
