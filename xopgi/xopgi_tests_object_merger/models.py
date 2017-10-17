@@ -29,6 +29,7 @@ class Checkfks(models.Model):
                                  column1='meld_column1_id',
                                  column2='meld_column2_id',
                                  string='relation')
+    partner_id = fields.Many2one('res.partner', 'Parent')
 
 
 class Test_merger_settings(models.Model):
