@@ -292,7 +292,6 @@ class object_merger(models.TransientModel):
             fks = self._cr.fetchall()
         else:
             fks = []
-        records = target + sources
         for field_name, model_name, ttype in fks:
             model_registry = self.env.registry.get(model_name)
             if not model_registry:
@@ -326,15 +325,6 @@ class object_merger(models.TransientModel):
                 sources=sources,
                 target=target
             )
-            if model_name == sources._name:
-                if ttype == 'many2one' and not records._check_recursion(parent=field_name):
-                    target[field_name] = False
-                elif ttype == 'many2many' and records._check_m2m_recursion(
-                        parent=field_name):
-                    raise UserError(_('Information!'),
-                                    _('''There are recursive relationships in the
-                                      many2many fields please check those
-                                      relationships'''))
 
     def _upd_fk(self, table, field, sources, target):
         '''Update foreign key (field) to destination value `target` where

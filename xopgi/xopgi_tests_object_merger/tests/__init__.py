@@ -19,4 +19,5 @@ from __future__ import (division as _py3_division,
 
 
 from . import test_objectmerger  # noqa
-from . import test_merge_recursion  # noqa
+from . import test_informal_reference  #noqa
+from . import test_merge_graph  #noqa
