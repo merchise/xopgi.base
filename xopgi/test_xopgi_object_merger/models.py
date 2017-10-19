@@ -20,7 +20,7 @@ from __future__ import (division as _py3_division,
 from xoeuf import models, fields
 
 
-class Checkfks(models.Model):
+class B(models.Model):
     _name = 'model.b'
 
     name = fields.Char()
@@ -32,7 +32,7 @@ class Checkfks(models.Model):
     partner_id = fields.Many2one('res.partner', 'Parent')
 
 
-class Test_merger_settings(models.Model):
+class A(models.Model):
     _name = 'model.a'
 
     add_char = fields.Char()
