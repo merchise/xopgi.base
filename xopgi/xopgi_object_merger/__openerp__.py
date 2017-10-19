@@ -1,17 +1,11 @@
 #!/usr/bin/env python
-# -*- encoding: utf-8 -*-
-# --------------------------------------------------------------------------
-# xopgi_object_merge.__openerp__
-# --------------------------------------------------------------------------
-# Copyright (c) 2014-2017 Merchise Autrement [~º/~] and Contributors
+# -*- coding: utf-8 -*-
+# ---------------------------------------------------------------------
+# Copyright (c) Merchise Autrement [~º/~] and Contributors
 # All rights reserved.
 #
-# Author: Merchise Autrement [~º/~]
-# Contributors: see CONTRIBUTORS and HISTORY file
+# This is free software; you can do what the LICENCE file allows you to.
 #
-# This is free software; you can redistribute it and/or modify it under the
-# terms of the LICENCE attached (see LICENCE file) in the distribution
-# package.
 
 {
     'name': 'Xopgi Object Merger',
