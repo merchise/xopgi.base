@@ -41,10 +41,10 @@ class TestObjectmailalias(TransactionCase):
     def test_check_mail_alias(self):
         self.objectmerger._check_on_alias_defaults(self.G, self.H)
         alias1 = self.alias1.alias_defaults
-        val = dict(eval(alias1))
+        val = eval(alias1)
         id = val['parent_id']
         self.assertEqual(self.H.id, id)
         alias2 = self.alias2.alias_defaults
-        val = dict(eval(alias2))
+        val = eval(alias2)
         id = val['message_follower_ids'][-1][-1]
         self.assertEqual(self.H.id, id)
