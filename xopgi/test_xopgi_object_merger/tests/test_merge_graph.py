@@ -31,6 +31,7 @@ class TestMerge(TransactionCase):
         self.objectmerger.merge(self.A, self.C)
         self.assertEqual(self.D.partner_id, self.C)
         self.assertEqual(self.C.category_id.partner_ids, self.C)
+        # Q: Do partners allow cycles in parent_id?
         self.assertEqual(self.B.parent_id, self.C)
         self.assertEqual(self.C.parent_id, self.B)
 
@@ -38,5 +39,6 @@ class TestMerge(TransactionCase):
         self.objectmerger.merge(self.C, self.A)
         self.assertEqual(self.D.partner_id, self.A)
         self.assertEqual(self.A.category_id.partner_ids, self.A)
+        # Q: Do partners allow cycles in parent_id?
         self.assertEqual(self.B.parent_id, self.A)
         self.assertFalse(self.A.parent_id, self.B)
