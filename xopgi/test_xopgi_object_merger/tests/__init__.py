@@ -16,8 +16,6 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
-
-
 from . import test_objectmerger  # noqa
-from . import test_informal_reference  #noqa
-from . import test_merge_graph  #noqa
+from . import test_informal_reference  # noqa
+from . import test_merge_graph  # noqa
