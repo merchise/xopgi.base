@@ -19,10 +19,9 @@ from __future__ import (division as _py3_division,
 from xoeuf.odoo.tests.common import TransactionCase
 
 
-# Q: What does 'ac'  mean?
-class TestObjectmergerac(TransactionCase):
+class TestMerge(TransactionCase):
     def setUp(self):
-        super(TestObjectmergerac, self).setUp()
+        super(TestMerge, self).setUp()
         self.objectmerger = self.env['object.merger']
         partner = self.env['res.partner']
         modelb = self.env['model.b']
@@ -33,14 +32,14 @@ class TestObjectmergerac(TransactionCase):
         categoryb = partner.category_id.create(dict(name='CategoryB'))
         self.C.category_id += categoryb
 
-    def test_merger_graph(self):
+    def test_merge_a_and_c_targeting_c(self):
         self.objectmerger.merge(self.A, self.C)
         self.assertEqual(self.D.partner_id, self.C)
         self.assertEqual(self.C.category_id.partner_ids, self.C)
         self.assertEqual(self.B.parent_id, self.C)
         self.assertEqual(self.C.parent_id, self.B)
 
-    def test_merger_graph2(self):
+    def test_merge_a_and_c_targeting_a(self):
         self.objectmerger.merge(self.C, self.A)
         self.assertEqual(self.D.partner_id, self.A)
         self.assertEqual(self.A.category_id.partner_ids, self.A)
