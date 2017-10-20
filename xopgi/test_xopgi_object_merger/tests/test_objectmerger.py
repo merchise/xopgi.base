@@ -71,19 +71,28 @@ class TestObjectMerger(TransactionCase):
         self.field.create(dict(name=field_max_int.id, merge_way=maxid, model=self.irmodel.id))
         self.field.create(dict(name=field_min_int.id, merge_way=minid, model=self.irmodel.id))
 
-    def test_merger(self):
+    def test_deactivate_sources(self):
+        self.objectmerger.merge(self.sources, self.target)
+        self.assertFalse(self.sources.active)
+
+    def test_merger_fields(self):
         result_char = self.target.add_char + ' ' + self.sources.add_char
         result_text = self.target.add_text + ' ' + self.sources.add_text
         result_sum = self.target.price_int + self.sources.price_int
         result_sum_float = round((self.target.cost_float +
                                   self.sources.cost_float), 1)
         self.objectmerger.merge(self.sources, self.target)
-        self.assertFalse(self.sources.active)
         self.assertEqual(result_char, self.target.add_char)
         self.assertEqual(result_text, self.target.add_text)
         self.assertEqual(self.target.price_int, result_sum)
         self.assertEqual(result_sum_float, self.target.cost_float)
         self.assertEqual(self.target.min_int, 2)
         self.assertEqual(self.target.max_int, 12)
+
+    def test_check_m2o(self):
+        self.objectmerger.merge(self.sources, self.target)
         self.assertEqual(self.modela_id.modela_id, self.target)
+
+    def test_check_m2m(self):
+        self.objectmerger.merge(self.sources, self.target)
         self.assertEqual(self.target.meldb_ids.melda_ids, self.target)

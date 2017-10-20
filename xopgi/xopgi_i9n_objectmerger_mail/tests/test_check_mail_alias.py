@@ -23,7 +23,6 @@ class TestObjectmailalias(TransactionCase):
         self.mail_alias = self.env['mail.alias']
         self.H = partner.create({'name': 'H'})
         self.G = partner.create({'name': 'G'})
-        self.I = partner.create({'name': 'I', 'parent_id': self.G.id})
         res_partner = self.env['ir.model'].search(
             [('model', '=', 'res.partner')])
         category_id = partner.category_id.create(dict(name='Category'))

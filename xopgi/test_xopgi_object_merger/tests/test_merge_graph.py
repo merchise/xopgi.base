@@ -30,7 +30,5 @@ class TestMerge(TransactionCase):
 
     def test_merge_a_and_c_targeting_a(self):
         self.objectmerger.merge(self.C, self.A)
-        self.assertEqual(self.D.partner_id, self.A)
-        self.assertEqual(self.A.category_id.partner_ids, self.A)
         self.assertEqual(self.B.parent_id, self.A)
         self.assertNotEqual(self.A.parent_id, self.B)
