@@ -65,15 +65,12 @@ class objectmerge_mail(models.TransientModel):
         return True
 
     def _notify_merge(self, sources, target):
-        try:
-            src_names = sources.name_get()
-            if src_names:
-                subject = _('%s(s) Merged') % target._description
-                body = '<br/>'.join([_('<b>ID:</b> %s; <b>Name:</b> %s') % id_name
-                                     for id_name in src_names])
-                return target.message_post(body=body, subject=subject)
-        except Exception:
-            return None
+        src_names = sources.name_get()
+        if src_names:
+            subject = _('%s(s) Merged') % target._description
+            body = '<br/>'.join([_('<b>ID:</b> %s; <b>Name:</b> %s') % id_name
+                                 for id_name in src_names])
+            return target.message_post(body=body, subject=subject)
 
     def merge(self, sources, target):
         res = super(objectmerge_mail, self).merge(
@@ -82,5 +79,6 @@ class objectmerge_mail(models.TransientModel):
         )
         sources -= target
         self._check_on_alias_defaults(sources, target)
-        self._notify_merge(sources, target)
+        if target.message_capable_models():
+            self._notify_merge(sources, target)
         return res
