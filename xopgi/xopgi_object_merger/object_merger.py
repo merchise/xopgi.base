@@ -281,6 +281,7 @@ class object_merger(models.TransientModel):
           WHERE relation=%(model)s AND ttype != 'one2many'"""
         args = dict(model=sources._name)
         model = IrModel.search([('model', '=', sources._name)])
+        record = sources + target
         if model:
             self._cr.execute(query, args)
             fks = self._cr.fetchall()
@@ -319,6 +320,9 @@ class object_merger(models.TransientModel):
                 sources=sources,
                 target=target
             )
+            field_names = []
+            field_names.append(str(field_name))
+            record._validate_fields(field_names)
 
     def _upd_fk(self, table, field, sources, target):
         '''Update foreign key (field) to destination value `target` where
