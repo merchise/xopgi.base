@@ -25,5 +25,8 @@ class TestObjectinformalRef(TransactionCase):
 
     def test_check_informal_reference(self):
         self.objectmerger._check_informal_reference(self.B, self.A)
-        m = self.mail_message.search([('res_id', '=', self.B.id)])
-        self.assertFalse(m)
+        # check if there is any mail.message with the id of the sources
+        message_b = self.mail_message.search([('res_id', '=', self.B.id)])
+        self.assertFalse(message_b)
+        message_a = self.mail_message.search([('res_id', '=', self.A.id)])
+        self.assertEqual(len(message_a), 2)
