@@ -12,6 +12,7 @@ from __future__ import (division as _py3_division,
                         absolute_import as _py3_abs_import)
 
 from xoeuf.odoo.tests.common import TransactionCase
+from xoeuf import MAJOR_ODOO_VERSION
 
 
 class TestObjectmailalias(TransactionCase):
@@ -27,15 +28,25 @@ class TestObjectmailalias(TransactionCase):
             [('model', '=', 'res.partner')])
         category_id = partner.category_id.create(dict(name='Category'))
         self.G.category_id += category_id
+
         self.alias1 = mail_alias.create(
             dict(alias_model_id=res_partner.id,
                  alias_defaults={'type': 'out_invoice',
                                  'parent_id': self.G.id, 'currency_id': 1}))
-        self.alias2 = mail_alias.create(
-            dict(alias_model_id=res_partner.id,
-                 alias_defaults={'type': 'out_invoice',
-                                 'message_follower_ids': [(category_id.id, self.G.id)],
-                                 'currency_id': 1}))
+
+        if MAJOR_ODOO_VERSION >= 9:
+            self.alias2 = mail_alias.create(
+                dict(alias_model_id=res_partner.id,
+                     alias_defaults={'type': 'out_invoice',
+                                     'message_partner_ids': [(category_id.id, self.G.id)],
+                                     'currency_id': 1}))
+
+        else:
+            self.alias2 = mail_alias.create(
+                dict(alias_model_id=res_partner.id,
+                     alias_defaults={'type': 'out_invoice',
+                                     'message_follower_ids': [(category_id.id, self.G.id)],
+                                     'currency_id': 1}))
 
     def test_check_mail_alias(self):
         self.objectmerger._check_on_alias_defaults(self.G, self.H)
@@ -43,7 +54,13 @@ class TestObjectmailalias(TransactionCase):
         val = eval(alias1)
         id = val['parent_id']
         self.assertEqual(self.H.id, id)
-        alias2 = self.alias2.alias_defaults
-        val = eval(alias2)
-        id = val['message_follower_ids'][-1][-1]
-        self.assertEqual(self.H.id, id)
+        if MAJOR_ODOO_VERSION >= 9:
+            alias2 = self.alias2.alias_defaults
+            val = eval(alias2)
+            id = val['message_partner_ids'][-1][-1]
+            self.assertEqual(self.H.id, id)
+        else:
+            alias2 = self.alias2.alias_defaults
+            val = eval(alias2)
+            id = val['message_follower_ids'][-1][-1]
+            self.assertEqual(self.H.id, id)
