@@ -20,15 +20,16 @@ class TestMerge(TransactionCase):
         super(TestMerge, self).setUp()
         self.objectmerger = self.env['object.merger']
         partner = self.env['res.partner']
-        self.A = partner.create({'name': 'A'})
-        self.B = partner.create({'name': 'B', 'parent_id': self.A.id})
-        self.C = partner.create({'name': 'C', 'parent_id': self.B.id})
+        self.partner_A = partner.create({'name': 'A'})
+        self.partner_B = partner.create({'name': 'B', 'parent_id': self.partner_A.id})
+        self.partner_C = partner.create({'name': 'C', 'parent_id': self.partner_B.id})
 
     def test_merge_a_and_c_targeting_c(self):
         with self.assertRaises(ValidationError):
-            self.objectmerger.merge(self.A, self.C)
+            self.objectmerger.merge(self.partner_A, self.partner_C)
 
     def test_merge_a_and_c_targeting_a(self):
-        self.objectmerger.merge(self.C, self.A)
-        self.assertEqual(self.B.parent_id, self.A)
-        self.assertNotEqual(self.A.parent_id, self.B)
+        # Notice merge does not commute.
+        self.objectmerger.merge(self.partner_C, self.partner_A)
+        self.assertEqual(self.partner_B.parent_id, self.partner_A)
+        self.assertNotEqual(self.partner_A.parent_id, self.partner_B)
