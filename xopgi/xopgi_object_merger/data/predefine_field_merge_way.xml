@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
   <data> <!-- noupdate="1"-->
-    <record id="add" model="field.merge.way">
+    <record id="uniform" model="field.merge.way">
       <field name="name">Add/Concat</field>
       <field name="code">add</field>
     </record>
-    <record id="max" model="field.merge.way">
+    <record id="effort" model="field.merge.way">
       <field name="name">Max</field>
       <field name="code">max</field>
     </record>
-    <record id="min" model="field.merge.way">
+    <record id="effort_month" model="field.merge.way">
       <field name="name">Min</field>
       <field name="code">min</field>
     </record>
@@ -17,7 +17,7 @@
       <field name="name">Average</field>
       <field name="code">average</field>
     </record>
-    <record id="sum" model="field.merge.way">
+    <record id="suma" model="field.merge.way">
       <field name="name">Sum</field>
       <field name="code">sum</field>
     </record>
