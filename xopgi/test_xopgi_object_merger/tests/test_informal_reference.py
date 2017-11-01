@@ -19,14 +19,39 @@ class TestObjectinformalRef(TransactionCase):
         super(TestObjectinformalRef, self).setUp()
         self.objectmerger = self.env['object.merger']
         partner = self.env['res.partner']
-        self.mail_message = self.env['mail.message']
-        self.A = partner.create({'name': 'A'})
-        self.B = partner.create({'name': 'B'})
+        self.Message = self.env['mail.message']
+        self.partner_A = partner.create({'name': 'A'})
+        self.partner_B = partner.create({'name': 'B'})
+        # Ensure partner B has at least a message
+        self.partner_B.message_post()
 
-    def test_check_informal_reference(self):
-        self.objectmerger._check_informal_reference(self.B, self.A)
-        # check if there is any mail.message with the id of the sources
-        message_b = self.mail_message.search([('res_id', '=', self.B.id)])
-        self.assertFalse(message_b)
-        message_a = self.mail_message.search([('res_id', '=', self.A.id)])
-        self.assertEqual(len(message_a), 2)
+    def test_mail_messages_are_moved(self):
+        # The thread of a message is represented as an 'informal reference',
+        # so we're testing that the merge procedure do merge those.
+        partner_a_messages = self.Message.search(
+            [('res_id', '=', self.partner_A.id)],
+            count=True
+        )
+        partner_b_messages = self.Message.search(
+            [('res_id', '=', self.partner_B.id)],
+            count=True
+        )
+        B = self.partner_B.id
+        self.objectmerger.merge(self.partner_B, self.partner_A)
+        self.Message.invalidate_cache()
+        self.assertEqual(
+            self.Message.search(
+                [('res_id', '=', B)],
+                count=True
+            ),
+            0
+        )
+        merged_messages = self.Message.search(
+            [('res_id', '=', self.partner_A.id)],
+            count=True
+        )
+        self.assertEqual(
+            merged_messages,
+            partner_a_messages + partner_b_messages
+        )
+        self.assertGreater(merged_messages, 0)
