@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data>
+    <menuitem id="menu_object_merger_settings" name="Object Merger"
+              parent="base.menu_config"
+              sequence="35" action="action_object_merger_settings"/>
+
+  </data>
+</openerp>

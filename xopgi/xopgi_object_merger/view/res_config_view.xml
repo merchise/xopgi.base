@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
-	<data>
+  <data>
     <record id="view_object_merger_settings" model="ir.ui.view">
       <field name="name">Object merger settings</field>
       <field name="model">object.merger.settings</field>
@@ -23,7 +23,6 @@
                     <field name="name"/>
                     <field name="model"/>
                     <field name="merge_limit"/>
-                    <field name="merge_cyclic"/>
                   </tree>
                 </field>
               </group>
@@ -43,10 +42,6 @@
       <field name="view_mode">form</field>
       <field name="target">inline</field>
     </record>
-
-    <menuitem id="menu_object_merger_settings" name="Object Merger"
-              parent="base.menu_config"
-              sequence="35" action="action_object_merger_settings"/>
 
     <record id="view_ir_model_merge_form" model="ir.ui.view">
       <field name="name">ir.model.merge.form</field>
@@ -69,17 +64,7 @@
                     <label string="(0 for no limit)"
                            class="oe_inline"/>
                   </div>
-                  <field name="merge_cyclic"/>
                 </group>
-              </page>
-              <page string="General Merge Way">
-                <p>Python code to return on result var a python dict like:</p>
-                <p>result = {'field_name': field_value, ...}</p>
-                <p>self, dst_obj and src_objs are able to use:</p>
-                <p>self => active ir.model (on new api).</p>
-                <p>dst_obj => merge destination object.</p>
-                <p>src_objs => merge source objects without dst_obj.</p>
-                <field name="general_merge_way" nolabel="1"/>
               </page>
               <page string="Specific Merge Ways for model fields">
                 <field name="field_merge_way_ids" nolabel="1"
@@ -88,7 +73,7 @@
                     <field name="model" invisible="1"/>
                     <field name="name"
                            domain="[('model_id','=', model),
-                                      ('ttype', 'not in', ('many2many', 'one2many'))]"/>
+                                   ('ttype', 'not in', ('many2many', 'one2many'))]"/>
                     <field name="merge_way"/>
                   </tree>
                 </field>
@@ -105,7 +90,7 @@
       <field name="arch" type="xml">
         <tree string="Field Merge Way">
           <field name="name"/>
-          <field name="predefine"/>
+          <field name="code"/>
         </tree>
       </field>
     </record>
@@ -117,12 +102,9 @@
       <field name="priority" eval="8"/>
       <field name="arch" type="xml">
         <form>
-          <field name="predefine" invisible="1"/>
           <group>
-            <field name="name" required="1"
-                   attrs="{'readonly': [('predefine','=', True)]}"/>
-            <field name="code" required="1"
-                   attrs="{'invisible': [('predefine','=', True)]}"/>
+            <field name="name" required="1"/>
+            <field name="code" required="1"/>
           </group>
         </form>
       </field>
@@ -133,10 +115,10 @@
       <field name="model">informal.reference</field>
       <field name="arch" type="xml">
         <tree string="Model">
-              <field name="table_name"/>
-              <field name="id_field_name"/>
-              <field name="model_field_name"/>
-              <field name="model_field_value"/>
+          <field name="table_name"/>
+          <field name="id_field_name"/>
+          <field name="model_field_name"/>
+          <field name="model_field_value"/>
         </tree>
       </field>
     </record>
