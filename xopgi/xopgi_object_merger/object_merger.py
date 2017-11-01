@@ -1,29 +1,21 @@
 #!/usr/bin/env python
-# -*- encoding: utf-8 -*-
-# --------------------------------------------------------------------------
-# xopgi_object_merge.object_merger
-# --------------------------------------------------------------------------
-# Copyright (c) 2014-2017 Merchise Autrement [~º/~] and Contributors
+# -*- coding: utf-8 -*-
+# ---------------------------------------------------------------------
+# Copyright (c) Merchise Autrement [~º/~] and Contributors
 # All rights reserved.
 #
-# Author: Merchise Autrement [~º/~]
-# Contributors: see CONTRIBUTORS and HISTORY file
+# This is free software; you can do what the LICENCE file allows you to.
 #
-# This is free software; you can redistribute it and/or modify it under the
-# terms of the LICENCE attached (see LICENCE file) in the distribution
-# package.
 
 from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
+from xoeuf import api, fields, models, MAJOR_ODOO_VERSION
+from xoeuf.odoo import _
+from xoeuf.odoo.exceptions import Warning as UserError, AccessError
 
-from openerp import SUPERUSER_ID
-from openerp.exceptions import AccessError
-
-from openerp.osv import orm, osv, fields
-
-from openerp.tools.translate import _
+from xoeuf.models.proxy import IrModel
 
 from six import string_types
 from xoeuf.ui import CLOSE_WINDOW
@@ -47,27 +39,27 @@ def get_filters(data, except_field):
             if field_name != except_field]
 
 
-class object_merger(orm.TransientModel):
+class object_merger(models.TransientModel):
     _name = 'object.merger'
     _description = 'Merge objects'
 
-    _columns = {'name': fields.char('Name', size=16), }
+    name = fields.Char('Name', size=16)
 
-    def fields_view_get(self, cr, uid, view_id=None, view_type='form',
-                        context=None, toolbar=False, submenu=False):
+    @api.model
+    def fields_view_get(self, view_id=None, view_type='form',
+                        toolbar=False, submenu=False):
         res = super(object_merger, self).fields_view_get(
-            cr, uid, view_id, view_type, context=context, toolbar=toolbar,
-            submenu=submenu)
+            view_id,
+            view_type,
+            toolbar=toolbar,
+            submenu=submenu
+        )
         if view_type == 'form':
-            if context is None:
-                context = {}
-            object_ids = context.get('active_ids', [])
-            active_model = context.get('active_model')
+            object_ids = self._context.get('active_ids', [])
+            active_model = self._context['active_model']
             if object_ids:
-                self._check_quantity(cr, uid, object_ids, active_model,
-                                     context=context)
-                field_name = 'x_%s_id' % (
-                    active_model and active_model.replace('.', '_') or '')
+                self._check_quantity(active_model)
+                field_name = 'x_%s_id' % active_model.replace('.', '_')
                 view_part = """
                 <field name="{field_name}"/>
                 <separator string="{string}" colspan="4"/>
@@ -76,156 +68,143 @@ class object_merger(orm.TransientModel):
                 res['arch'] = res['arch'].decode('utf8').replace(
                     """<separator string="to_replace"/>""", view_part
                 )
-                field = self.fields_get(cr, uid, [field_name, 'info'],
-                                        context=context)
-                field[field_name]['domain'] = [('id', '=', object_ids)]
-                field[field_name]['selection'] = self.pool[active_model].name_get(
-                    cr, SUPERUSER_ID, object_ids, context=context)
-                field[field_name]['required'] = True
+                field = self.fields_get([field_name, 'info'])
+                field_data = field[field_name]
+                field_data.update(
+                    domain=[('id', '=', object_ids)],
+                    selection=self.env[active_model].sudo().name_get(),
+                    required=True
+                )
                 res['fields'].update(field)
         return res
 
-    def fields_get(self, cr, user, fields_list=None, context=None,
-                   write_access=True, attributes=None):
-        res = super(object_merger, self).fields_get(
-            cr, user, allfields=fields_list, context=context,
-            write_access=write_access, attributes=attributes)
+    if MAJOR_ODOO_VERSION < 10:
+        @api.model
+        def fields_get(self, fields_list=None, write_access=True, attributes=None):
+            res = super(object_merger, self).fields_get(
+                allfields=fields_list,
+                write_access=write_access,
+                attributes=attributes
+            )
+            if fields_list and 'info' in fields_list:
+                active_model = self._context.get('active_model')
+                fvg = lambda view: self.env[active_model].fields_view_get(
+                    view_type=view
+                )
+                res.update(info=dict(
+                    type='many2many',
+                    relation=active_model,
+                    views={k: fvg(k) for k in ['tree', 'form']}
+                ))
+            return res
+    else:
+        @api.model
+        def fields_get(self, fields_list=None, attributes=None):
+            res = super(object_merger, self).fields_get(
+                allfields=fields_list,
+                attributes=attributes
+            )
+            if fields_list and 'info' in fields_list:
+                active_model = self._context.get('active_model')
+                fvg = lambda view: self.env[active_model].fields_view_get(
+                    view_type=view
+                )
+                res.update(info=dict(
+                    type='many2many',
+                    relation=active_model,
+                    views={k: fvg(k) for k in ['tree', 'form']}
+                ))
+            return res
+
+    @api.model
+    def default_get(self, fields_list):
+        res = super(object_merger, self).default_get(fields_list)
         if fields_list and 'info' in fields_list:
-            active_model = context.get('active_model')
-            fvg = lambda view: self.pool[active_model].fields_view_get(
-                cr, user, view_type=view, context=context)
-            res.update(info=dict(
-                type='many2many',
-                relation=active_model,
-                views={k: fvg(k) for k in ['tree', 'form']}
-            ))
+            res.update(info=self._context.get('active_ids', False))
         return res
 
-    def default_get(self, cr, uid, fields_list, context=None):
-        res = super(object_merger, self).default_get(cr, uid, fields_list,
-                                                     context=context)
-        if fields_list and 'info' in fields_list:
-            res.update(info=context.get('active_ids', False))
-        return res
-
-    def _browse_active_model(self, cr, active_model):
-        model_obj = self.pool['ir.model']
-        model = model_obj.browse(
-            cr,
-            SUPERUSER_ID,
-            model_obj.search(cr, SUPERUSER_ID, [('model', '=', active_model)])
-        )
-        return model and model[0] or False
-
-    def _check_quantity(self, cr, uid, ids, active_model, context=None):
-        '''Check for groups_id of uid and if it are not merger manager check
-        limit quantity of objects to merge.
+    def _check_quantity(self, active_model):
+        '''Check for groups_id of uid and if it are not merger manager check limit
+        quantity of objects to merge.
 
         '''
-        if len(ids) < 2:
-            raise osv.except_osv(
+        if len(self._context.get('active_ids', [])) < 2:
+            raise UserError(
                 _('Information!'),
                 _('At less two items are necessary for merge.')
             )
-        model = self._browse_active_model(cr, active_model)
-        if model and 0 < model.merge_limit < len(ids):
-            raise osv.except_osv(_('Warning!'),
-                                 _('You can`t merge so much objects '
-                                   'at one time.'))
+        model = IrModel.sudo().search([('model', '=', active_model)], limit=1)
+        if model and 0 < model.merge_limit < len(self._context.get('active_ids', [])):
+            raise UserError(_('Warning!'),
+                            _('You can`t merge so much objects at one time.'))
         return True
 
-    def action_merge(self, cr, uid, ids, context=None):
-        """
-        Merges two or more objects
-        @param self: The object pointer
-        @param cr: the current row, from the database cursor,
-        @param uid: the current user’s ID for security checks,
-        @param ids: List of Lead to Opportunity IDs
-        @param context: A standard dictionary for contextual values
-
-        @return : {}
-        """
-        if context is None:
-            context = {}
-        active_model = context.get('active_model')
+    @api.requires_singleton
+    def action_merge(self):
+        active_model = self._context.get('active_model')
         if not active_model:
-            raise orm.except_orm(_('Configuration Error!'),
-                                 _('The is no active model defined!'))
-        src_ids = context.get('active_ids', [])
-        field_to_read = context.get('field_to_read')
-        field_list = field_to_read and [field_to_read] or []
-        object = self.read(cr, uid, ids[0], field_list, context=context)
-        if object and field_list and object[field_to_read]:
-            dst_id = object[field_to_read][0]
-        else:
-            raise orm.except_orm(_('Configuration Error!'),
-                                 _('Please select one value to keep'))
-        model = self.pool.get(active_model)
-        src_names = model.name_get(cr, uid, src_ids, context=context)
-
-        ir_model = self.pool['ir.model'].browse(
-            cr, uid, context=context).search([('model', '=', active_model)])
-        src_ids.remove(dst_id)
-        ir_model.merge(dst_id, src_ids)
-        # cr.commit()  # Why do we need to commit at this point?
-        self._merge(cr, active_model, dst_id, src_ids, context=context)
-        # cr.commit()  # and at this point also?
-        self._check_on_alias_defaults(cr, dst_id, src_ids,
-                                      active_model, context=context)
-        thread = self.pool.get('mail.thread')
-        if thread and active_model in thread.message_capable_models(
-                cr, SUPERUSER_ID, context=context):
-            self._notify_merge(cr, uid, active_model, dst_id, src_names,
-                               context=context)
+            raise UserError(_('Configuration Error!'),
+                            _('The is no active model defined!'))
+        Model = self.env[active_model]
+        sources = Model.browse(self._context.get('active_ids', []))
+        attr = self._context.get('field_to_read')
+        val = getattr(self, attr, None) if attr else None
+        if not val:
+            raise UserError(_('Configuration Error!'),
+                            _('Please select one value to keep'))
+        target = val[0]
+        self.merge(sources, target)
         try:
-            model.read(cr, uid, dst_id, [], context=context)
-            return model.get_formview_action(cr, uid, dst_id, context=context)
+            Model.read([])
+            return target.get_formview_action()
         except AccessError:
             return CLOSE_WINDOW
 
-    def _notify_merge(self, cr, uid, active_model, dst_id, src_names,
-                      context=None):
-        context['thread_model'] = active_model
-        model = self.pool[active_model]
-        subject = _('%s(s) Merged') % model._description or active_model
+    @api.model
+    def merge(self, sources, target=None, deactivate=True):
+        '''Merge all recordsets from `source` into `target`.
 
-        body = '<br/>'.join([_('<b>ID:</b> %s; <b>Name:</b> %s') % id_name
-                             for id_name in src_names])
-        return model.message_post(
-            cr, uid, dst_id, body=body, subject=subject, context=context)
+        If `target` is None, it defaults to the last-created record from
+        `source`.
 
-    def _merge(self, cr, active_model, dst_id, src_ids, context=None):
-        '''Do merge src_ids: first verify if at less 2 src_ids exist
-        and one of they are dst_id, then update all references of any
-        src_ids to dst_id and at the end deactivate or delete
-        src_ids.
+        If `deactivate` is True (the default), and the `sources` have an
+        'active' field, we deactivate the sources instead of deleting them.
+
+        Return False if no merge happened.  Otherwise, return True.
+
+        .. rubric:: Merging trees.
+
+        .. rubric:: Merging arbitrary graphs.
 
         '''
-        model_pool = self.pool.get(active_model)
-        src_ids = model_pool.exists(cr, SUPERUSER_ID, src_ids,
-                                    context=context)
-        if src_ids and len(src_ids) >= 1:
-            self._check_fks(cr, active_model, dst_id, src_ids)
-            self._check_references(cr, active_model, dst_id, src_ids)
-            active_col = (model_pool._columns.get('active')
-                          if hasattr(model_pool, '_columns') else False)
-            if active_col and not isinstance(active_col, fields.function):
-                return model_pool.write(cr, SUPERUSER_ID, src_ids,
-                                        {'active': False}, context=context)
-            return model_pool.unlink(cr, SUPERUSER_ID, src_ids,
-                                     context=context)
+        sources = sources.sudo().exists()
+        active_model = sources._name
+        merge_way = IrModel.search([('model', '=', active_model)])
+        if not target:
+            target = sources.sorted(key=lambda date: date.create_date)[-1]
+        sources -= target
+        if sources:
+            merge_way._merge(sources, target)
+            self._check_fks(sources, target)
+            self._check_references(sources, target)
+            has_active = sources._fields.get('active', False)
+            if has_active and deactivate:
+                sources.write({'active': False})
+            else:
+                sources.unlink()
+            return True
+        else:
+            return False
 
-    def _get_contraints(self, cr, table, field):
+    def _get_contraints(self, table, field):
+        '''Get unique constraints that involve `column` in `table`.
+
+        :return: list of list of columns per constraint where `field` is
+                 involved.
+
         '''
-        Get a list of unique constraints that involve column to update
-        (foreign key from merging model)
-        :param cr:
-        :param table: db table to update
-        :param field: column to update
-        :return: list of (list of fields involve on each constraint) or
-        empty list if not unique constraint involve column tu update
-        '''
-        cr.execute("""
+        self._cr.execute(
+            """
             SELECT
               kcu.column_name,
               tc.constraint_name
@@ -243,191 +222,175 @@ class object_merger(orm.TransientModel):
               tc.constraint_type = 'UNIQUE' AND
               tc.table_name = %s AND
               kcuw.column_name = %s
-              """, (table, field))
+              """,
+            (table, field)
+        )
         constraints = {}
-        for column_name, constraint_name in cr.fetchall():
-            if constraint_name not in constraints:
-                constraints[constraint_name] = []
-            constraints[constraint_name].append(column_name)
+        for column_name, constraint_name in self._cr.fetchall():
+            data = constraints.setdefault(constraint_name, [])
+            data.append(column_name)
         return constraints.values()
 
-    def _check_constraints(self, cr, table, field, dst_id, filters,
-                           constraints, model='', subquery='{field} = {id}'):
-        '''
-        Revisar si hay alguna fila que contenga los mismos valores que
-        la que se está intentando actualizar de forma que se viole
-        alguna restricción de tipo unique.
+    def _check_constraints(self, table, field, target, filters,
+                           model='', subquery='{field} = {id}'):
+        '''Check unique constraints.
 
         :return: False if any violation detected else True
 
         '''
+        constraints = self._get_contraints(table, field)
         for columns in constraints:
-            query_filters = ' AND '.join(
-                ['%s %s %s' % f for f in filters if f[0] in columns] +
-                [subquery.format(field=field, model=model, id=str(dst_id))])
-            cr.execute("SELECT {field} FROM {table} WHERE {filters}".format(
+            if columns:
+                query_filters = ' AND '.join(
+                    ['%s %s %s' % f for f in filters] +
+                    [subquery.format(field=field, model=model, id=target.id)])
+            self._cr.execute("SELECT {field} FROM {table} WHERE {filters}".format(
                 field=field, table=table, filters=query_filters))
-            if cr.rowcount:
+            if self._cr.rowcount:
                 return False
         return True
 
-    def _upd_del(self, action_update, cr, table, field, dst_id, filters,
-                 src_id, model='', subquery='{field}={id}'):
+    def _upd_del(self, table, field, target, filters,
+                 sources, model=None, subquery='{field}={id}'):
         '''
         Update or Delete rows matching with filters passed.
         :param action_update: if True Update query are executed else
         Delete query are executed
         :return:
         '''
+        ok = self._check_constraints(table, field, target, filters,
+                                     model=model, subquery=subquery)
         query_filters = ' AND '.join(
             ['%s %s %s' % f for f in filters] +
-            [subquery.format(field=field, model=model, id=str(src_id))])
-        if action_update:
+            [subquery.format(field=field, id=sources)])
+        if ok:
             query = "UPDATE {table} SET " + subquery + " WHERE {filters};"
-            cr.execute(query.format(table=table, field=field, model=model,
-                                    id=str(dst_id), filters=query_filters))
+            self._cr.execute(query.format(table=table, field=field, model=model,
+                             id=str(target.id), filters=query_filters))
         else:
             query = """DELETE FROM {table} WHERE {filters};"""
-            cr.execute(query.format(table=table, filters=query_filters))
+            self._cr.execute(query.format(table=table, filters=query_filters))
 
-    def _check_fks(self, cr, active_model, dst_id, src_ids):
+    @api.model
+    def _check_fks(self, sources, target):
         '''Get all relational field with active_model and send to update it.
-        :param cr:
-        :param active_model:
-        :param dst_id:
-        :param src_ids:
-        :return:
         '''
         query = """
           SELECT name, model, ttype
           FROM ir_model_fields
-          WHERE relation=%s AND ttype != 'one2many'"""
-        query_args = [active_model]
-        model = self._browse_active_model(cr, active_model)
-        if model and not model.merge_cyclic:
-            query += " AND model!=%s"
-            query_args.append(active_model)
-        cr.execute(query, tuple(query_args))
-        fks = cr.fetchall()
+          WHERE relation=%(model)s AND ttype != 'one2many'"""
+        args = dict(model=sources._name)
+        model = IrModel.search([('model', '=', sources._name)])
+        record = sources + target
+        if model:
+            self._cr.execute(query, args)
+            fks = self._cr.fetchall()
+        else:
+            fks = []
         for field_name, model_name, ttype in fks:
-            pool = self.pool.get(model_name)
-            if not pool:
+            model_registry = self.env.registry.get(model_name)
+            if not model_registry:
+                # The model is not the registry
+                raise UserError(_('Information!'),
+                                _('The model is not the registry.'))
+            if not getattr(model_registry, '_auto', False):
+                # The model is not created by the ORM
                 continue
-            if ((not pool) or (hasattr(pool, '_auto') and not pool._auto) or
-                    hasattr(pool, '_check_time')):
+            field = model_registry._fields.get(field_name, False)
+            assert not field or field.relational
+            if not field or not field.store:
+                # Fields which are not in the
                 continue
-            if hasattr(pool, '_columns'):
-                column = pool._columns.get(field_name, False)
-                if (not column) or (isinstance(column, fields.function) and
-                                    not column.store):
-                    continue
-                if ttype == 'many2one':
-                    if hasattr(pool, '_table'):
-                        model = pool._table
-                    else:
-                        model = model_name.replace('.', '_')
-                elif ttype == 'many2many':
-                    model, _, field_name = column._sql_names(pool)
+            if ttype == 'many2one':
+                if hasattr(model_registry, '_table'):
+                    table = model_registry._table
                 else:
-                    continue
-                self._upd_fk(cr, table=model, field=field_name,
-                             dst_id=dst_id, src_ids=src_ids)
+                    table = model_name.replace('.', '_')
+            elif ttype == 'many2many':
+                if MAJOR_ODOO_VERSION < 10:
+                    modelname = self.env[model_name]
+                    table, _x, field_name = field.column._sql_names(modelname)
+                else:
+                    table, field_name = field.relation, field.column2
+            else:
+                assert False
+            self._upd_fk(
+                table=table,
+                field=field_name,
+                sources=sources,
+                target=target
+            )
+            field_names = []
+            field_names.append(str(field_name))
+            record._validate_fields(field_names)
 
-    def _upd_fk(self, cr, table, field, dst_id, src_ids):
-        '''Update foreign key (field) to destination value (dst_id) where
-        actual field value are in merging object ids (src_ids).
+    def _upd_fk(self, table, field, sources, target):
+        '''Update foreign key (field) to destination value `target` where
+        actual field value are in merging object `sources`.
         if not constraint involve the field to update.
             Update all matching rows
         else
             check one by one if can update and update it or delete.
 
         '''
-        constraints = self._get_contraints(cr, table, field)
+        constraints = self._get_contraints(table, field)
         if not constraints:
-            query = """UPDATE {model} SET {field}={dst_id}
-                           WHERE {field} IN ({filter});"""
-            cr.execute(query.format(
+            query = 'UPDATE {table} SET {field}={target} WHERE {field} IN ({filter});'
+            self._cr.execute(query.format(
+                table=table,
+                field=field,
+                target=target.id,
+                filter=','.join(str(i) for i in sources.ids)
+            ))
+        else:
+            query = 'SELECT {fields} FROM {model} WHERE {field} IN ({filter})'
+            self._cr.execute(query.format(
+                fields=', '.join(str(i) for i in constraints[0]),
                 model=table,
                 field=field,
-                dst_id=str(dst_id),
-                filter=','.join([str(i) for i in src_ids])
+                filter=','.join(str(i) for i in sources.ids)
             ))
-            return
-        all_columns = []
-        for columns in constraints:
-            all_columns.extend(columns)
-        all_columns = set(all_columns)
-        query = '''SELECT {fields} FROM {model}
-                   WHERE {field} IN ({filter})'''
-        cr.execute(query.format(
-            fields=', '.join(all_columns),
-            model=table,
-            field=field,
-            filter=','.join([str(i) for i in src_ids])
-        ))
-        ck_ctr = lambda f: self._check_constraints(cr, table, field,
-                                                   dst_id, f, constraints)
-        upd_del = lambda a, f, src_id: self._upd_del(a, cr, table, field,
-                                                     dst_id, f, src_id)
-        for row in cr.dictfetchall():
-            filters = get_filters(row, field)
-            upd_del(ck_ctr(filters), filters, row.get(field))
+            for row in self._cr.dictfetchall():
+                filters = get_filters(row, field)
+                self._upd_del(table, field, target, filters, row.get(field))
 
-    def _check_references(self, cr, active_model, dst_id, src_ids):
+    def _check_references(self, sources, target):
         '''Get all reference field and send to update it.
         '''
-        cr.execute(
-            "SELECT name, model "
-            "FROM ir_model_fields "
-            "WHERE ttype = 'reference' AND model!=%s;", (active_model,))
-        _update = lambda t, f, mf=False, m=active_model: (
-            self._upd_reference(cr, table=t, model=m,
-                                field=f, dst_id=dst_id,
-                                src_ids=src_ids, model_field=mf))
-        for field_name, model_name in cr.fetchall():
-            pool = self.pool.get(model_name)
-            if not pool:
+        query = """
+          SELECT name, model
+          FROM ir_model_fields
+          WHERE ttype = 'reference' AND model!=%(model)s;"""
+        query_args = dict(model=sources._name)
+        self._cr.execute(query, query_args)
+        refks = self._cr.fetchall()
+        for field_name, model_name in refks:
+            model = self.env.registry(model_name)
+            if not model:
+                # The model is not the registry
+                raise UserError(_('Information!'),
+                                _('The model is not the registry.'))
                 continue
-            if (not pool or (hasattr(pool, '_auto') and not pool._auto) or hasattr(pool, '_check_time')):
+            if not getattr(model, '_auto', False):
                 continue
-            if hasattr(pool, '_columns'):
-                column = pool._columns.get(field_name, False)
-                if not column or (isinstance(column, fields.function) and not column.store):
+            if hasattr(model, '_fields'):
+                field = model._fields.get(field_name, False)
+                if not field or not field.store:
                     continue
-            if hasattr(pool, '_table'):
-                table = pool._table
+            if hasattr(model, '_table'):
+                table = model._table
             else:
                 table = model_name.replace('.', '_')
-            _update(table, field_name)
+            self._upd_reference(
+                table=table,
+                field=field_name,
+                sources=sources,
+                target=target,
+                model=model_name
+            )
+        self._check_informal_reference(sources, target)
 
-        def _check_field_exist(table_name, column_names):
-            query = """
-              SELECT column_name
-              FROM information_schema.columns
-              WHERE table_schema='public' AND table_name=%s AND column_name=%s
-            """
-            for column_name in column_names:
-                cr.execute(query, (table_name, column_name))
-                if not cr.rowcount:
-                    return False
-            return True
-        for ref in self.pool['informal.reference'].get_all(cr, SUPERUSER_ID):
-            if _check_field_exist(ref.table_name, (ref.id_field_name,
-                                                   ref.model_field_name)):
-                if ref.model_field_value == IS_MODEL_ID:
-                    args = [('model', '=', active_model)]
-                    model_id = self.pool['ir.model'].search(cr,
-                                                            SUPERUSER_ID,
-                                                            args)
-                    if model_id and model_id[0]:
-                        _update(ref.table_name, ref.id_field_name,
-                                ref.model_field_name, str(model_id[0]))
-                else:
-                    _update(ref.table_name, ref.id_field_name,
-                            ref.model_field_name)
-
-    def _upd_reference(self, cr, table, model, field, dst_id, src_ids,
-                       model_field=False):
+    def _upd_reference(self, table, field, sources, target, model_field=None, model=None):
         '''Update reference (field) to destination value (dst_id) where
         actual field value are in merging object ids (src_ids).
         if not constraint involve the field to update.
@@ -436,91 +399,97 @@ class object_merger(orm.TransientModel):
             check one by one if can update and update it or delete.
 
         '''
-        constraints = self._get_contraints(cr, table, field)
-        SUBQUERY = (["{field} = {id}", "{model_field}='{model}'"]
-                    if model_field else ["{field} = '{model},{id}'"])
+        constraints = self._get_contraints(table, field)
+        if model_field:
+            SUBQUERY = ["{field} = {id}", "{model_field}='{model}'"]
+        else:
+            SUBQUERY = ["{field} = '{model},{id}'"]
         if not constraints:
             if model_field:
-                query = """UPDATE {table} SET {field}={dst_id}
+                query = """UPDATE {table} SET {field}={target}
                                WHERE {field} IN ({filter})
                                   AND {model_field}='{model}';"""
-                cr.execute(query.format(table=table, field=field,
-                                        dst_id=str(dst_id),
-                                        filter=','.join([str(i) for i in src_ids]),
-                                        model_field=model_field,
-                                        model=model))
+                self._cr.execute(query.format(
+                    table=table,
+                    field=field,
+                    target=target.id,
+                    filter=','.join(str(i) for i in sources.ids),
+                    model_field=model_field,
+                    model=model
+                ))
                 return
-            for _id in src_ids:
+            for record in sources:
                 query = ("UPDATE {table} "
-                         "SET {field}='{model},{dst_id}' " +
+                         "SET {field}='{model},{target}' " +
                          "WHERE " + SUBQUERY[0])
-                cr.execute(query.format(table=table, field=field, model=model,
-                                        dst_id=str(dst_id), id=str(_id)))
+                self._cr.execute(query.format(
+                    table=table,
+                    field=field,
+                    model=model,
+                    target=target.id,
+                    id=record.id
+                ))
             return
-        all_columns = []
-        for columns in constraints:
-            all_columns.extend(columns)
-        all_columns = set(all_columns)
-        query = ("SELECT {fields} FROM {table} WHERE " + ' AND '.join(SUBQUERY))
-        ck_ctr = lambda f: self._check_constraints(
-            cr, table, field, dst_id, f, constraints, model, SUBQUERY[0])
-        upd_del = lambda a, f, src_id: self._upd_del(a, cr, table, field,
-                                                     dst_id, f, src_id,
-                                                     model, SUBQUERY[0])
-        for src_id in src_ids:
-            cr.execute(
-                query.format(fields=', '.join(all_columns), table=table,
-                             field=field, model=model, id=src_id,
-                             model_field=model_field))
-            for row in cr.dictfetchall():
-                filters = get_filters(row, field)
-                upd_del(ck_ctr(filters), filters, src_id)
+        else:
+            query = ("SELECT {fields} FROM {table} WHERE " + ' AND '.join(SUBQUERY))
+            for sources in sources:
+                _query = (query.format(
+                    fields=', '.join(str(i) for i in constraints[0]),
+                    table=table,
+                    field=field,
+                    model=model,
+                    id=sources.id,
+                    model_field=model_field
+                ))
+                self._cr.execute(_query)
+                for row in self._cr.dictfetchall():
+                    filters = get_filters(row, field)
+                    self._upd_del(
+                        table,
+                        field,
+                        target,
+                        filters,
+                        sources.id,
+                        model_field
+                    )
 
-    def _check_on_alias_defaults(self, cr, dst_id,
-                                 src_ids, model, context=None):
-        """Check if any of merged partner_ids are referenced on any mail.alias
-        and on this case update the references to the dst_partner_id.
-        """
-        alias_upd = self.pool['mail.alias'].write
-        _update_alias = lambda _id, alias_defaults: alias_upd(
-            cr,
-            SUPERUSER_ID,
-            _id,
-            {'alias_defaults': str(alias_defaults)},
-            context=context
-        )
-        query = """SELECT id, alias_defaults FROM mail_alias
-                         WHERE alias_model_id = {model}
-                         AND (alias_defaults LIKE '%''{field}''%')"""
-        cr.execute("SELECT name, model_id, ttype FROM ir_model_fields "
-                   "WHERE relation='%s';" % model)
-        read = cr.fetchall()
-        for field, model_id, ttype in read:
-            cr.execute(query.format(model=model_id, field=field))
-            for alias_id, defaults in cr.fetchall():
-                try:
-                    defaults_dict = dict(eval(defaults))
-                except Exception:
-                    defaults_dict = {}
-                val = defaults_dict.get(field, False)
-                if not val:
-                    continue
-                if ttype == 'many2one':
-                    if val in src_ids and val != dst_id:
-                        defaults_dict[field] = dst_id
-                        _update_alias(alias_id, defaults_dict)
+    def _check_informal_reference(self, sources, target):
+        for ref in self.env['informal.reference'].sudo().search([]):
+            if self._check_field_exist(
+                ref.table_name,
+                (ref.id_field_name,
+                 ref.model_field_name)):
+                model = sources._name
+                if ref.model_field_value == IS_MODEL_ID:
+                    args = [('model', '=', model)]
+                    model_id = IrModel.sudo().search(args)
+                    if model_id:
+                        self._upd_reference(
+                            table=ref.table_name,
+                            field=ref.id_field_name,
+                            sources=sources,
+                            target=target,
+                            model_field=ref.model_field_name,
+                            model=str(model_id.id)
+                        )
                 else:
-                    res_val = []
-                    for rel_item in val:
-                        rel_ids = rel_item[-1]
-                        if isinstance(rel_ids, (tuple, list)):
-                            wo_partner_ids = [i for i in rel_ids if i not in src_ids]
-                            if wo_partner_ids != rel_ids:
-                                rel_ids = set(wo_partner_ids + [dst_id])
-                        elif rel_ids in src_ids and val != dst_id:
-                            rel_ids = dst_id
-                        res_val.append(tuple(rel_item[:-1]) + (rel_ids,))
-                    if val != res_val:
-                        defaults_dict[field] = res_val
-                        _update_alias(alias_id, defaults_dict)
-        return True
+                    self._upd_reference(
+                        table=ref.table_name,
+                        field=ref.id_field_name,
+                        sources=sources,
+                        target=target,
+                        model_field=ref.model_field_name,
+                        model=model
+                    )
+
+    def _check_field_exist(self, table_name, column_names):
+        query = """
+        SELECT column_name
+        FROM information_schema.columns
+        WHERE table_schema='public' AND table_name=%s AND column_name=%s
+        """
+        for column_name in column_names:
+            self._cr.execute(query, (table_name, column_name))
+            if not self._cr.rowcount:
+                return False
+            return True

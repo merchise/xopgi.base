@@ -7,16 +7,16 @@
 # This is free software; you can do what the LICENCE file allows you to.
 #
 
-from __future__ import (division as _py3_division,
-                        print_function as _py3_print,
-                        absolute_import as _py3_abs_import)
+dict(
+    name='Mail integration merger',
+    version='1.0',
+    category='Hidden',
+    author="Merchise Autrement",
+    depends=['xopgi_object_merger', 'mail'],
 
-from xoeuf import MAJOR_ODOO_VERSION
-
-
-if MAJOR_ODOO_VERSION in (8, 9, 10):
     # MIGRATION POLICY: All addons are not included until someone work on them
     # and upgrade them.
+    installable= 8 <= MAJOR_ODOO_VERSION < 11,   # noqa
 
-    from . import object_merger  # noqa
-    from . import res_config  # noqa
+    auto_install=True,
+)
