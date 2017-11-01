@@ -87,16 +87,33 @@ class ir_model(models.Model):
 class InformalReference(models.Model):
     _name = 'informal.reference'
 
-    table_name = fields.Char('Table Name', size=128, required=True,
-                             help='Name of DB table where informal reference are.')
-    id_field_name = fields.Char('Id Field Name', size=128, required=True, default='res_id',
-                                help='Name of field where destination id are saved.')
-    model_field_name = fields.Char('Model Field Name', size=128,
-                                   required=True, default='res_model',
-                                   help='Name of field where destination model are saved.')
-    model_field_value = fields.Selection(MODEL_FIELD_VALUE_SELECTION, 'Model Field Value',
-                                         required=True, default='0', help='How save destination '
-                                         'model reference.')
+    table_name = fields.Char(
+        'Table Name',
+        size=128,
+        required=True,
+        help='Name of DB table where informal reference are.'
+    )
+    id_field_name = fields.Char(
+        'Id Field Name',
+        size=128,
+        required=True,
+        default='res_id',
+        help='Name of field where destination id are saved.'
+    )
+    model_field_name = fields.Char(
+        'Model Field Name',
+        size=128,
+        required=True,
+        default='res_model',
+        help='Name of field where destination model are saved.'
+    )
+    model_field_value = fields.Selection(
+        MODEL_FIELD_VALUE_SELECTION,
+        'Model Field Value',
+        required=True,
+        default='0',
+        help='How save destination model reference.'
+    )
 
 
 class object_merger_settings(models.Model):
