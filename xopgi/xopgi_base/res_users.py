@@ -42,10 +42,7 @@ class User(Model):
         '''Deactivate users and all related partners.
 
         '''
-        # TODO: [med] This method is only used in migration tools, maybe its
-        # functionality must be moved outside add-ons code.  Programmed by
-        # ~Yurdik.
         vals = {'active': False}
-        res = self.write(vals)
+        self.write(vals)
         partners = self.mapped('partner_id').exists()
         partners.write(vals)
