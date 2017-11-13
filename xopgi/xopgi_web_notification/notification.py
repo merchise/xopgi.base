@@ -20,7 +20,7 @@ from xoeuf.odoo.http import request
 
 try:
     from xoeuf.odoo.addons.bus.bus import Controller
-except:
+except ImportError:
     from xoeuf.odoo.addons.bus.controllers.main import BusController as Controller
 
 CHANNELS = {'notify': 'res_user_notify', 'warn': 'res_user_warn'}

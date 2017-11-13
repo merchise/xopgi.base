@@ -238,7 +238,7 @@ class BasicEvent(models.Model):
         '''
         try:
             value = self.event_id._evaluate()
-        except:
+        except Exception:
             logger.exception(
                 'Error evaluating event %s defined as: ',
                 self.name, self.definition
@@ -285,7 +285,7 @@ class RecurrentEvent(models.Model):
         '''
         try:
             value = self.event_id._evaluate()
-        except:
+        except Exception:
             logger.exception(
                 'Error evaluating event %s defined as: ',
                 self.name, self.definition

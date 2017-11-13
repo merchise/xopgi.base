@@ -39,7 +39,9 @@ def lineal_color_scaling(value,  # 0-1 float
     def transition(value, start_point, end_point):
         return start_point + (end_point - start_point) * value
 
-    def transition3(value, (s1, s2, s3), (e1, e2, e3)):
+    def transition3(value, s, e):
+        s1, s2, s3 = s
+        e1, e2, e3 = e
         r1 = transition(value, s1, e1)
         r2 = transition(value, s2, e2)
         r3 = transition(value, s3, e3)
