@@ -23,7 +23,7 @@
     'depends': ['base', 'web'],
     'data': [
         "security/security.xml",
-        "view/%d/res_config_view.xml" % ODOO_VERSION_INFO[0],
+        "view/%d/res_config_view.xml" % ODOO_VERSION_INFO[0],  # noqa
         "view/work_distributor_view.xml",
         "data/work_distribution_strategies.xml",
     ],

@@ -21,8 +21,7 @@ from .board_widget import WIDGET_REL_MODEL_NAME
 
 try:
     from xoeuf.odoo.addons.base.res.res_users import Groups as res_groups
-except:
-    # odoo 8
+except ImportError:
     from xoeuf.odoo.addons.base.res.res_users import res_groups
 
 

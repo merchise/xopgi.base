@@ -18,7 +18,7 @@
     'version': '1.0',
     'depends': ['web'],
     'data': [
-        'views/%d/many2one_default_choices.xml' % MAJOR_ODOO_VERSION,
+        'views/%d/many2one_default_choices.xml' % MAJOR_ODOO_VERSION,  # noqa
     ],
     'auto_install': False,
 

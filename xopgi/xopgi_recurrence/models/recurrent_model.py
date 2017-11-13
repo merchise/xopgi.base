@@ -30,6 +30,12 @@ from xoeuf.tools import normalize_date
 from xoeuf.tools import normalize_datetimestr as normalize_dt_str
 from xoeuf.tools import normalize_datestr as normalize_d_str
 
+
+def _SEARCH_DOWNGRADE(self, value, args, offset=0, limit=None, order=None,
+                      count=False):
+    return list(value.ids) if not count else value
+
+
 OPERATORS = {
     '<': operator.lt,
     '<=': operator.le,
@@ -726,10 +732,7 @@ class RecurrentModel(models.Model):
         return False
 
     @api.model
-    @api.returns(
-        'self',
-        downgrade=lambda self, value, args, offset=0, limit=None, order=None, count=False: list(value.ids) if not count else value
-    )
+    @api.returns('self', downgrade=_SEARCH_DOWNGRADE)
     def search(self, args, offset=0, limit=None, order=None, count=False):
         """If 'virtual_id' not in context or are False then normally
         search, else search virtual occurrences and return then.

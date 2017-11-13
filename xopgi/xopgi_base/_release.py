@@ -26,5 +26,6 @@ def read_terpfile():
         fake = {'ODOO_VERSION_INFO': (7, 0), 'MAJOR_ODOO_VERSION': 7}
         return eval(content, fake, {})
 
+
 _TERP = read_terpfile()
 VERSION = _TERP['version']

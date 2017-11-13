@@ -21,7 +21,7 @@ from .board_widget import WIDGET_REL_MODEL_NAME
 
 try:
     from xoeuf.odoo.addons.base.ir.ir_ui_menu import ir_ui_menu
-except:
+except ImportError:
     from xoeuf.odoo.addons.base.ir.ir_ui_menu import IrUiMenu as ir_ui_menu
 
 

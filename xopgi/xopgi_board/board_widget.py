@@ -76,7 +76,7 @@ class XopgiBoardWidget(models.Model):
             safe_eval(python_code, local_dict, mode='exec', nocopy=True)
             logger.debug('Python code for widget %s evaluated sussefully.' %
                          name)
-        except:
+        except ValueError:
             logger.exception('An error happen trying to execute the Python '
                              'code for \'%s\' board widget, python code: %s',
                              name, python_code)
