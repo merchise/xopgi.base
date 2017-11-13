@@ -493,15 +493,7 @@ class WorkDistributionStrategy(models.Model):
                   if self.predefine else self.custom)
         candidates = _evaluate_domain(dist_model, values)
         if method and candidates:
-            try:
-                return method(dist_model, candidates, values, **kwargs)
-            except:
-                logger.exception(
-                    'An error happen trying to execute work distribution for '
-                    'Model: %s, Field: %s,' %
-                    (dist_model.destination_field.model,
-                     dist_model.destination_field.name))
-        return None
+            return method(dist_model, candidates, values, **kwargs)
 
     def uniform(self, dist_model, candidates, values, **kwargs):
         """Detect the next corresponding domain id and update values with it.

@@ -61,35 +61,29 @@ def post_fields_view_get(self, **kwargs):
         [('group_field.relation', '=', self._name)])
     if not distribution_models:
         return result
-    try:
-        temp = dict(result)
-        fields_to_add = {}
-        for dist_model in distribution_models:
-            fields_to_add.update({
-                dist_model.strategy_field.name:
-                    "<field name='{field_name}' "
-                    "domain=\"[('id', 'in', {strategy_ids})]\"/>".format(
-                        field_name=dist_model.strategy_field.name,
-                        strategy_ids=dist_model.strategy_ids.ids)})
-        view_part = "<group>%s</group>"
-        arch = temp['arch'].decode('utf8')
-        xpath = '</sheet>'
-        if arch.find(xpath):
-            view_part += xpath
-        elif arch.find('<footer'):
-            xpath = '<footer'
-            view_part = xpath + view_part
-        else:
-            xpath = '</form>'
-            view_part += xpath
+    temp = dict(result)
+    fields_to_add = {}
+    for dist_model in distribution_models:
+        fields_to_add.update({
+            dist_model.strategy_field.name:
+                "<field name='{field_name}' "
+                "domain=\"[('id', 'in', {strategy_ids})]\"/>".format(
+                    field_name=dist_model.strategy_field.name,
+                    strategy_ids=dist_model.strategy_ids.ids)})
+    view_part = "<group>%s</group>"
+    arch = temp['arch'].decode('utf8')
+    xpath = '</sheet>'
+    if arch.find(xpath):
+        view_part += xpath
+    elif arch.find('<footer'):
+        xpath = '<footer'
+        view_part = xpath + view_part
+    else:
+        xpath = '</form>'
+        view_part += xpath
 
-        temp['arch'] = arch.replace(
-            xpath, view_part % '\t'.join(fields_to_add.values()))
-        temp['fields'].update(self.fields_get(fields_to_add.keys()))
-        result.update(temp)
-    except:
-        logger.exception(
-            'An error happen trying to add work distribution strategy '
-            'fields on form view for '
-            'Model: %s.' % (self._name))
+    temp['arch'] = arch.replace(
+        xpath, view_part % '\t'.join(fields_to_add.values()))
+    temp['fields'].update(self.fields_get(fields_to_add.keys()))
+    result.update(temp)
     return result
