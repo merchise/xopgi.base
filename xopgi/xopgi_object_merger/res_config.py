@@ -231,19 +231,10 @@ class FieldMergeWay(models.Model):
 
     def apply(self, sources, target, field):
         method = getattr(self, 'apply_' + self.code, None)
-        try:
-            if method:
-                return method(sources, target, field)
-            else:
-                return None
-        except:  # TODO: Which exceptions
-            logger.exception(
-                'An error happened trying to execute the Specific Merge '
-                'Way python code for Model: %s, Field: %s, '
-                'Target id: %s and Sources ids: %s',
-                field.model, field.field_description, target.id,
-                sources.ids
-            )
+        if method:
+            return method(sources, target, field)
+        else:
+            return None
 
     def apply_add(self, sources, target, field):
         result = getattr(target, field.name, None)
