@@ -59,10 +59,10 @@ class TestObjectMerger(TransactionCase):
         field_max_int = self.ir_model_fields.search([('name', '=', 'max_int'),
                                                      ('model', '=', 'model.a')])
 
-        addid = self.env.ref('xopgi_object_merger.add').id
-        sumid = self.env.ref('xopgi_object_merger.sum').id
-        maxid = self.env.ref('xopgi_object_merger.max').id
-        minid = self.env.ref('xopgi_object_merger.min').id
+        addid = self.env.ref('xopgi_object_merger.uniform').id
+        sumid = self.env.ref('xopgi_object_merger.suma').id
+        maxid = self.env.ref('xopgi_object_merger.effort').id
+        minid = self.env.ref('xopgi_object_merger.effort_month').id
 
         self.field.create(dict(name=field_char.id, merge_way=addid, model=self.irmodel.id))
         self.field.create(dict(name=field_text.id, merge_way=addid, model=self.irmodel.id))
