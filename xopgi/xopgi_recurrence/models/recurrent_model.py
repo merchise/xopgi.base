@@ -69,8 +69,8 @@ def _required_field(field='A field'):
     raise exceptions.except_orm(_('Error!'), field + _(' is required.'))
 
 
-class RecurrentModel(models.Model):
-    '''Model for recurrent things (in time).
+class RecurrentModel(models.AbstractModel):
+    '''A mixin for recurrent things (in time).
 
     It's very similar of recurrence in the calendar module, with some
     adjustments.
