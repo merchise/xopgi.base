@@ -22,7 +22,6 @@ from dateutil import rrule
 from datetime import datetime, timedelta
 
 from six import string_types
-from xoutil.future.types import is_collection
 
 from xoeuf.osv import datetime_user_to_server_tz
 from xoeuf.tools import normalize_datetime as normalize_dt
@@ -139,16 +138,18 @@ class RecurrentModel(models.AbstractModel):
     @api.multi
     def _get_date(self):
         '''Get the values for the compute 'date' field of the recurrent object
-        using the user timezone.This is calculated with the field 'date_from'.
+        using the user timezone.  This is calculated with the field 'date_from'.
 
         '''
-
-        _date = lambda date: datetime_user_to_server_tz(
-            self._cr, self._uid, date, self._context.get('tz'))
         for item in self:
             # Plus an hour to avoid the problem with daylight saving time.
             date_from = normalize_dt(item.date_from) + timedelta(hours=1)
-            item.date = normalize_dt_str(_date(date_from))
+            if isinstance(item.id, string_types):
+                start, _ = self._extract_dates(item.id,
+                                               item.calendar_duration or 23)
+                item.date = normalize_dt_str(start)
+            else:
+                item.date = normalize_dt_str(date_from)
 
     def _search_date(self, operator, value):
         """Get the domain to search for 'date'.
@@ -616,6 +617,7 @@ class RecurrentModel(models.AbstractModel):
                                 forceset=True)
         return list(result)
 
+    @api.model
     def real_id2virtual(self, real_id, recurrent_date):
         ''' Convert a real id (type int) into a "virtual id" (type string).
 
@@ -629,7 +631,8 @@ class RecurrentModel(models.AbstractModel):
             return '%d-%s' % (real_id, recurrent_date)
         return real_id
 
-    def _virtual_id2real(self, virtual_id=None, with_date=False):
+    @api.model
+    def _virtual_id2real(self, virtual_id=None):
         ''' Convert a "virtual id" (type string) into a real id (type int).
 
         E.g. virtual/recurring event id is 4-20091201100000, so
@@ -641,18 +644,22 @@ class RecurrentModel(models.AbstractModel):
         @return: real id or real id, date
 
         '''
-        if virtual_id and isinstance(virtual_id, (str, unicode)):
-            res = virtual_id.split('-')
+        from xoutil.eight import string_types
+        if virtual_id and isinstance(virtual_id, string_types):
+            res = virtual_id.split('-', 1)
             if len(res) >= 2:
                 real_id = res[0]
-                if not with_date:
-                    return real_id
-                start = datetime.strptime(res[1], _V_DATE_FORMAT)
-                end = start + timedelta(hours=with_date)
-                start = normalize_dt_str(start)
-                end = normalize_dt_str(end)
-                return int(real_id), start, end
+                return real_id
         return virtual_id
+
+    @api.model
+    def _extract_dates(self, virtual_id, duration):
+        _, res = virtual_id.split('-', 1)
+        start = datetime.strptime(res, _V_DATE_FORMAT)
+        end = start + timedelta(hours=duration)
+        start = normalize_dt_str(start)
+        end = normalize_dt_str(end)
+        return start, end
 
     @api.multi
     def _update_rrule(self):
@@ -738,12 +745,22 @@ class RecurrentModel(models.AbstractModel):
         search, else search virtual occurrences and return then.
 
         """
-        _super = super(RecurrentModel, self).search
-        res = _super(args, offset=offset, limit=limit, order=order, count=False)
+        if self._context.get('virtual_id', True):
+            return self._logical_search(args, offset=offset, limit=limit, order=order, count=False)
+        else:
+            return self._real_search(args, offset=offset, limit=limit, order=order, count=False)
+
+    @api.model
+    def _real_search(self, args, offset=0, limit=None, order=None, count=False):
+        return super(RecurrentModel, self).search(args, offset=offset, limit=limit, order=order, count=False)
+
+    @api.model
+    def _logical_search(self, args, offset=0, limit=None, order=None, count=False):
+        res = self._real_search(args, offset=offset, limit=limit, order=order,
+                                count=False)
         if not res:
             return self.browse()
-        if self._context.get('virtual_id', True):
-            res = self.browse(res._get_virtuals_ids(args, offset, limit))
+        res = self.browse(res._get_virtuals_ids(args, offset, limit))
         if limit:
             res = res[offset:offset + limit]
         if count:
@@ -760,9 +777,6 @@ class RecurrentModel(models.AbstractModel):
         with this fields plus id. If :param calendar_duration: is include in
         fields it will be add to the result else is exclude.
         '''
-        _super = super(RecurrentModel, self).read
-        if not self._context.get('virtual_id', True):
-            return _super(fields, load=load)
         if not fields:
             fields = []
         fields2 = fields[:] if fields else []
@@ -774,42 +788,22 @@ class RecurrentModel(models.AbstractModel):
                      for record in self}
         # If dict:ids_index have as keys virtual_ids:(str,unicode) the
         # id_reals are dict.values() else the id_reals are dict.keys()
-        keys = ids_index.keys()
-        if keys:
-            if isinstance(keys[0], (str, unicode)):
-                real_ids = self.browse(ids_index.values())
-            elif keys and isinstance(keys[0], int):
-                real_ids = self.browse(keys)
-        else:
-            real_ids = self.browse()
-        real_data = super(RecurrentModel, real_ids.with_context(
-            virtual_id=False)).read(fields2)
-        real_data = {row['id']: row for row in real_data}
-        result = []
-        for virtual_id, real_id in ids_index.items():
-            res = real_data.get(real_id, {}).copy()
-            # If :param fields have (date,date_from or date_to)
-            if has_dates:
-                ls = self._virtual_id2real(virtual_id,
-                                           with_date=res.get(
-                                               'calendar_duration') or 23)
-                # ls is a tuple E.g. (id, date_start,date_end)
-                if is_collection(ls) and len(ls) >= 2:
-                    if res.get('date_from'):
-                        res['date_from'] = normalize_d_str(ls[1])
-                    if res.get('date'):
-                        res['date'] = normalize_dt_str(ls[1])
-                    if res.get('date_to'):
-                        res['date_to'] = normalize_d_str(ls[2])
-            res['id'] = virtual_id
-            result.append(res)
-        # If calendar_duration not is in :param fields:,it's remove of result.
-        if fields and 'calendar_duration' not in fields:
-            for r in result:
-                r.pop('calendar_duration', None)
-        if not self._ids:
-            return result[0] if result else []
-        return result
+        ids_reals = list(set(ids_index.values()))
+        reals = self.browse(ids_reals)
+        values = super(RecurrentModel, reals).read(fields2, load=load)
+        results = {r['id']: r for r in values}
+
+        def select(virtual_id, data):
+            if data is None:
+                return None
+            else:
+                data['id'] = virtual_id
+                return data
+
+        return list(filter(bool, (
+            select(key, results.get(ids_index[key], None))
+            for key in ids_index
+        )))
 
     @api.multi
     def unlink(self):
