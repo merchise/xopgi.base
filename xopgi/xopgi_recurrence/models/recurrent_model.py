@@ -745,7 +745,8 @@ class RecurrentModel(models.AbstractModel):
         search, else search virtual occurrences and return then.
 
         """
-        if self._context.get('virtual_id', True):
+        virtual_id = self._context.get('virtual_id', False)
+        if virtual_id:
             return self._logical_search(args, offset=offset, limit=limit, order=order, count=False)
         else:
             return self._real_search(args, offset=offset, limit=limit, order=order, count=False)
@@ -756,16 +757,26 @@ class RecurrentModel(models.AbstractModel):
 
     @api.model
     def _logical_search(self, args, offset=0, limit=None, order=None, count=False):
-        res = self._real_search(args, offset=offset, limit=limit, order=order,
+        res = self._real_search([], offset=offset, limit=limit, order=order,
                                 count=False)
-        if not res:
+        result = [recu._get_virtuals_ids(args, offset, limit) for recu in res]
+
+        virtuals = []
+        while(len(result) != 0):
+            for virtual in result:
+                if len(virtual) == 0:
+                    result.remove(virtual)
+                if len(virtual) > 0:
+                    virtuals.append(virtual.pop(0))
+        if virtuals:
+            result = self.browse(virtuals)
+        else:
             return self.browse()
-        res = self.browse(res._get_virtuals_ids(args, offset, limit))
         if limit:
-            res = res[offset:offset + limit]
+            result = result[offset:offset + limit]
         if count:
-            return len(res)
-        return res
+            return len(result)
+        return result
 
     @api.multi
     def read(self, fields=None, load='_classic_read'):
@@ -797,7 +808,10 @@ class RecurrentModel(models.AbstractModel):
             if data is None:
                 return None
             else:
-                data['id'] = virtual_id
+                if isinstance(virtual_id, string_types):
+                    date_show, _ = self._extract_dates(virtual_id, 23)
+                    data['id'] = virtual_id
+                    data['date'] = date_show
                 return data
 
         return list(filter(bool, (
