@@ -68,7 +68,10 @@ def _required_field(field='A field'):
     raise exceptions.except_orm(_('Error!'), field + _(' is required.'))
 
 
-class RecurrentModel(models.AbstractModel):
+# TODO: Convert to a mixin.  I can't do it now because the CDR has a relation
+# with this model.  I would have to create a migration for this.  Holidays
+# does use it as a mixin.
+class RecurrentModel(models.Model):
     '''A mixin for recurrent things (in time).
 
     It's very similar of recurrence in the calendar module, with some
