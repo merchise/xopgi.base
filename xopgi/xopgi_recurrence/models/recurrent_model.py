@@ -29,6 +29,8 @@ from xoeuf.tools import normalize_date
 from xoeuf.tools import normalize_datetimestr as normalize_dt_str
 from xoeuf.tools import normalize_datestr as normalize_d_str
 
+from .describe import RECURRENT_DESCRIPTION_MODEL
+
 
 def _SEARCH_DOWNGRADE(self, value, args, offset=0, limit=None, order=None,
                       count=False):
@@ -47,18 +49,6 @@ OPERATORS = {
 }
 
 
-FREQ = [('daily', 'Day(s)'), ('weekly', 'Week(s)'), ('monthly', 'Month(s)'),
-        ('yearly', 'Year(s)')]
-END_TYPE = [('no_end_date', 'No end date'), ('until', 'Until'),
-            ('count', 'Number of repetitions')]
-BYWEEKDAY = [('n', 'Every'), ('1', 'The First'), ('2', 'The Second'),
-             ('3', 'The Third'), ('4', 'The Fourth'), ('5', 'The Fifth'),
-             ('-1', 'The Last')]
-MONTHS = [('1', 'January'), ('2', 'February'), ('3', 'March'), ('4', 'April'),
-          ('5', 'May'), ('6', 'June'), ('7', 'July'), ('8', 'August'),
-          ('9', 'September'), ('10', 'October'), ('11', 'November'),
-          ('12', 'December')]
-
 _HOURS_PER_DAY = 24
 _SECS_PER_HOUR = 3600
 _V_DATE_FORMAT = "%Y%m%dT%H%M%S"
@@ -66,6 +56,10 @@ _V_DATE_FORMAT = "%Y%m%dT%H%M%S"
 
 def _required_field(field='A field'):
     raise exceptions.except_orm(_('Error!'), field + _(' is required.'))
+
+
+#: The model name of the recurrent mixin defined below.
+RECURRENT_MIXIN_MODEL = 'recurrent.model'
 
 
 # TODO: Convert to a mixin.  I can't do it now because the CDR has a relation
@@ -135,7 +129,8 @@ class RecurrentModel(models.Model):
 
     '''
 
-    _name = 'recurrent.model'
+    _name = RECURRENT_MIXIN_MODEL
+    _inherit = [RECURRENT_DESCRIPTION_MODEL]
     _description = 'Recurrent model'
 
     @api.multi
@@ -185,30 +180,11 @@ class RecurrentModel(models.Model):
             else:
                 item.calendar_duration = 1
 
-    # Basic datas.
-    date_from = fields.Date(
-        'Initial date',
-        required=True,
-        default=normalize_d_str(datetime.today()),
-        help='Date to be init of recurrence'
-    )
-
     date = fields.Datetime(
         compute=_get_date,
         search=_search_date,
         method=True,
         string='Date and time for representation in calendar views',
-    )
-
-    date_to = fields.Date(
-        'Final date',
-        help='Date to be end the recurrence'
-    )
-
-    duration = fields.Integer(
-        'Duration',
-        default=1,
-        help='Duration on days of the recurrence'
     )
 
     calendar_duration = fields.Float(
@@ -218,18 +194,12 @@ class RecurrentModel(models.Model):
         help='Get the duration on hours of the recurrence'
     )
 
-    allday = fields.Boolean(
-        'All Day',
-        default=True
-    )
-
     active = fields.Boolean(
         'Active',
         default=True,
         help='Indicate if recurrent object is active or not'
     )
 
-    # General recurrence data.
     is_recurrent = fields.Boolean(
         'Is recurrent',
         default=True,
@@ -245,125 +215,6 @@ class RecurrentModel(models.Model):
              ' model by the function  _update_rrule. By default it is taken'
              ' value but then it is calculated and takes a similar value.'
              ' E.g. rrule=FREQ=WEEKLY;INTERVAL=1;BYDAY=TU,MO'
-    )
-
-    freq = fields.Selection(
-        FREQ,
-        'Frequency type',
-        default='daily',
-        # XXX: Don't put this, because there's an error in the JS client that
-        # messes up with the invisible toggling we have there.
-        # help='Frecuency type (Daily/Weekly/Monthly/Yearly)'
-    )
-
-    interval = fields.Integer(
-        'Repeat Every',
-        default=1,
-        help='Repeat every (Days/Week/Month/Year)'
-    )
-
-    # Recurrence by week data.
-    mo = fields.Boolean(
-        'Monday',
-        help="Indicate if the week's day 'Monday' is include or not for the"
-             " recurrence pattern"
-    )
-
-    tu = fields.Boolean(
-        'Tuesday',
-        help="Indicate if the week's day 'Tuesday' is include or not for the"
-             " recurrence pattern"
-    )
-
-    we = fields.Boolean(
-        'Wednesday',
-        help="Indicate if the week's day 'Wednesday' is include for the"
-             " recurrence pattern"
-    )
-
-    th = fields.Boolean(
-        'Thursday',
-        help="Indicate if the week's day 'Thursday' is include for the"
-             " recurrence pattern"
-    )
-
-    fr = fields.Boolean(
-        'Friday',
-        help="Indicate if the week's day 'Friday' is include for the"
-             " recurrence pattern"
-    )
-
-    sa = fields.Boolean(
-        'Saturday',
-        help="Indicate if the week's day 'Saturday' is include for the"
-             " recurrence pattern"
-    )
-
-    su = fields.Boolean(
-        'Sunday',
-        help="Indicate if the week's day 'Sunday' is include for the"
-             " recurrence pattern"
-    )
-
-    # Recurrence by month data.
-    days_option = fields.Selection([
-        ('week_day', 'By week day'),
-        ('month_day', 'By month day')],
-        'Option',
-        default='month_day',
-        help='Indicates the days of the week: E.g.(Mo, Tu, We, Th, Fr, Sa, Su) or'
-             ' indicates the days of the month'
-    )
-
-    monthly_day = fields.Integer(
-        'Days of month',
-        default=datetime.today().day
-    )
-
-    by_week_day = fields.Selection(
-        BYWEEKDAY,
-        'Reference',
-        default='n',
-        help="Selection by week's days E.g.(Every, The First, The Second, The Third,"
-             " The Fourth, The Fifth, The Last)"
-    )
-
-    # Recurrence by year data.
-    months = fields.Selection(
-        MONTHS,
-        'Month',
-        deafault=str(datetime.today().month),
-        help='Allow to select month of year'
-    )
-
-    is_easterly = fields.Boolean(
-        'By easter',
-        help='A date from western easter sunday.'
-    )
-
-    byeaster = fields.Integer(
-        'By easter',
-        default=0,
-        help='Number of days from western easter sunday.'
-    )
-
-    # Ending data
-    end_type = fields.Selection(
-        END_TYPE,
-        'Recurrence Termination',
-        default='no_end_date',
-        help='Selection by recurrence termination'
-    )
-
-    count = fields.Integer(
-        'Repeat',
-        default=5,
-        help='Repeat recurrent event by x times'
-    )
-
-    until = fields.Date(
-        'Repeat Until',
-        help='Date end for the recurrent termination'
     )
 
     @staticmethod
