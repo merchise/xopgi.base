@@ -584,6 +584,8 @@ class RecurrentModel(models.Model):
                 result_data.append(item)
                 rule_str = False
             elif not item['rrule']:
+                # FIXME: there's no method _get_rulestring.  There's one in
+                # model 'calendar.calendar'.
                 rule_str = self._get_rulestring(item['id'])
                 rule_str = rule_str[item['id']]
             else:
