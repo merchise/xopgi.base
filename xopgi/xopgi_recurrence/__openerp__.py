@@ -19,5 +19,5 @@
         'security/ir.model.access.csv',
     ],
 
-    'installable': 8 <= ODOO_VERSION_INFO[0] < 11,  # noqa
+    'installable': 8 <= MAJOR_ODOO_VERSION < 11,  # noqa
 }
