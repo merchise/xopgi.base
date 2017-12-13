@@ -68,67 +68,86 @@ RECURRENT_MIXIN_MODEL = 'recurrent.model'
 class RecurrentModel(models.Model):
     '''A mixin for recurrent things (in time).
 
-    It's very similar of recurrence in the calendar module, with some
-    adjustments.
+    The actual recurrence model is that implemented by the python module
+    `dateutil.rrule`:mod:.
 
-    ``recurrent.model`` defines fields use to define the conditions in a
-    timeline and the recurrence rules (to see module :mod:`dateutil.rrule`) in
-    which a given activity can occur.
+    Examples::
 
-    You can declare a recurrence in a time interval -'Repeat every' for example:
+      class MyMeeting(Model):
+          _name = 'my.meeting'
+          _inherit = [_name, 'recurrent.model']
 
-    Recurrent pattern:
-    Repeat every: 1  (Days/Week/Month/Year)
+      >>> Meeting = self.env['my.meeting']
 
-    You can also state how often, days of the week, days of the month or at
-    what time of year the recurrence may occur, for example:
+      # Case 1:Repeat once every day
 
-    class MyMeeting(Model):
-        _name = 'my.meeting'
-        _inherit = [_name, 'recurrent.model']
+      >>> meeting = Meeting.create(dict(
+      ...    interval=1,
+      ...    freq='daily',
+      ...    end_type='no_end_date'
+      ... ))
 
-    >>> Meeting = self.env['my.meeting']
+      # Case 2:Repeat each week on Mondays and Fridays
 
-    # Case 1:Repeat once every day
-    >>> meeting = Meeting.create(interval=1, freq='daily', end_type='no_end_date')
+      >>> meeting = Meeting.create(dict(
+      ...    interval=1,
+      ...    freq='weekly',
+      ...    mo=True,
+      ...    fr=True,
+      ...    end_type='no_end_date'
+      ... ))
 
-    # Case 2:Repeat each week on Mondays and Fridays
-    >>> meeting = Meeting.create(interval=1, freq='weekly', monday=True,
-                                 friday=True, end_type='no_end_date')
+      # Case 3:Repeat each month the nth days Mondays and Fridays':
 
-    :attr monday:  Set this True to indicate that this event happen on Mondays.
-    Attributes 'tuesday' and other week day names are similar to `monday`.
+      >>> meeting = Meeting.create(dict(
+      ...    interval=1,
+      ...    freq='monthly',
+      ...    days_option='week_day',
+      ...    mo=True,
+      ...    fr=True,
+      ...    end_type='no_end_date'
+      ... ))
 
-    # Case 3:Repeat each month the nth days Mondays and Fridays':
-    >>> meeting = Meeting.create(interval=1, freq='monthly', days_option='week_day',
-                                 monday=True, friday=True, end_type='no_end_date')
 
+      # Case 4:Repeat each month the cardinal days of month:
 
-    # Case 4:Repeat each month the cardinal days of month:
-    >>> meeting = Meeting.create(interval=1, freq='monthly',days_option='month_day',
-                                 monthly_day=5, end_type='no_end_date',
-                                 end_type='no_end_date')
+      >>> meeting = Meeting.create(dict(
+      ...    interval=1,
+      ...    freq='monthly',
+      ...    days_option='month_day',
+      ...    monthly_day=5,
+      ...    end_type='no_end_date',
+      ...    end_type='no_end_date'
+      ... ))
 
-    :attr monthly_day: Refers to the cardinal days of the month.
+      # Repeat each year, similar to case three specifying that month of the
+      # year.
 
-    # Repeat each year, similar to case three specifying that month of the year.
-       >>> meeting = Meeting.create(interval=1, freq='yearly',days_option='month_day',
-                                 monthly_day=5, months=1, end_type='no_end_date')
+      >>> meeting = Meeting.create(dict(
+      ...    interval=1,
+      ...    freq='yearly',
+      ...    days_option='month_day',
+      ...    monthly_day=5,
+      ...    months=1,
+      ...    end_type='no_end_date'
+      ... ))
+
+      # Repeat each year specifying number of days before western easter
+      # sunday.
+
+      >>> meeting = Meeting.create(dict(
+      ...    interval=1,
+      ...    freq='yearly',
+      ...    is_easterly=True,
+      ...    byeaster_day=-2,
+      ...    end_type='no_end_date'
+      ... ))
+
     :attr months: specify year month.
-
-    # Repeat each year specifying number of days from western easter sunday.
-       >>> meeting = Meeting.create(interval=1, freq='yearly',is_easterly=True,
-                                 byeaster_day=-2, end_type='no_end_date')
+    :attr monthly_day: Refers to the nth day of the month.
     :attr byeaster: Number of days from western easter sunday by default is 0.
 
-    # Recurrent Termination
-    One recurrent by default is end_type='no_end_date' but this can to take other
-    values:
-    E.g. Value1: until='2017-03-04'
-         Value2: count=5  Repeat recurrent event by x=5 times.
-
     '''
-
     _name = RECURRENT_MIXIN_MODEL
     _inherit = [RECURRENT_DESCRIPTION_MODEL]
     _description = 'Recurrent model'
