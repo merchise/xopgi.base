@@ -14,12 +14,13 @@ from __future__ import (division as _py3_division,
 import operator
 from operator import itemgetter
 
-from xoeuf.odoo import api, models, fields, exceptions, _
 from dateutil import rrule
 from datetime import datetime, timedelta
 
 from six import string_types
 
+from xoeuf import api, models, fields
+from xoeuf.odoo import exceptions, _
 from xoeuf.osv import datetime_user_to_server_tz
 from xoeuf.tools import normalize_datetime as normalize_dt
 from xoeuf.tools import normalize_date
@@ -146,6 +147,12 @@ class RecurrentModel(models.AbstractModel):
     _inherit = [RECURRENT_DESCRIPTION_MODEL]
     _description = 'Recurrent model'
 
+    date_to = fields.Date(
+        'Final date',
+        help='End date of the occurrence'
+    )
+
+
     @api.multi
     def _get_date(self):
         '''Get the values for the compute 'date' field of the recurrent object
@@ -217,17 +224,6 @@ class RecurrentModel(models.AbstractModel):
         'Is recurrent',
         default=True,
         help='Check if is recurrent.'
-    )
-
-    rrule = fields.Char(
-        'RRULE',
-        size=124,
-        readonly=True,
-        default='',
-        help='This field is update after to creates or to update the recurrent'
-             ' model by the function  _update_rrule. By default it is taken'
-             ' value but then it is calculated and takes a similar value.'
-             ' E.g. rrule=FREQ=WEEKLY;INTERVAL=1;BYDAY=TU,MO'
     )
 
     @staticmethod
