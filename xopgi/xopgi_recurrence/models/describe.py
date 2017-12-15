@@ -308,12 +308,14 @@ class RecurrentRuleDefinition(models.AbstractModel):
         :returns: `dateutil.rrule.rrule`:class:.
 
         '''
+        from xoeuf.tools import normalize_date
         kwargs = dict(
-            dtstart=self.date_from,
+            dtstart=normalize_date(self.date_from),
             interval=max(1, self.interval or 0),
         )
         if self.end_type == ENDS_AT:
-            kwargs['until'] = max(self.date_from, self.until)   # or date_to?
+            kwargs['until'] = max(normalize_date(self.date_from),
+                                  normalize_date(self.until))   # or date_to?
         elif self.end_type == ENDS_AFTER_MANY:
             kwargs['count'] = min(1, self.count)
         else:
