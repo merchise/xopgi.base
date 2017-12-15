@@ -234,106 +234,6 @@ class RecurrentModel(models.AbstractModel):
         end_date_new = normalize_dt(until).replace(hour=23)
         return end_date_new.strftime(_V_DATE_FORMAT)
 
-    def _compute_rule_string(self, data):
-        '''Compute rule string according to value type RECUR of iCalendar
-        from the values given.
-
-        @param data: dictionary of freq and interval value
-
-        @return: string containing recurring rule (empty if no rule)
-
-        '''
-        def get_BYDAY_string(freq, data):
-            '''Compose the 'BYDAY' and params for rrule.
-
-            If in BYDAY not is specificate 'n', means every  week's day. E.g.
-            BYDAY={}MO,{}TU If 'n' can take values(n,1..5,-1).
-            The First Monday and Tuesday is equal: E.g.BYDAY={1}MO,{1}TU
-            To see module :mod:`dateutil.rrule`
-
-            '''
-            weekdays = ['mo', 'tu', 'we', 'th', 'fr', 'sa', 'su']
-            day_option = data['days_option']
-            if freq == 'weekly' or (freq == 'monthly' and
-                                    day_option == 'week_day') or \
-                                   (freq == 'yearly' and
-                                    day_option == 'week_day' and
-                                    not data.get('is_easterly')):
-                by_week_day = (freq != 'weekly' and
-                               data.get('by_week_day', '') != 'n' and
-                               data.get('by_week_day', '') or '')
-                byday = [by_week_day + weekday.upper()
-                         for weekday, val in data.items()
-                         if val and weekday in weekdays]
-                if byday:
-                    return ';BYDAY=' + ','.join(byday)
-                _required_field('At least a weekday')
-
-            return ''
-
-        def get_BYMONTHDAY_string(freq, data):
-            '''Compose the 'BYMONTHDAY' param for rrule
-
-            '''
-            if freq == 'monthly' or (freq == 'yearly' and not
-                                     data.get('is_easterly')):
-                days_option = data.get('days_option', '')
-                monthly_day = data.get('monthly_day', 0)
-                if not days_option:
-                    _required_field('An option')
-                if days_option == 'month_day':
-                    if not monthly_day:
-                        _required_field('At least a month date')
-                    if -31 <= int(monthly_day) <= 31:
-                        return ';BYMONTHDAY=' + str(monthly_day)
-                    else:
-                        raise ValueError()
-            return ''
-
-        def get_BYEASTER_string(freq, data):
-            '''Compose the 'BYEASTER' param for rrule
-
-            '''
-            if freq == 'yearly':
-                if data.get('is_easterly'):
-                    byeaster = data.get('byeaster', 0)
-                    if not (-365 <= int(byeaster) <= 365):
-                        raise ValueError()
-                    return ';BYEASTER=' + str(data.get('byeaster', '0'))
-                else:
-                    if not data.get('months'):
-                        _required_field('Month')
-                    return ';BYMONTH=' + str(data.get('months')) or ''
-            return ''
-
-        def get_end_date(data):
-            '''Concatenate the string rule to the field 'rrule'. Compose the 'UNTIL'
-            or 'COUNT' param.
-
-            '''
-            end_type = data.get('end_type')
-            if end_type == 'count':
-                return ';COUNT=' + str(data.get('count')) or ''
-            until = data.get('until')
-            if until and end_type == 'until':
-                end_date = self.parse_until_date(until)
-                return ';UNTIL=' + end_date or ''
-            return ''
-
-        freq = data.get('freq', False)
-        res = ''
-        if freq:
-            interval = data.get('interval')
-            template = 'FREQ={freq}{interval}{end_date}{by}{easter}'
-            res = template.format(
-                freq=freq.upper(),
-                interval=(';INTERVAL=%s' % interval if interval else ''),
-                end_date=get_end_date(data),
-                by=get_BYDAY_string(freq, data) or get_BYMONTHDAY_string(freq, data),
-                easter=get_BYEASTER_string(freq, data)
-            )
-        return res
-
     def _check_dates(self, virtual_dates, data, args):
         '''Check every occurrence date for domain args referent to date.
 
@@ -532,12 +432,8 @@ class RecurrentModel(models.AbstractModel):
         'rrule' and update the value by each recurrent model.
 
         '''
-        res_rrules = self.get_rulestring()
-        if not res_rrules:
-            return False
-        for item in self:
-            item.write(res_rrules)
-        return res_rrules
+        for record in self:
+            record.rrule = str(record.get_rrule_from_description())
 
     @api.model
     def _check_for_one_occurrency_change(self):
@@ -552,35 +448,6 @@ class RecurrentModel(models.AbstractModel):
             raise exceptions.except_orm(_('Error!'), _('An occurrence of an '
                                                        'recurrent rule can`t be'
                                                        'modify or deleted.'))
-
-    @api.model
-    def get_rulestring(self):
-        """Gets Recurrence rule string according to value type RECUR of
-        iCalendar from the values given.
-
-        @param ids: List of calendar event's ids.
-
-        @return: dictionary of rrule value.
-
-        """
-        result = {}
-        # Browse these fields as SUPERUSER because if the record is
-        # private a normal search could return False and raise an error.
-        for item in self.sudo().read():
-            if item:
-                if not item.get('freq'):
-                    _required_field('Frequency')
-                if (item['interval'] or 0) < 0:
-                    raise exceptions.except_orm(_('Warning!'), _('Interval cannot '
-                                                                 'be negative.'))
-                if (item['count'] or 0) <= 0:
-                    raise exceptions.except_orm(_('Warning!'), _('Count cannot be '
-                                                                 'negative or 0.'))
-                if item['is_recurrent']:
-                    result['rrule'] = self._compute_rule_string(item)
-                else:
-                    result['rrule'] = ''
-        return result
 
     @api.multi
     def is_occurrency(self, day):
