@@ -59,10 +59,7 @@ def _required_field(field='A field'):
 RECURRENT_MIXIN_MODEL = 'recurrent.model'
 
 
-# TODO: Convert to a mixin.  I can't do it now because the CDR has a relation
-# with this model.  I would have to create a migration for this.  Holidays
-# does use it as a mixin.
-class RecurrentModel(models.Model):
+class RecurrentModel(models.AbstractModel):
     '''A mixin for recurrent things (in time).
 
     The actual recurrence model is that implemented by the python module
