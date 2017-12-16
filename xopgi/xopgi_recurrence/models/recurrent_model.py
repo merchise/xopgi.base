@@ -611,17 +611,3 @@ class RecurrentModel(models.AbstractModel):
         if recurrence:
             recurrence._update_rrule()
         return recurrence
-
-    def next_date(self, rrulestring, dt=False, include=False):
-        """Returns the first recurrence after the given datetime instance.
-
-        :param rrulestring:
-        :param dt: start date or None to use now().
-        :param include: defines what happens if dt is an occurrence. With
-        include=True, if dt itself is an occurrence, it will be returned.
-        :return: next occurrence datetime.
-        """
-        if not dt:
-            dt = datetime.now()
-        rule = rrule.rrulestr(str(rrulestring), dtstart=dt, forceset=True)
-        return rule.after(dt, include)
