@@ -431,43 +431,27 @@ class RecurrentModel(models.AbstractModel):
         rule_str += ';COUNT=' + str(offset + (limit or 100))
         return rule_str
 
-    @api.requires_singleton
+    @api.multi
     def _iter_ocurrences(self, start=None):
         '''Yields all occurrences of `self` since `start`.
 
-        If `start` is None we start at the earliest possible date.
-
-        Each item is a dictionary with keys `date`, `duration` and `id`
-        (virtual id).
-
-        Notice that this generator is possible infinite.  So you should use in
-        a procedure that filters and or limits it.
+        Each item is an instance of `Ocurrence`:class:.
 
         '''
-        from xoutil.eight import integer_types
-        if not isinstance(self.id, integer_types) or not self.is_recurrent:
-            raise TypeError('_iter_ocurrences requires a recurrent object', self)
-        if start is None:
-            start = self.date_from
-
-        # We hide the generator so that requirements (TypeError above) are
-        # checked at call-time and not at iteration-time.
-        def _generator(self, start):
-            for date in self.iter_from(start):
-                yield dict(
-                    id=self._get_occurrence_id(date),
-                    date=date,
-                    duration=self.calendar_duration,
-                )
-
-        return _generator(self, start)
+        from xoutil.future.itertools import map
+        from xoutil.fp.tools import compose, pos_args
+        return map(
+            compose(Occurrence, pos_args),
+            self._iter_occurrences_dates(start=start)
+        )
 
     @api.multi
     def _iter_occurrences_dates(self, start=None):
         '''Produce **all** the occurrences.
 
         Each item is pair of `(date, record)`, where `date` is the date of an
-        occurrence defined by `record.  Records are all the records in `self`.
+        occurrence defined by `record.  Records are all the records in
+        `self`.  `date` is always a `datetime`:class: object.
 
         Items are produced from `start` to end in order of occurrence.  Thus,
         items from different records can be intertwined.
@@ -622,3 +606,21 @@ class RecurrentModel(models.AbstractModel):
             if d_from.date() <= day.date() <= d_to.date():
                 return True
         return False
+
+
+class Occurrence(object):
+    def __iter__(self, date, record):
+        self.date = date
+        self.duration = record.calendar_duration
+        if record.is_recurrent:
+            self.id = record._real_id2virtual(record.id, date)
+        else:
+            self.id = record.id
+        self.__record = record
+
+    def __getattr__(self, attr):
+        return getattr(self.__record, attr)
+
+    @property
+    def recordset(self):
+        return self.__record.browse(self.id)
