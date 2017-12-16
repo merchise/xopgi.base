@@ -158,7 +158,6 @@ class RecurrentModel(models.AbstractModel):
         help='End date of the occurrence'
     )
 
-
     @api.multi
     def _get_date(self):
         '''Get the values for the compute 'date' field of the recurrent object
@@ -240,14 +239,20 @@ class RecurrentModel(models.AbstractModel):
 
         """
         virtual_id = self._context.get('virtual_id', False)
-        if virtual_id:
-            return self._logical_search(args, offset=offset, limit=limit, order=order, count=False)
+        if virtual_id and not count:
+            return self._logical_search(args, offset=offset, limit=limit, order=order, count=count)
         else:
-            return self._real_search(args, offset=offset, limit=limit, order=order, count=False)
+            return self._real_search(args, offset=offset, limit=limit, order=order, count=count)
 
     @api.model
     def _real_search(self, args, offset=0, limit=None, order=None, count=False):
-        return super(RecurrentModel, self).search(args, offset=offset, limit=limit, order=order, count=False)
+        return super(RecurrentModel, self).search(
+            args,
+            offset=offset,
+            limit=limit,
+            order=order,
+            count=count
+        )
 
     @api.model
     def _logical_search(self, args, offset=0, limit=None, order=None, count=False):
