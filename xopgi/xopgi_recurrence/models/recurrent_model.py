@@ -232,6 +232,111 @@ class RecurrentModel(models.AbstractModel):
         help='Check if is recurrent.'
     )
 
+    @api.model
+    @api.returns('self', downgrade=_SEARCH_DOWNGRADE)
+    def search(self, args, offset=0, limit=None, order=None, count=False):
+        """If 'virtual_id' not in context or are False then normally
+        search, else search virtual occurrences and return then.
+
+        """
+        virtual_id = self._context.get('virtual_id', False)
+        if virtual_id:
+            return self._logical_search(args, offset=offset, limit=limit, order=order, count=False)
+        else:
+            return self._real_search(args, offset=offset, limit=limit, order=order, count=False)
+
+    @api.model
+    def _real_search(self, args, offset=0, limit=None, order=None, count=False):
+        return super(RecurrentModel, self).search(args, offset=offset, limit=limit, order=order, count=False)
+
+    @api.model
+    def _logical_search(self, args, offset=0, limit=None, order=None, count=False):
+        res = self._real_search([], offset=offset, limit=limit, order=order,
+                                count=False)
+        result = [recu._get_virtuals_ids(args, offset, limit) for recu in res]
+
+        virtuals = []
+        while(len(result) != 0):
+            for virtual in result:
+                if len(virtual) == 0:
+                    result.remove(virtual)
+                if len(virtual) > 0:
+                    virtuals.append(virtual.pop(0))
+        if virtuals:
+            result = self.browse(virtuals)
+        else:
+            return self.browse()
+        if limit:
+            result = result[offset:offset + limit]
+        if count:
+            return len(result)
+        return result
+
+    @api.multi
+    def read(self, fields=None, load='_classic_read'):
+        '''Return the list of dict with the [fields].
+        if [ids] contain virtual ids read data from real ids and create
+        virtual copies to return
+
+        If :param fields: have [date, date_from, date_to] return a list of dict
+        with this fields plus id. If :param calendar_duration: is include in
+        fields it will be add to the result else is exclude.
+        '''
+        if not fields:
+            fields = []
+        fields2 = fields[:] if fields else []
+        targets = ('date', 'date_from', 'date_to')
+        has_dates = any(field in fields for field in targets)
+        if fields and 'calendar_duration' not in fields and has_dates:
+            fields2.append('calendar_duration')
+        ids_index = {record.id: int(self._virtual_id2real(record.id))
+                     for record in self}
+        # If dict:ids_index have as keys virtual_ids:(str,unicode) the
+        # id_reals are dict.values() else the id_reals are dict.keys()
+        ids_reals = list(set(ids_index.values()))
+        reals = self.browse(ids_reals)
+        values = super(RecurrentModel, reals).read(fields2, load=load)
+        results = {r['id']: r for r in values}
+
+        def select(virtual_id, data):
+            if data is None:
+                return None
+            else:
+                if isinstance(virtual_id, string_types):
+                    date_show, _ = self._extract_dates(virtual_id, 23)
+                    data['id'] = virtual_id
+                    data['date'] = date_show
+                return data
+
+        return list(filter(bool, (
+            select(key, results.get(ids_index[key], None))
+            for key in ids_index
+        )))
+
+    @api.multi
+    def unlink(self):
+        # TODO: implement the logic for rule exceptions and one occurrence
+        # modifications.
+        self._check_for_one_occurrency_change()
+        return super(RecurrentModel, self).unlink()
+
+    @api.multi
+    def write(self, values):
+        # TODO: implement the logic for rule exceptions and one occurrence
+        # modifications.
+        self._check_for_one_occurrency_change()
+        res = super(RecurrentModel, self).write(values)
+        if 'no_update_rrule' not in self._context and not values.get('rrule'):
+            self._update_rrule()
+        return res
+
+    @api.model
+    def create(self, values):
+        recurrence = super(RecurrentModel, self).create(values)
+        if recurrence:
+            recurrence._update_rrule()
+        return recurrence
+
     @staticmethod
     def parse_until_date(until):
         '''Set of 11PM hour of day on UTC
@@ -537,108 +642,3 @@ class RecurrentModel(models.AbstractModel):
             if d_from.date() <= day.date() <= d_to.date():
                 return True
         return False
-
-    @api.model
-    @api.returns('self', downgrade=_SEARCH_DOWNGRADE)
-    def search(self, args, offset=0, limit=None, order=None, count=False):
-        """If 'virtual_id' not in context or are False then normally
-        search, else search virtual occurrences and return then.
-
-        """
-        virtual_id = self._context.get('virtual_id', False)
-        if virtual_id:
-            return self._logical_search(args, offset=offset, limit=limit, order=order, count=False)
-        else:
-            return self._real_search(args, offset=offset, limit=limit, order=order, count=False)
-
-    @api.model
-    def _real_search(self, args, offset=0, limit=None, order=None, count=False):
-        return super(RecurrentModel, self).search(args, offset=offset, limit=limit, order=order, count=False)
-
-    @api.model
-    def _logical_search(self, args, offset=0, limit=None, order=None, count=False):
-        res = self._real_search([], offset=offset, limit=limit, order=order,
-                                count=False)
-        result = [recu._get_virtuals_ids(args, offset, limit) for recu in res]
-
-        virtuals = []
-        while(len(result) != 0):
-            for virtual in result:
-                if len(virtual) == 0:
-                    result.remove(virtual)
-                if len(virtual) > 0:
-                    virtuals.append(virtual.pop(0))
-        if virtuals:
-            result = self.browse(virtuals)
-        else:
-            return self.browse()
-        if limit:
-            result = result[offset:offset + limit]
-        if count:
-            return len(result)
-        return result
-
-    @api.multi
-    def read(self, fields=None, load='_classic_read'):
-        '''Return the list of dict with the [fields].
-        if [ids] contain virtual ids read data from real ids and create
-        virtual copies to return
-
-        If :param fields: have [date, date_from, date_to] return a list of dict
-        with this fields plus id. If :param calendar_duration: is include in
-        fields it will be add to the result else is exclude.
-        '''
-        if not fields:
-            fields = []
-        fields2 = fields[:] if fields else []
-        targets = ('date', 'date_from', 'date_to')
-        has_dates = any(field in fields for field in targets)
-        if fields and 'calendar_duration' not in fields and has_dates:
-            fields2.append('calendar_duration')
-        ids_index = {record.id: int(self._virtual_id2real(record.id))
-                     for record in self}
-        # If dict:ids_index have as keys virtual_ids:(str,unicode) the
-        # id_reals are dict.values() else the id_reals are dict.keys()
-        ids_reals = list(set(ids_index.values()))
-        reals = self.browse(ids_reals)
-        values = super(RecurrentModel, reals).read(fields2, load=load)
-        results = {r['id']: r for r in values}
-
-        def select(virtual_id, data):
-            if data is None:
-                return None
-            else:
-                if isinstance(virtual_id, string_types):
-                    date_show, _ = self._extract_dates(virtual_id, 23)
-                    data['id'] = virtual_id
-                    data['date'] = date_show
-                return data
-
-        return list(filter(bool, (
-            select(key, results.get(ids_index[key], None))
-            for key in ids_index
-        )))
-
-    @api.multi
-    def unlink(self):
-        # TODO: implement the logic for rule exceptions and one occurrence
-        # modifications.
-        self._check_for_one_occurrency_change()
-        return super(RecurrentModel, self).unlink()
-
-    @api.multi
-    def write(self, values):
-        # TODO: implement the logic for rule exceptions and one occurrence
-        # modifications.
-        self._check_for_one_occurrency_change()
-        res = super(RecurrentModel, self).write(values)
-        if 'no_update_rrule' not in self._context and not values.get('rrule'):
-            self._update_rrule()
-        return res
-
-    @api.model
-    def create(self, values):
-        recurrence = super(RecurrentModel, self).create(values)
-        if recurrence:
-            recurrence._update_rrule()
-        return recurrence
