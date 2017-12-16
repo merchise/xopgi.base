@@ -15,9 +15,6 @@
     "website": "http://xhg.ca.merchise.org/addons/xopgi_recurrence",
     'version': '1.0',
     'depends': ['base'],
-    'data': [
-        'security/ir.model.access.csv',
-    ],
 
     'installable': 8 <= MAJOR_ODOO_VERSION < 11,  # noqa
 }
