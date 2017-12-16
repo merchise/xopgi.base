@@ -64,6 +64,11 @@ RECURRENT_MIXIN_MODEL = 'recurrent.model'
 class RecurrentModel(models.AbstractModel):
     '''A mixin for recurrent things (in time).
 
+    This mixin modifies `search` so that your model can be seen as an
+    occurrence of the recurrent event.  You must provide `search_occurrences`
+    (or the deprecated `virtual_id`) context key to True to trigger this
+    behavior.
+
     The actual recurrence model is that implemented by the python module
     `dateutil.rrule`:mod:.
 
@@ -352,6 +357,38 @@ class RecurrentModel(models.AbstractModel):
         'Return the virtual id a single occurrence at the given datetime `dt`.'
         from xoeuf.tools import normalize_datetimestr
         return '{}-{}'.format(self.id, normalize_datetimestr(dt))
+
+    @api.multi
+    def _iter_occurrences_dates(self, start=None):
+        '''Produce **all** the occurrences.
+
+        Each item is pair of `(date, record)`, where `date` is the date of an
+        occurrence defined by `record.  Records are all the records in `self`.
+
+        Items are produced from `start` to end in order of occurrence.  Thus,
+        items from different records can be intertwined.
+
+        If `start` is None, use the first possible date (`date_from`) for all
+        items.
+
+        If any record in `self` is not recurrent it will yield a single
+        instance with `date` to `date_from`.
+
+        .. note:: This can be a potentially infinite iterator.
+
+        '''
+        from xoutil.future.itertools import merge
+
+        def _iter_from(record):
+            if record.is_recurrent:
+                for date in record.iter_from(start=start):
+                    #  The date comes first so that `merge` result be sorted by
+                    #  date.
+                    yield date, record
+            else:
+                yield normalize_dt(record.date_from), record
+
+        return merge(*(_iter_from(record) for record in self))
 
     @api.multi
     def _get_virtuals_ids(self, domain, offset=0, limit=100):
