@@ -315,6 +315,43 @@ class RecurrentModel(models.AbstractModel):
         rule_str += ';COUNT=' + str(offset + (limit or 100))
         return rule_str
 
+    @api.requires_singleton
+    def _iter_ocurrences(self, start=None):
+        '''Yields all occurrences of `self` since `start`.
+
+        If `start` is None we start at the earliest possible date.
+
+        Each item is a dictionary with keys `date`, `duration` and `id`
+        (virtual id).
+
+        Notice that this generator is possible infinite.  So you should use in
+        a procedure that filters and or limits it.
+
+        '''
+        from xoutil.eight import integer_types
+        if not isinstance(self.id, integer_types) or not self.is_recurrent:
+            raise TypeError('_iter_ocurrences requires a recurrent object', self)
+        if start is None:
+            start = self.date_from
+
+        # We hide the generator so that requirements (TypeError above) are
+        # checked at call-time and not at iteration-time.
+        def _generator(self, start):
+            for date in self.iter_from(start):
+                yield dict(
+                    id=self._get_occurrence_id(date),
+                    date=date,
+                    duration=self.calendar_duration,
+                )
+
+        return _generator(self, start)
+
+    @api.requires_singleton
+    def _get_occurrence_id(self, dt):
+        'Return the virtual id a single occurrence at the given datetime `dt`.'
+        from xoeuf.tools import normalize_datetimestr
+        return '{}-{}'.format(self.id, normalize_datetimestr(dt))
+
     @api.multi
     def _get_virtuals_ids(self, domain, offset=0, limit=100):
         '''Gives virtual event ids for recurring events based on value of

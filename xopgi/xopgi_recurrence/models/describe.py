@@ -302,6 +302,7 @@ class RecurrentRuleDefinition(models.AbstractModel):
         for record in self:
             record.rrule = str(record.get_rrule_from_description())
 
+    @api.requires_singleton
     def get_rrule_from_description(self):
         '''The recurrent rule that describes this recurrent event.
 
@@ -352,3 +353,19 @@ class RecurrentRuleDefinition(models.AbstractModel):
                     raise ValidationError(
                         'By Easter must not extend longer than a year'
                     )
+
+    @api.requires_singleton
+    def iter_from(self, start=None):
+        '''Return an iterator that yields each occurrence after `start` date.
+
+        If `start` is None, start at the first `date` (field ``date_from``).
+
+        :returns: A generator of the dates of the occurrences.
+
+        .. warning:: This can be an infinite iterator.
+
+        '''
+        from xoeuf.tools import normalize_date
+        if start is None:
+            start = normalize_date(self.date_from)
+        return self.get_rrule_from_description().xafter(start)
