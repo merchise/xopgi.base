@@ -20,7 +20,8 @@ from datetime import datetime, timedelta
 from six import string_types
 
 from xoeuf import api, models, fields
-from xoeuf.odoo import exceptions, _
+from xoeuf.odoo import _
+from xoeuf.odoo.exceptions import ValidationError
 from xoeuf.osv import datetime_user_to_server_tz
 from xoeuf.tools import normalize_datetime as normalize_dt
 from xoeuf.tools import normalize_date
@@ -53,7 +54,7 @@ _V_DATE_FORMAT = "%Y%m%dT%H%M%S"
 
 
 def _required_field(field='A field'):
-    raise exceptions.except_orm(_('Error!'), field + _(' is required.'))
+    raise ValidationError(field + _(' is required.'))
 
 
 #: The model name of the recurrent mixin defined below.
@@ -482,9 +483,7 @@ class RecurrentModel(models.AbstractModel):
         real_id_vs_virtual = map(lambda x: (x, self._virtual_id2real(x)), self.ids)
         real_ids = [real_id for virtual_id, real_id in real_id_vs_virtual]
         if real_ids != self.ids:
-            raise exceptions.except_orm(_('Error!'), _('An occurrence of an '
-                                                       'recurrent rule can`t be'
-                                                       'modify or deleted.'))
+            raise ValidationError('Expected only real ids')
 
     @api.multi
     def is_occurrency(self, day):
