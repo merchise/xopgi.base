@@ -382,7 +382,7 @@ class RecurrentModel(models.AbstractModel):
             if not any(True for val in new_pile if not val):
                 r_date_str = normalize_dt_str(r_date)
                 # Get virtual_id with id and date E.g. 19-20170830T230000
-                idval = self.real_id2virtual(data.get('id'), r_date_str)
+                idval = self._real_id2virtual(data.get('id'), r_date_str)
                 result_data.append(dict(data, id=idval, date=r_date_str))
         return result_data
 
@@ -456,12 +456,6 @@ class RecurrentModel(models.AbstractModel):
                 )
 
         return _generator(self, start)
-
-    @api.requires_singleton
-    def _get_occurrence_id(self, dt):
-        'Return the virtual id a single occurrence at the given datetime `dt`.'
-        from xoeuf.tools import normalize_datetimestr
-        return '{}-{}'.format(self.id, normalize_datetimestr(dt))
 
     @api.multi
     def _iter_occurrences_dates(self, start=None):
@@ -563,13 +557,7 @@ class RecurrentModel(models.AbstractModel):
         return list(result)
 
     @api.model
-    def real_id2virtual(self, real_id, recurrent_date):
-        ''' Convert a real id (type int) into a "virtual id" (type string).
-
-        E.g. real event id is 1 and recurrent_date
-        is set to 01-12-2009 10:00:00, so it will return 1-20091201100000.
-
-        '''
+    def _real_id2virtual(self, real_id, recurrent_date):
         if real_id and recurrent_date:
             recurrent_date = normalize_dt(recurrent_date)
             recurrent_date = recurrent_date.strftime(_V_DATE_FORMAT)
@@ -578,17 +566,6 @@ class RecurrentModel(models.AbstractModel):
 
     @api.model
     def _virtual_id2real(self, virtual_id=None):
-        ''' Convert a "virtual id" (type string) into a real id (type int).
-
-        E.g. virtual/recurring event id is 4-20091201100000, so
-        it will return 4.
-
-        @param with_date: if a value is passed to this param it will
-        return dates based on value of withdate + base_calendar_id
-
-        @return: real id or real id, date
-
-        '''
         from xoutil.eight import string_types
         if virtual_id and isinstance(virtual_id, string_types):
             res = virtual_id.split('-', 1)
@@ -599,6 +576,7 @@ class RecurrentModel(models.AbstractModel):
 
     @api.model
     def _extract_dates(self, virtual_id, duration):
+        '''Extract start and end dates from the virtual id and duration.'''
         _, res = virtual_id.split('-', 1)
         start = datetime.strptime(res, _V_DATE_FORMAT)
         end = start + timedelta(hours=duration)
@@ -608,10 +586,7 @@ class RecurrentModel(models.AbstractModel):
 
     @api.multi
     def _update_rrule(self):
-        '''Allow to call the calculation the string representing a rule:
-        'rrule' and update the value by each recurrent model.
-
-        '''
+        '''Update the rrule string representation.'''
         for record in self:
             record.rrule = str(record.get_rrule_from_description())
 
