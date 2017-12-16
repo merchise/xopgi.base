@@ -475,13 +475,8 @@ class RecurrentModel(models.AbstractModel):
 
     @api.model
     def _check_for_one_occurrency_change(self):
-        '''
-        :raise an except_orm if one of ids is virtual
-        :param ids:
-        :return:
-        '''
-        real_id_vs_virtual = map(lambda x: (x, self._virtual_id2real(x)), self.ids)
-        real_ids = [real_id for virtual_id, real_id in real_id_vs_virtual]
+        'Ensure only real ids.'
+        real_ids = [self._virtual_id2real(x) for x in self.ids]
         if real_ids != self.ids:
             raise ValidationError('Expected only real ids')
 
