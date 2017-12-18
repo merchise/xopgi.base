@@ -11,10 +11,6 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
-import operator
-from operator import itemgetter
-
-from dateutil import rrule
 from datetime import datetime, timedelta
 
 from six import string_types
@@ -26,7 +22,6 @@ from xoeuf.osv import datetime_user_to_server_tz
 from xoeuf.tools import normalize_datetime as normalize_dt
 from xoeuf.tools import normalize_date
 from xoeuf.tools import normalize_datetimestr as normalize_dt_str
-from xoeuf.tools import normalize_datestr as normalize_d_str
 
 from .describe import RECURRENT_DESCRIPTION_MODEL
 
@@ -34,18 +29,6 @@ from .describe import RECURRENT_DESCRIPTION_MODEL
 def _SEARCH_DOWNGRADE(self, value, args, offset=0, limit=None, order=None,
                       count=False):
     return list(value.ids) if not count else value
-
-
-OPERATORS = {
-    '<': operator.lt,
-    '<=': operator.le,
-    '>': operator.gt,
-    '>=': operator.ge,
-    '=': operator.eq,
-    '!=': operator.ne,
-    '==': operator.eq,
-    '<>': operator.ne,
-}
 
 
 _HOURS_PER_DAY = 24
@@ -59,6 +42,11 @@ def _required_field(field='A field'):
 
 #: The model name of the recurrent mixin defined below.
 RECURRENT_MIXIN_MODEL = 'recurrent.model'
+
+
+#: The maximal amount of occurrences to return in a logical (occurrence-based)
+#: search.
+MAX_OCCURRENCES = 1000
 
 
 class RecurrentModel(models.AbstractModel):
@@ -240,7 +228,7 @@ class RecurrentModel(models.AbstractModel):
         """
         virtual_id = self._context.get('virtual_id', False)
         if virtual_id and not count:
-            return self._logical_search(args, offset=offset, limit=limit, order=order, count=count)
+            return self._logical_search(args, offset=offset, limit=limit, order=order)
         else:
             return self._real_search(args, offset=offset, limit=limit, order=order, count=count)
 
@@ -255,27 +243,84 @@ class RecurrentModel(models.AbstractModel):
         )
 
     @api.model
-    def _logical_search(self, args, offset=0, limit=None, order=None, count=False):
-        res = self._real_search([], offset=offset, limit=limit, order=order,
-                                count=False)
-        result = [recu._get_virtuals_ids(args, offset, limit) for recu in res]
+    def _logical_search(self, domain, offset=0, limit=None, order=None):
+        '''Finds all occurrences that match the domain.
 
-        virtuals = []
-        while(len(result) != 0):
-            for virtual in result:
-                if len(virtual) == 0:
-                    result.remove(virtual)
-                if len(virtual) > 0:
-                    virtuals.append(virtual.pop(0))
-        if virtuals:
-            result = self.browse(virtuals)
-        else:
+        Since there can be an unlimited number of occurrences, `limit` is
+        always bounded to MAX_OCCURRENCES.
+
+        '''
+        import operator
+        from xoutil.future.functools import reduce
+        from xoutil.future.itertools import ifilter, first_n, map
+        from xoutil.eight import integer_types
+        from xoutil.fp.tools import compose
+        from ..tools.predicate import Predicate
+
+        # Normalize limit to be 0 <= limit <= MAX_OCCURRENCES.  If limit is
+        # zero, bail the whole procedure by returning the empty recordset
+        limit = min(max(limit or 0, 0), MAX_OCCURRENCES)
+        if not limit:
             return self.browse()
-        if limit:
-            result = result[offset:offset + limit]
-        if count:
-            return len(result)
-        return result
+
+        # This is a tricky implementation to get right.  Domain can be
+        # arbitrarily complex, and mix date-related and non-date related
+        # conditions.  Since all non-date related conditions will match for
+        # both the occurrences and the recurrent pattern itself, we'd like to
+        # find the *recurrence patterns* that match the domain **striping the
+        # date-related conditions**, and then rematch the occurrences with the
+        # rest of the date-related domain.
+        #
+        # This is to say that if we're given a domain T that may contain
+        # date-related conditions, we would like to find another domain Q
+        # without date-related conditions such that ``T => Q``.
+        #
+        # Then we could find recurrence patterns that match Q, and afterwards
+        # filter occurrences by T.  This would make the amount of filtering
+        # done in Python less of an issue.
+        #
+        # Trivially, for any T, making ``Q=[]`` (i.e always True) satisfies
+        # this condition, but then will have to filter all of the recurrence
+        # in Python and that might be a performance issue.
+        #
+        # Yet, trying to find a non-trivial Q cannot be achieved in all cases.
+        #
+        # In the following, all capitalized symbols starting with D will
+        # represent predicates (terms in a domain) involving the `date` field,
+        # non capitalized symbols will represent predicates not involving the
+        # `date` field.  The logical AND and OR will be represented by `and`
+        # and `or`, where the logical NOT will be `~`.
+        #
+        # For the predicate T ``(D or ~n) and (~D or n)``, Q can be ``~n or
+        # n``, with is the same as ``[]``.  For the predicate ``(D or n) and
+        # (~D or n)``, we can find Q as ``n``.  Notice that both predicates
+        # are in Conjunctive Normal Form (CNF).
+        #
+        # For Odoo domains, we can use the 2nd normal form (2NF) which
+        # distributes NOT within the term themselves, this mean we won't see
+        # any ``~`` in our predicates.  So a CNF can be ``(D or nn) and (DD or
+        # n)`` that will yield Q to be ``~nn or ~n``, which *we* (but not our
+        # machinery) know to be equivalent to ``[]``.
+        #
+        # If the domain is given in CNF and 2NF, it's easy to find Q. So, the
+        # algorithm needed is to find the CNF for the 2NF of a domain.
+        #
+        # HOWEVER, I believe that this is NOT currently needed IN OUR CASE.
+        # So let's mark it as a thing to do.
+        #
+        # TODO:  Compute the CNF to get Q.
+        #
+        res = self._real_search([], order=order)
+        # At this point `res` has the recurrence in the order requested.
+        # _iter_occurrence will yield the occurrences in the `date` order
+        # first.
+        assert all(isinstance(r.id, integer_types) for r in res)
+        pred = Predicate(domain)
+        occurrences = first_n(ifilter(pred, map(
+            compose(self.browse, self._real_id2virtual),
+            res._iter_occurrences_dates()
+        )), limit)
+        return reduce(operator.or_, occurrences, self.browse())
 
     @api.multi
     def read(self, fields=None, load='_classic_read'):
@@ -342,109 +387,6 @@ class RecurrentModel(models.AbstractModel):
             recurrence._update_rrule()
         return recurrence
 
-    @staticmethod
-    def parse_until_date(until):
-        '''Set of 11PM hour of day on UTC
-
-        '''
-        end_date_new = normalize_dt(until).replace(hour=23)
-        return end_date_new.strftime(_V_DATE_FORMAT)
-
-    def _check_dates(self, virtual_dates, data, args):
-        '''Check every occurrence date for domain args referent to date.
-
-        :param virtual_dates: List of date to check.
-        :param data: List of dict with all fields values.
-        :param args: Domain to check.
-        :return: Filtered list of dict with all fields values.
-        '''
-        result_data = []
-        for r_date in virtual_dates:
-            pile = []
-            for arg in args:
-                if arg[0] in ('date', 'date_from', 'date_to'):
-                    op = OPERATORS[arg[1]]
-                    ok = op(r_date, normalize_dt(arg[2]))
-                    pile.append(ok)
-                elif str(arg) in ('&', '|'):
-                    pile.append(arg)
-                else:
-                    pile.append(True)
-            pile.reverse()
-            new_pile = []
-            for val in pile:
-                if not isinstance(val, string_types):
-                    res = val
-                elif str(val) == '&':
-                    first = new_pile.pop()
-                    second = new_pile.pop()
-                    res = first and second
-                elif str(val) == '|':
-                    first = new_pile.pop()
-                    second = new_pile.pop()
-                    res = first or second
-                new_pile.append(res)
-            if not any(True for val in new_pile if not val):
-                r_date_str = normalize_dt_str(r_date)
-                # Get virtual_id with id and date E.g. 19-20170830T230000
-                idval = self._real_id2virtual(data.get('id'), r_date_str)
-                result_data.append(dict(data, id=idval, date=r_date_str))
-        return result_data
-
-    def _sort(self, data, order):
-        '''Sort the list of items by order specs.
-
-        :return:List of ids sorted by order specs.
-        '''
-        def comparer(left, right):
-            from xoutil.future.types import are_instances
-            for fn, sign in comparers:
-                leftres = fn(left)
-                rightres = fn(right)
-                if are_instances(leftres, rightres, tuple):
-                    # comparing many2one values, sorting on name_get
-                    # result
-                    leftv, rightv = leftres[1], rightres[1]
-                else:
-                    leftv, rightv = leftres, rightres
-                return sign * cmp(leftv, rightv)
-            return 0
-        comparers = [(itemgetter(field), -1 if spec == 'desc' else 1) for
-                     field, spec in order]
-        # Return virtual_id with order specify E.g.['19-20170830T230000'...]
-        result = [r['id'] for r in sorted(data, cmp=comparer)]
-        return result
-
-    @api.model
-    def _set_end(self, rule_str, domain, offset, limit):
-        '''Force to end for non infinitive search.
-
-        '''
-        for arg in domain:
-            if arg[0] in ('date', 'date_from', 'date_to') and arg[1] in ['<', '<=']:
-                until = normalize_dt(arg[2])
-                until = datetime_user_to_server_tz(self._cr, self._uid, until,
-                                                   tz_name=self._context.get('tz'))
-                until = normalize_d_str(until)
-                rule_str += ';UNTIL=' + self.parse_until_date(until)
-                return rule_str
-        rule_str += ';COUNT=' + str(offset + (limit or 100))
-        return rule_str
-
-    @api.multi
-    def _iter_ocurrences(self, start=None):
-        '''Yields all occurrences of `self` since `start`.
-
-        Each item is an instance of `Ocurrence`:class:.
-
-        '''
-        from xoutil.future.itertools import map
-        from xoutil.fp.tools import compose, pos_args
-        return map(
-            compose(Occurrence, pos_args),
-            self._iter_occurrences_dates(start=start)
-        )
-
     @api.multi
     def _iter_occurrences_dates(self, start=None):
         '''Produce **all** the occurrences.
@@ -478,75 +420,8 @@ class RecurrentModel(models.AbstractModel):
 
         return merge(*(_iter_from(record) for record in self))
 
-    @api.multi
-    def _get_virtuals_ids(self, domain, offset=0, limit=100):
-        '''Gives virtual event ids for recurring events based on value of
-        Recurrence Rule.
-
-        Read the actual recurring models that you pass and according to the
-        'rrule' of each of them returns the virtual_ids.
-
-        This method gives ids of dates that comes between start date and
-        end date of calendar views
-
-        @param limit: The Number of Results to Return
-
-        '''
-        result_data = []
-        extra_fields = ['date', 'rrule', 'is_recurrent']
-        order = self._context.get('order', None) or self._order
-        order = order.split(',') if order else []
-        order_specs = [
-            (field.split()[0], field.split()[-1].lower())
-            for field in order
-        ]
-        order_fields = [field for field, _ in order_specs]
-        fields = list(set(extra_fields + order_fields))
-        for item in self.read(fields):
-            if not item['is_recurrent'] or isinstance(item['id'], string_types):
-                result_data.append(item)
-                rule_str = False
-            elif not item['rrule']:
-                # FIXME: there's no method _get_rulestring.  There's one in
-                # model 'calendar.calendar'.
-                rule_str = self._get_rulestring(item['id'])
-                rule_str = rule_str[item['id']]
-            else:
-                rule_str = item['rrule']
-            if rule_str:
-                if rule_str.find('COUNT') < 0 and rule_str.find('UNTIL') < 0:
-                    # Add COUNT=100 for 'rule_str, if limit is not specify.
-                    rule_str = self._set_end(rule_str, domain, offset, limit)
-                date = normalize_dt(item['date'])
-                # Get recurrent dates E.g. [datetime.datetime(2017, 8, 29, 23, 0)]
-                recurrent_dates = self._get_recurrent_dates(str(rule_str),
-                                                            startdate=date)
-                result_data.extend(self._check_dates(recurrent_dates, item,
-                                                     domain))
-        if order:
-            result = self._sort(result_data, order_specs)
-        else:
-            result = [data.get('id') for data in result_data]
-        if limit and len(result) >= limit:
-            return result[0:limit]
-        return result
-
-    def _get_recurrent_dates(self, rrulestring, startdate=None):
-        '''Call rrule.rrulestr for list of occurrences dates
-
-        :param rrulestring:
-        :param startdate:
-        :return:
-        '''
-        if not startdate:
-            startdate = datetime.now()
-        # Gets and verifies the rrule following RFC2445.
-        result = rrule.rrulestr(str(rrulestring), dtstart=startdate,
-                                forceset=True)
-        return list(result)
-
     @api.model
-    def _real_id2virtual(self, real_id, recurrent_date):
+    def _real_id2virtual(self, recurrent_date, real_id):
         if real_id and recurrent_date:
             recurrent_date = normalize_dt(recurrent_date)
             recurrent_date = recurrent_date.strftime(_V_DATE_FORMAT)
@@ -582,8 +457,8 @@ class RecurrentModel(models.AbstractModel):
     @api.model
     def _check_for_one_occurrency_change(self):
         'Ensure only real ids.'
-        real_ids = [self._virtual_id2real(x) for x in self.ids]
-        if real_ids != self.ids:
+        real_ids = {self._virtual_id2real(x) for x in self.ids}
+        if real_ids != set(self.ids):
             raise ValidationError('Expected only real ids')
 
     @api.multi
@@ -606,21 +481,3 @@ class RecurrentModel(models.AbstractModel):
             if d_from.date() <= day.date() <= d_to.date():
                 return True
         return False
-
-
-class Occurrence(object):
-    def __iter__(self, date, record):
-        self.date = date
-        self.duration = record.calendar_duration
-        if record.is_recurrent:
-            self.id = record._real_id2virtual(record.id, date)
-        else:
-            self.id = record.id
-        self.__record = record
-
-    def __getattr__(self, attr):
-        return getattr(self.__record, attr)
-
-    @property
-    def recordset(self):
-        return self.__record.browse(self.id)
