@@ -14,7 +14,7 @@
             <button string="Cancel" type="object" name="cancel"
                     class="oe_link"/>
           </header>
-          <separator string="Object MergerConfiguration"/>
+          <separator string="Object Merger Configuration"/>
           <group name="object_merger_config">
             <div name="object_merger">
               <group string="Models">
