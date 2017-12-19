@@ -22,7 +22,7 @@ from dateutil import rrule
 from datetime import datetime, timedelta
 
 from six import string_types
-from xoutil.types import is_collection
+from xoutil.future.types import is_collection
 
 from xoeuf.osv import datetime_user_to_server_tz
 from xoeuf.tools import normalize_datetime as normalize_dt
@@ -517,7 +517,7 @@ class RecurrentModel(models.Model):
         :return:List of ids sorted by order specs.
         '''
         def comparer(left, right):
-            from xoutil.types import are_instances
+            from xoutil.future.types import are_instances
             for fn, sign in comparers:
                 leftres = fn(left)
                 rightres = fn(right)
