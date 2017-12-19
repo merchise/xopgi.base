@@ -5,36 +5,36 @@
       <field name="name">xopgi.board.config.form</field>
       <field name="model">xopgi.board.config</field>
       <field name="arch" type="xml">
-	<form string="" class="oe_form_configuration">
-	  <header>
-	    <button string="Apply" type="object" name="execute"
-		    class="oe_highlight"/>
-	    or
-	    <button string="Cancel" type="object" name="cancel"
-		    class="oe_link"/>
-	  </header>
-	  <group name="xopgi_board_config">
-	    <label string="Widgets"/>
-	    <div>
-	      <button string="View/Edit Widgets"
-		      icon="fa-sign-in"
-		      type="action"
-		      class="oe_highlight"
-		      name="%(act_open_xopgi_board_widget_view)d"/>
-	      or
-	      <button string="View/Edit Widget-Job position relations"
-		      icon="fa-sign-in"
-		      type="action"
-		      class="oe_highlight"
-		      name="%(act_open_xopgi_hr_job_widget_view)d"/>
-	    </div>
-	  </group>
-	</form>
+        <form string="" class="oe_form_configuration">
+          <header>
+            <button string="Apply" type="object" name="execute"
+                    class="oe_highlight"/>
+            or
+            <button string="Cancel" type="object" name="cancel"
+                    class="oe_link"/>
+          </header>
+          <group name="xopgi_board_config">
+            <label string="Widgets"/>
+            <div>
+              <button string="View/Edit Widgets"
+                      icon="fa-sign-in"
+                      type="action"
+                      class="oe_highlight"
+                      name="%(act_open_xopgi_board_widget_view)d"/>
+              or
+              <button string="View/Edit Widget-Job position relations"
+                      icon="fa-sign-in"
+                      type="action"
+                      class="oe_highlight"
+                      name="%(act_open_xopgi_hr_job_widget_view)d"/>
+            </div>
+          </group>
+        </form>
       </field>
     </record>
 
     <record model="ir.actions.act_window"
-	    id="act_open_xopgi_board_config_view">
+            id="act_open_xopgi_board_config_view">
       <field name="name">Configure Preview</field>
       <field name="type">ir.actions.act_window</field>
       <field name="res_model">xopgi.board.config</field>
@@ -44,6 +44,6 @@
     </record>
 
     <menuitem id="menu_xopgi_board_config" parent="base.menu_administration"
-	      sequence="36" action="act_open_xopgi_board_config_view"/>
+              sequence="36" action="act_open_xopgi_board_config_view"/>
   </data>
 </openerp>

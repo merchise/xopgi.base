@@ -19,11 +19,11 @@ odoo.define('xopgi.base.Board', function (require) {
                 self.render();
                 // Events
                 self.$el.delegate('.oe_board_container .oe_fold', 'click',
-				  self.on_fold_action);
+                                  self.on_fold_action);
                 self.$el.delegate('.o_dashboard_action', 'click',
-				  self.on_dashboard_action_clicked);
+                                  self.on_dashboard_action_clicked);
                 self.$el.delegate('.o_target_to_set', 'click',
-				  self.on_dashboard_target_clicked);
+                                  self.on_dashboard_target_clicked);
             });
         },
 
@@ -48,8 +48,8 @@ odoo.define('xopgi.base.Board', function (require) {
                             widget: self,
                             values: result
                         });
-			//Hide panel Preview in Odoo 10
-			$('.o_control_panel.o_breadcrumb_full').hide();
+                        //Hide panel Preview in Odoo 10
+                        $('.o_control_panel.o_breadcrumb_full').hide();
                         $(dashboard).prependTo(self.$el);
                         _.each(result, function (category) {
                             _.each(category, function (values) {
@@ -74,7 +74,7 @@ odoo.define('xopgi.base.Board', function (require) {
                         self.addGraphs();
                         res.resolve();
                     }, function() {res.reject();});
-		});
+                });
             return res.promise();
         },
 
@@ -126,13 +126,13 @@ odoo.define('xopgi.base.Board', function (require) {
             var self = this;
             var chart;
             switch (type) {
-                case 'line':
-                    chart = nv.models.lineChart();
-                    chart.yAxis.tickFormat(d3.format(',f'));
-                    break;
+            case 'line':
+                chart = nv.models.lineChart();
+                chart.yAxis.tickFormat(d3.format(',f'));
+                break;
                 //TODO: manage other graph type.
-                default :
-                    chart = nv.models.pieChart();
+            default :
+                chart = nv.models.pieChart();
             }
             chart.xAxis.tickFormat(function (d) {
                 try {
@@ -166,8 +166,8 @@ odoo.define('xopgi.base.Board', function (require) {
             var title = e.series.key,
                 $tooltip = $('<div>').addClass('o_tooltip'),
                 value = e.series.currency_id ?
-                        this.formatCurrency(e.point.y, e.series.currency_id) :
-                        e.point.y;
+                this.formatCurrency(e.point.y, e.series.currency_id) :
+                e.point.y;
             $('<b>')
                 .addClass('o_tooltip_title')
                 .html(title)
@@ -207,7 +207,7 @@ odoo.define('xopgi.base.Board', function (require) {
                                 $.when(menu.open_menu(action_menu_id)).then(function(){
                                     def.resolve();
                                 });
-			    });
+                            });
                         }
                     });
             }
@@ -245,8 +245,8 @@ odoo.define('xopgi.base.Board', function (require) {
                              _t("Only Integer Value should be valid."));
             } else if (old_value == target_value){
                 var target_text = target_value ?
-			self.humanFriendlyNumber(target_value) :
-			_t('Click to set');
+                    self.humanFriendlyNumber(target_value) :
+                    _t('Click to set');
                 var $span = $('<span>' + target_text + '</span>');
                 $span.attr('name', target_name);
                 $span.attr('class', 'o_target_to_set');
@@ -348,8 +348,8 @@ odoo.define('xopgi.base.Board', function (require) {
         view_loading: function (r) {
             var context_mode = this.dataset.context['default_mode'];
             if (!!context_mode && (context_mode == 'day' ||
-				   context_mode == 'week' ||
-				   context_mode == 'month')) {
+                                   context_mode == 'week' ||
+                                   context_mode == 'month')) {
                 r.arch.attrs.mode = context_mode;
             }
             return this._super(r);
@@ -359,7 +359,7 @@ odoo.define('xopgi.base.Board', function (require) {
     XopgiBoard.Menu = Menu.extend({
         destroy: function () {
             /* This is necessary to avoid main menu drop when leave a
-             instanced menu from board.
+               instanced menu from board.
             */
         }
     });

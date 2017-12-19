@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
-	<data>
+  <data>
     <record id="view_work_distribution_settings" model="ir.ui.view">
       <field name="name">Work Distribution settings</field>
       <field name="model">work.distribution.settings</field>
@@ -56,9 +56,9 @@
                   <field name="strategy_by_group"/>
                   <field name="group_field"
                          attrs="{'invisible': [('strategy_by_group','!=', True)],
-                             'required': [('strategy_by_group','=', True)]}"
+                                 'required': [('strategy_by_group','=', True)]}"
                          domain="[('ttype', '=', 'many2one'),
-                              ('model_id','=', model)]"/>
+                                  ('model_id','=', model)]"/>
                   <label for="domain"/>
                   <div attrs="{'invisible': [('destination_model','=', False)]}">
                     (<field name="use_domain_builder" nolabel="1"/>
@@ -70,12 +70,10 @@
                                  'required': [('use_domain_builder','!=', True)],}"/>
                   <field name="build_domain" nolabel="1" widget="char_domain"
                          options="{'model_field': 'destination_model'}"
-                         attrs="{'invisible':
-                                    ['|', ('use_domain_builder','!=', True),
-                                     ('destination_model', '=', False)],
-                                 'required':
-                                    [('use_domain_builder','=', True),
-                                     ('destination_model', '!=', False)],}"/>
+                         attrs="{'invisible': ['|', ('use_domain_builder','!=', True),
+                                                    ('destination_model', '=', False)],
+                                'required': [('use_domain_builder','=', True),
+                                             ('destination_model', '!=', False)],}"/>
                 </group>
               </page>
               <page string="Strategies">
