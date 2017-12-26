@@ -6,9 +6,9 @@
       <field name="model">hr.job</field>
       <field name="inherit_id" ref="hr.view_hr_job_form" />
       <field name="arch" type="xml">
-	<xpath expr="//group[1]" position="after">
+        <xpath expr="//group[1]" position="after">
           <notebook>
-	  <page string="Widgets">
+            <page string="Widgets">
               <field name="widgets" nolabel="1"
                      context="{'default_hr_job': active_id}">
                 <tree editable="top">
@@ -16,8 +16,8 @@
                   <field name="priority"/>
                 </tree>
               </field>
-	  </page>
-	  </notebook>
+            </page>
+          </notebook>
         </xpath>
       </field>
     </record>

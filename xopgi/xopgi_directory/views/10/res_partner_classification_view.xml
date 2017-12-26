@@ -48,7 +48,7 @@
     </record>
 
     <menuitem id="menu_partner_classification_config"
-	      name ="Partner's Classification"
+              name ="Partner's Classification"
               parent="contacts.menu_contacts"
               sequence="3" action="action_partner_classification_config"/>
 

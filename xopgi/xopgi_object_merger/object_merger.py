@@ -288,11 +288,12 @@ class object_merger(models.TransientModel):
         else:
             fks = []
         for field_name, model_name, ttype in fks:
+            # When a model disappears, Odoo won't remove it from
+            # ir_models_fields until the addon is removed.  So we can get a
+            # model_name that it's not in the registry.  Ignore it.
             model_registry = self.env.registry.get(model_name)
             if not model_registry:
-                # The model is not the registry
-                raise UserError(_('Information!'),
-                                _('The model is not the registry.'))
+                continue
             if not getattr(model_registry, '_auto', False):
                 # The model is not created by the ORM
                 continue
@@ -367,9 +368,6 @@ class object_merger(models.TransientModel):
         for field_name, model_name in refks:
             model = self.env.registry(model_name)
             if not model:
-                # The model is not the registry
-                raise UserError(_('Information!'),
-                                _('The model is not the registry.'))
                 continue
             if not getattr(model, '_auto', False):
                 continue

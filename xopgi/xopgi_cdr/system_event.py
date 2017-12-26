@@ -1,22 +1,19 @@
-# -*- encoding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # ---------------------------------------------------------------------
-# xopgi_cdr.system_event
-# ---------------------------------------------------------------------
-# Copyright (c) 2016-2017 Merchise Autrement [~º/~] and Contributors
+# Copyright (c) Merchise Autrement [~º/~] and Contributors
 # All rights reserved.
 #
-# This is free software; you can redistribute it and/or modify it under the
-# terms of the LICENCE attached (see LICENCE file) in the distribution
-# package.
+# This is free software; you can do what the LICENCE file allows you to.
 #
-# Created on 2016-02-13
 
 from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
 from datetime import timedelta, datetime
-from xoeuf.odoo import api, exceptions, fields, models, _
+from xoeuf import api, fields, models
+from xoeuf.odoo import exceptions, _
 from xoeuf.tools import str2dt
 from .cdr_agent import EVENT_SIGNALS
 from .util import evaluate, get_free_names
@@ -248,11 +245,17 @@ class BasicEvent(models.Model):
             self.update_event(value, cycle)
 
 
+class RecurrentEventDefinition(models.Model):
+    _name = 'cdr.recurrent.event.def'
+    _inherit = ['recurrent.model']
+
+
 class RecurrentEvent(models.Model):
     _name = 'cdr.recurrent.event'
     _description = "Recurrent CDR event"
+
     _inherits = {'cdr.system.event': 'event_id',
-                 'recurrent.model': 'recurrence'}
+                 'cdr.recurrent.event.def': 'recurrence_def'}
 
     event_id = fields.Many2one(
         'cdr.system.event',
@@ -262,8 +265,8 @@ class RecurrentEvent(models.Model):
 
     time = fields.Float()
 
-    recurrence = fields.Many2one(
-        'recurrent.model',
+    recurrence_def = fields.Many2one(
+        'cdr.recurrent.event.def',
         required=True,
         ondelete='cascade'
     )
@@ -273,7 +276,7 @@ class RecurrentEvent(models.Model):
         When an event is evaluated is necessary to update its values.
 
         '''
-        next_call = self.recurrence.next_date(self.recurrence.rrule)
+        next_call = self.recurrence_def.next_date(self.recurrence_def.rrule)
         state = 'raising' if value else 'not_raising'
         action = 'raise' if state == 'raising' else 'do_nothing'
         values = dict(next_call=next_call, state=state, action=action)
@@ -297,6 +300,6 @@ class RecurrentEvent(models.Model):
     @api.model
     @api.returns('self', lambda value: value.id)
     def create(self, vals):
-        if any(field in self.recurrence._fields for field in vals):
+        if any(field in self.recurrence_def._fields for field in vals):
             vals.update(is_recurrent=True)
         return super(RecurrentEvent, self).create(vals)

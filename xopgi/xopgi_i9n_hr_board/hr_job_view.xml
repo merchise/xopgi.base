@@ -6,16 +6,16 @@
       <field name="model">hr.job</field>
       <field name="inherit_id" ref="xopgi_hr_contract.xopgi_view_hr_job_form" />
       <field name="arch" type="xml">
-	<xpath expr="//notebook" position="inside">
-            <page string="Widgets">
-              <field name="widgets" nolabel="1"
-                     context="{'default_hr_job': active_id}">
-                <tree editable="top">
-                  <field name="widget"/>
-                  <field name="priority"/>
-                </tree>
-              </field>
-            </page>
+        <xpath expr="//notebook" position="inside">
+          <page string="Widgets">
+            <field name="widgets" nolabel="1"
+                   context="{'default_hr_job': active_id}">
+              <tree editable="top">
+                <field name="widget"/>
+                <field name="priority"/>
+              </tree>
+            </field>
+          </page>
         </xpath>
       </field>
     </record>

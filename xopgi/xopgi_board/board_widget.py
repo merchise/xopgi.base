@@ -15,12 +15,16 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
-from xoutil import logger
 import operator
 import itertools
+
 from xoeuf import api, fields, models
 from xoeuf.odoo.tools.safe_eval import safe_eval
 from xoeuf.tools import normalize_datetime
+
+import logging
+logger = logging.getLogger(__name__)
+del logging
 
 
 WIDGET_MODEL_NAME = 'xopgi.board.widget'

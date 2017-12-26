@@ -11,10 +11,10 @@
     <br t-if="actions"/>
     <t t-foreach="actions" t-as="action">
       <button
-	  t-attf-class="web_notification_action btn btn-sm oe_highlight #{action['class']}"
-	  t-if="action['title']" t-att-action="JSON.stringify(action)">
-	<span t-if="action['title']" t-esc="action['title']"/>
-	<span t-if="!action['title']">Link</span>
+          t-attf-class="web_notification_action btn btn-sm oe_highlight #{action['class']}"
+          t-if="action['title']" t-att-action="JSON.stringify(action)">
+        <span t-if="action['title']" t-esc="action['title']"/>
+        <span t-if="!action['title']">Link</span>
       </button>
     </t>
   </t>
