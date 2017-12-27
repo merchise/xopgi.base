@@ -46,10 +46,8 @@ class WorkDistributionSettings(models.TransientModel):
         return RELOAD_UI
 
 
-# TODO: The name of the function should not mimic that of the receiver, but
-# provide a clue at what is going to happen post fields_view_get
 @signals.receiver(signals.post_fields_view_get)
-def post_fields_view_get(self, **kwargs):
+def _inject_work_distribution_fields(self, signal, **kwargs):
     result = kwargs['result']
     if kwargs['view_type'] != 'form':
         return kwargs['result']
