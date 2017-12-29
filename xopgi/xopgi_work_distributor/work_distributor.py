@@ -54,10 +54,6 @@ DOMAIN_DEFAULT = '''
 
 
 def _evaluate_domain(dist_model, values):
-    ''' Pop user lang information from context to allow put in domain names
-    and search always on original text and not on user lang translations.
-
-    '''
     domain = dist_model.domain or dist_model.build_domain
     self = dist_model.env[dist_model.destination_field.relation]
     context = dict(dist_model.env.context, lang=False)
