@@ -110,8 +110,9 @@ class ControlVariable(models.Model):
         field 'args' represent a string of type text.
 
         '''
+        from xoeuf.tools import normalize_datetime
         return self.template.eval(
-            now or fields.Datetime.now(),
+            normalize_datetime(now or fields.Datetime.now()),
             self.args if self.template.args_need else {}
         )
 
