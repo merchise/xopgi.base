@@ -54,8 +54,25 @@ def evaluate(expression, mode='eval', **kwargs):
     The expression is provided several functions described below.
 
     If `mode` is 'eval', return the result of the evaluating the expression.
+
     If `mode` is 'exec', the `expression` SHOULD assign a 'result' variable;
     if it does so, return the value of 'result', otherwise return None.
+
+    Symbols available to `expression`:
+
+    - `xoeuf.tools.date2str`:func:
+
+    - `xoeuf.tools.dt2str`:func:
+
+    - `xoeuf.tools.normalize_datetime`:func:
+
+    - `xoeuf.tools.localize_datetime`:func:
+
+    - `datetime.timedelta`:class:
+
+    - `datetime.datetime`:class:
+
+    - `dateutil.relativedelta.relativedelta`:class:
 
     '''
     if mode not in ('eval', 'exec'):

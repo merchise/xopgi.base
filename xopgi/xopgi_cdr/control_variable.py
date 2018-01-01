@@ -193,11 +193,13 @@ class ControlVariableTemplate(models.Model):
             self.args_need = False
 
     def eval(self, now, kwargs_str):
-        """ Evaluate template definition with given param values.
+        """Evaluate template definition with given param values.
 
         :param now: datetime of evaluation cycle start.
-        :param kwargs_str: param values to to passe it to str.format() on
-        definition.
+
+        :param kwargs_str: param values to passe it to str.format() on
+                           definition.
+
         """
         code = self.definition
         if self.args_need:
