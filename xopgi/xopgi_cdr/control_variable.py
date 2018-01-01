@@ -209,7 +209,6 @@ class ControlVariableTemplate(models.Model):
                     'Error formatting control variable template '
                     '%s: %s with %s params.', (self.name, self.definition,
                                                str(kwargs)))
-                logger.exception(e)
                 code = None
         if code:
             return evaluate(code, self.eval_mode, now=now, env=self.env)
