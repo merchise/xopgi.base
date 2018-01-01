@@ -11,7 +11,8 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
-from xoeuf.odoo import api, exceptions, fields, models, _
+from xoeuf import api, fields, models
+from xoeuf.odoo import exceptions, _
 from xoeuf.osv.orm import CREATE_RELATED
 from .util import evaluate
 
