@@ -32,7 +32,8 @@
       <field name="name">xopgi.dist.model.acl.private2</field>
       <field name="model_id"
              ref="xopgi_work_distributor.model_work_distribution_model"/>
-      <field name="group_id" ref="xopgi_work_distributor.group_distributor_manager"/>
+      <field name="group_id"
+             ref="xopgi_work_distributor.group_distributor_manager"/>
       <field name="perm_read" eval="1"/>
       <field name="perm_create" eval="1"/>
       <field name="perm_write" eval="1"/>

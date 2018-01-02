@@ -11,7 +11,8 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
-from xoeuf.odoo import api, exceptions, fields, models, _
+from xoeuf import api, fields, models
+from xoeuf.odoo import exceptions, _
 from xoeuf.osv.orm import CREATE_RELATED
 from .util import evaluate
 
@@ -109,8 +110,9 @@ class ControlVariable(models.Model):
         field 'args' represent a string of type text.
 
         '''
+        from xoeuf.tools import normalize_datetime
         return self.template.eval(
-            now or fields.Datetime.now(),
+            normalize_datetime(now or fields.Datetime.now()),
             self.args if self.template.args_need else {}
         )
 
@@ -193,11 +195,13 @@ class ControlVariableTemplate(models.Model):
             self.args_need = False
 
     def eval(self, now, kwargs_str):
-        """ Evaluate template definition with given param values.
+        """Evaluate template definition with given param values.
 
         :param now: datetime of evaluation cycle start.
-        :param kwargs_str: param values to to passe it to str.format() on
-        definition.
+
+        :param kwargs_str: param values to passe it to str.format() on
+                           definition.
+
         """
         code = self.definition
         if self.args_need:
@@ -209,7 +213,6 @@ class ControlVariableTemplate(models.Model):
                     'Error formatting control variable template '
                     '%s: %s with %s params.', (self.name, self.definition,
                                                str(kwargs)))
-                logger.exception(e)
                 code = None
         if code:
             return evaluate(code, self.eval_mode, now=now, env=self.env)

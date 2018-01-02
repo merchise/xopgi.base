@@ -1,17 +1,11 @@
 #!/usr/bin/env python
-# -*- encoding: utf-8 -*-
-# --------------------------------------------------------------------------
-# xopgi_work_distributor.work_distributor
-# --------------------------------------------------------------------------
-# Copyright (c) 2014-2017 Merchise Autrement [~º/~] and Contributors
+# -*- coding: utf-8 -*-
+# ---------------------------------------------------------------------
+# Copyright (c) Merchise Autrement [~º/~] and Contributors
 # All rights reserved.
 #
-# Author: Merchise Autrement [~º/~]
-# Contributors: see CONTRIBUTORS and HISTORY file
+# This is free software; you can do what the LICENCE file allows you to.
 #
-# This is free software; you can redistribute it and/or modify it under the
-# terms of the LICENCE attached (see LICENCE file) in the distribution
-# package.
 
 from __future__ import (division as _py3_division,
                         print_function as _py3_print,
@@ -60,10 +54,6 @@ DOMAIN_DEFAULT = '''
 
 
 def _evaluate_domain(dist_model, values):
-    ''' Pop user lang information from context to allow put in domain names
-    and search always on original text and not on user lang translations.
-
-    '''
     domain = dist_model.domain or dist_model.build_domain
     self = dist_model.env[dist_model.destination_field.relation]
     context = dict(dist_model.env.context, lang=False)
