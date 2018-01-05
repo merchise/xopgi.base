@@ -130,28 +130,24 @@ class object_merger(models.TransientModel):
         '''
         if len(self._context.get('active_ids', [])) < 2:
             raise UserError(
-                _('Information!'),
                 _('At less two items are necessary for merge.')
             )
         model = IrModel.sudo().search([('model', '=', active_model)], limit=1)
         if model and 0 < model.merge_limit < len(self._context.get('active_ids', [])):
-            raise UserError(_('Warning!'),
-                            _('You can`t merge so much objects at one time.'))
+            raise UserError(_('You can`t merge so much objects at one time.'))
         return True
 
     @api.requires_singleton
     def action_merge(self):
         active_model = self._context.get('active_model')
         if not active_model:
-            raise UserError(_('Configuration Error!'),
-                            _('The is no active model defined!'))
+            raise UserError(_('The is no active model defined!'))
         Model = self.env[active_model]
         sources = Model.browse(self._context.get('active_ids', []))
         attr = self._context.get('field_to_read')
         val = getattr(self, attr, None) if attr else None
         if not val:
-            raise UserError(_('Configuration Error!'),
-                            _('Please select one value to keep'))
+            raise UserError(_('Please select one value to keep'))
         target = val[0]
         self.merge(sources, target)
         try:
