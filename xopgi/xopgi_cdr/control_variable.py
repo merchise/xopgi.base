@@ -125,15 +125,17 @@ class ControlVariable(models.Model):
         return result
 
     @api.constrains('template', 'args')
-    def check_definition(self):
+    def _check_definition(self):
         '''Check the control variable definition.
 
         '''
-        try:
-            self.template.compile(self.arguments)
-        except Exception as e:
-            raise exceptions.ValidationError(_("Wrong definition: %s") %
-                                             e.message)
+        for variable in self:
+            try:
+                variable.template.compile(variable.arguments)
+            except Exception as e:
+                raise exceptions.ValidationError(
+                    _("Wrong definition: %s") % e.message
+                )
 
     def evaluate(self, cycle):
         '''Evaluate the control variables in a evaluation cycle.

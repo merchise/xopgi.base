@@ -154,12 +154,14 @@ class SystemEvent(models.Model):
         return evaluate(self.definition, **self.evidences.get_bool_value())
 
     @api.constrains('definition')
-    def check_definition(self):
-        try:
-            self._evaluate()
-        except Exception as e:
-            raise exceptions.ValidationError(
-                _("Wrong definition: %s") % e.message)
+    def _check_definition(self):
+        for record in self:
+            try:
+                record._evaluate()
+            except Exception as e:
+                raise exceptions.ValidationError(
+                    _("Wrong definition: %s") % e.message
+                )
 
     def evaluate(self, cycle):
         self.evaluate_dependences(cycle)
