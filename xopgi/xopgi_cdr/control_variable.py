@@ -131,7 +131,7 @@ class ControlVariable(models.Model):
         '''Evaluate the control variables in a evaluation cycle.
 
         '''
-        logger.debug('Start evaluation of %r, cycle: %r', self.name, cycle)
+        logger.debug('Start evaluation of %r, cycle: %r', self.mapped('name'), cycle)
         from celery.exceptions import SoftTimeLimitExceeded
         for var in self:
             try:
@@ -150,11 +150,12 @@ class ControlVariable(models.Model):
                     evaluations=[CREATE_RELATED(result=value,
                                                 cycle=cycle.id)]
                 ))
-        logger.debug('Done computing variable %r', self.name)
+        logger.debug('Done computing variable %r', self.mapped('name'))
 
     @api.model
     @api.returns('self', lambda value: value.id)
     def create(self, vals):
+        logger.debug('Creating variable %r', vals)
         res = super(ControlVariable, self).create(vals)
         logger.debug('Created variable %r', res.name)
         # evaluate by first time to get init value.
