@@ -57,6 +57,10 @@ class ControlVariable(models.Model):
         help="Python dictionary with arguments that template expect."
     )
 
+    @fields.Property
+    def arguments(self):
+        return evaluate(self.args) if self.args else {}
+
     evidences = fields.Many2many(
         'cdr.evidence',
         'evidence_control_variable_rel',
@@ -105,16 +109,20 @@ class ControlVariable(models.Model):
                       'deprecated.  Use the `result` property.')
         return self.result
 
+    @api.requires_singleton
     def _evaluate(self, now=None):
         '''Allow to make python expression for 'args' in the template. The
         field 'args' represent a string of type text.
 
         '''
+        logger.debug('Evaluating %r', self.name)
         from xoeuf.tools import normalize_datetime
-        return self.template.eval(
+        result = self.template.eval(
             normalize_datetime(now or fields.Datetime.now()),
-            self.args if self.template.args_need else {}
+            self.arguments
         )
+        logger.debug('Evaluated %r', self.name)
+        return result
 
     @api.constrains('template', 'args')
     def check_definition(self):
@@ -122,7 +130,7 @@ class ControlVariable(models.Model):
 
         '''
         try:
-            self._evaluate()
+            self.template.compile(self.arguments)
         except Exception as e:
             raise exceptions.ValidationError(_("Wrong definition: %s") %
                                              e.message)
@@ -199,26 +207,22 @@ class ControlVariableTemplate(models.Model):
         if not self.reusable:
             self.args_need = False
 
-    def eval(self, now, kwargs_str):
+    def compile(self, values):
+        '''Compiles the expression with `values`.'''
+        source = self.definition
+        if self.args_need:
+            source = source.format(**values)
+        compile(source, '<cdr-variable>', self.eval_mode)  # TODO: safe_compile
+        return source
+
+    def eval(self, now, values):
         """Evaluate template definition with given param values.
 
         :param now: datetime of evaluation cycle start.
 
-        :param kwargs_str: param values to passe it to str.format() on
+        :param values: param values to passe it to str.format() on
                            definition.
 
         """
-        code = self.definition
-        if self.args_need:
-            try:
-                kwargs = evaluate(kwargs_str)
-                code = code.format(**kwargs)
-            except Exception:
-                logger.exception(
-                    'Error formatting control variable template '
-                    '%s: %s with %s params.', (self.name, self.definition,
-                                               str(kwargs)))
-                code = None
-        if code:
-            return evaluate(code, self.eval_mode, now=now, env=self.env)
-        return None
+        code = self.compile(values)
+        return evaluate(code, self.eval_mode, now=now, env=self.env)
