@@ -3,6 +3,7 @@ odoo.define('xopgi.base.Board', function (require) {
 
     var core = require('web.core');
     var data = require('web.data');
+    var utils = require('web.utils');
     var form_common = require('web.form_common');
     var Model = require('web.DataModel');
     var pyeval = require('web.pyeval');
@@ -315,10 +316,10 @@ odoo.define('xopgi.base.Board', function (require) {
                 }
             }
             if (!!a && a < 0) {
-                return '-' + humanFriendlyNumber(a*-1, 0);
+                return '-' + utils.human_number(a*-1, 0);
             }
             else{
-                return humanFriendlyNumber(a, 0);
+                return utils.human_number(a, 0);
             }
         },
 
