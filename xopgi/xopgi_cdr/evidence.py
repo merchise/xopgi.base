@@ -141,16 +141,19 @@ class Evidence(models.Model):
         return bool(op_funct(definition_result, safe_eval(self.operand)))
 
     @api.constrains('definition', 'operand', 'operator')
-    def check_definition(self):
+    def _check_definition(self):
         '''Evaluate and verify the definition of an evidence.
 
         '''
-        try:
-            definition_res = self._evaluate()
-            self.evaluate_bool_expresion(definition_res)
-        except Exception as e:
-            raise exceptions.ValidationError(
-                _("Wrong definition: %s") % e.message)
+        for record in self:
+            try:
+                # TODO: Compile only
+                definition_res = record._evaluate()
+                record.evaluate_bool_expresion(definition_res)
+            except Exception as e:
+                raise exceptions.ValidationError(
+                    _("Wrong definition: %s") % e.message
+                )
 
     def evaluate(self, cycle):
         '''Evaluate the evidences in a evaluation cycle.
