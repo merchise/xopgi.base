@@ -14,6 +14,11 @@ odoo.define('xopgi.base.Board', function (require) {
     var QWeb = core.qweb;
 
     var XopgiBoard = form_common.FormWidget.extend({
+        init: function(field_manager, node) {
+            field_manager.ViewManager.need_control_panel = false;
+            this._super(field_manager,node);
+        },
+
         start: function() {
             var self = this;
             return $.when(this._super.apply(this, arguments)).then(function(){
@@ -49,8 +54,6 @@ odoo.define('xopgi.base.Board', function (require) {
                             widget: self,
                             values: result
                         });
-                        //Hide panel Preview in Odoo 10
-                        $('.o_control_panel.o_breadcrumb_full').hide();
                         $(dashboard).prependTo(self.$el);
                         _.each(result, function (category) {
                             _.each(category, function (values) {
@@ -126,13 +129,11 @@ odoo.define('xopgi.base.Board', function (require) {
         format_graph: function(type, values) {
             var self = this;
             var chart;
-            switch (type) {
-            case 'line':
+            if (type == 'line') {
                 chart = nv.models.lineChart();
                 chart.yAxis.tickFormat(d3.format(',f'));
-                break;
-                //TODO: manage other graph type.
-            default :
+            }
+            else {
                 chart = nv.models.pieChart();
             }
             chart.xAxis.tickFormat(function (d) {

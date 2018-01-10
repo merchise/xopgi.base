@@ -14,6 +14,11 @@ odoo.define('xopgi.base.Board', function (require) {
     var QWeb = core.qweb;
 
     var XopgiBoard = form_common.FormWidget.extend({
+        init: function(field_manager, node) {
+            field_manager.ViewManager.need_control_panel = false;
+            this._super(field_manager,node);
+        },
+
         start: function() {
             var self = this;
             return $.when(this._super.apply(this, arguments)).then(function(){
@@ -126,13 +131,11 @@ odoo.define('xopgi.base.Board', function (require) {
         format_graph: function(type, values) {
             var self = this;
             var chart;
-            switch (type) {
-            case 'line':
+            if (type == 'line') {
                 chart = nv.models.lineChart();
                 chart.yAxis.tickFormat(d3.format(',f'));
-                break;
-                //TODO: manage other graph type.
-            default :
+            }
+            else {
                 chart = nv.models.pieChart();
             }
             chart.xAxis.tickFormat(function (d) {
@@ -167,8 +170,8 @@ odoo.define('xopgi.base.Board', function (require) {
             var title = e.series.key,
                 $tooltip = $('<div>').addClass('o_tooltip'),
                 value = e.series.currency_id ?
-                this.formatCurrency(e.point.y, e.series.currency_id) :
-                e.point.y;
+                    this.formatCurrency(e.point.y, e.series.currency_id) :
+                    e.point.y;
             $('<b>')
                 .addClass('o_tooltip_title')
                 .html(title)
@@ -246,8 +249,8 @@ odoo.define('xopgi.base.Board', function (require) {
                              _t("Only Integer Value should be valid."));
             } else if (old_value == target_value){
                 var target_text = target_value ?
-                    self.humanFriendlyNumber(target_value) :
-                    _t('Click to set');
+                        self.humanFriendlyNumber(target_value) :
+                        _t('Click to set');
                 var $span = $('<span>' + target_text + '</span>');
                 $span.attr('name', target_name);
                 $span.attr('class', 'o_target_to_set');
