@@ -79,6 +79,9 @@ class objectmerge_mail(models.TransientModel):
         )
         sources -= target
         self._check_on_alias_defaults(sources, target)
-        if target.message_capable_models():
+        MailThread = self.env['mail.thread']
+        message = MailThread.message_capable_models()
+        model_name = target._name
+        if message.get(model_name, None):
             self._notify_merge(sources, target)
         return res
