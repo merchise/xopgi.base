@@ -1,4 +1,22 @@
 @charset "UTF-8";
+
+.xopgi_darkgray_bg {
+  background-color: #c9c9c6;
+}
+
+.xopgi_lightgray_bg {
+  background-color: #E2E2E0;
+}
+
+.xopgi_blue_bg {
+  background-color: #7c7bad;
+}
+.xopgi_blue_bg:hover {
+  background-color: #5f5e97;
+}
+
+
+
 .openerp .oe_board {
   width: 100%;
 }
