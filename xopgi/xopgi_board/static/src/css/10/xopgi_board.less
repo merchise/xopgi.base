@@ -1,21 +1,132 @@
 @charset "UTF-8";
 
-.xopgi_darkgray_bg {
-  background-color: #c9c9c6;
+//Colors taken from Odoo 10.
+@red_low: #efadac;
+@red_medium: #e88482;
+@red_strong: #a94442;
+@blue: #7c7bad;
+@green: #3dcc8c;
+@greenyellow: #bcbd22;
+@gray: #7f7f7f;
+@lightgray: #e2e2e0;
+@orange: #f59f00;
+@white: #ffffff;
+@black: #000000;
+
+
+.xb_darkgray_bg {
+  background-color: darken(@lightgray, 15%);
 }
 
-.xopgi_lightgray_bg {
-  background-color: #E2E2E0;
+.xb_lightgray_bg {
+  background-color: @lightgray;
 }
 
-.xopgi_blue_bg {
-  background-color: #7c7bad;
+.xb_dark {
+    color: black;
+    &:hover {
+	color: black;
+    }
+}
 
+.xb_light {
+    color: white;
+    &:hover {
+	color: white;
+    }
+}
+
+.xb_red_low {
+  background-color: @red_low;
+  color: @black !important;
   &:hover {
-    background-color: #5f5e97;
+    background-color: darken(@red_low, 5%);
   }
 }
 
+.xb_red_medium {
+  background-color: @red_medium;
+  color: @black !important;
+  &:hover {
+    background-color: darken(@red_medium, 5%);
+  }
+}
+
+.xb_red_bg {
+  background-color: @red_strong;
+  color: @black !important;
+  &:hover {
+    background-color: darken(@red_strong, 5%);
+  }
+}
+
+.xb_blue_bg {
+  background-color: @blue;
+  color: @white !important;
+  &:hover {
+    background-color: darken(@blue, 10%);
+  }
+}
+
+.xb_green_bg {
+  background-color: @green;
+  color: @black !important;
+  &:hover {
+    background-color: darken(@green, 10%);
+  }
+}
+
+.xb_orange_bg {
+    background-color: @orange;
+    color: @black !important;
+  &:hover {
+    background-color: darken(@orange, 5%);
+  }
+}
+
+.xb_subtotal {
+  padding-left: 10px;
+  .xb_lightgray_bg();
+}
+
+.xb_total {
+  .xb_darkgray_bg();
+  padding-left: 10px;
+  padding-bottom: 10px;
+}
+
+.xb_indicator {
+    &.xb_ok {
+	.xb_blue_bg();
+    }
+    &.xb_risk {
+	.xb_orange_bg();
+    }
+    &.xb_critical {
+	.xb_red_bg()
+    }
+}
+
+.xb_debt {
+    &.xb_a_month {
+	.xb_red_low();
+    }
+    &.xb_more_a_month {
+	.xb_red_medium();
+    }
+    &.xb_more_two_month {
+	.xb_red_bg()
+    }
+}
+
+.xb_invoice_indicator {
+    &.xb_open {
+	.xb_blue_bg();
+    }
+    &.xb_overdue {
+	.xb_red_bg()
+    }
+}
 
 .o_web_client .oe_board {
   width: 100%;
@@ -87,4 +198,110 @@ input.oe_changing {
   vertical-align: middle;
   text-align: center;
   width: 100%;
+}
+
+.o_xhg_dashboard {
+    padding: 10px 6px;
+    position: relative;
+    background-color: white;
+    flex: 1 0 100%;
+    margin: -4px -12px 4px;
+}
+
+a.o_dashboard_action {
+    display: block;
+    max-width: 100%;
+}
+
+.o_dashboard .o_welcome_message {
+    width: 100%;
+    bottom: auto;
+    right: auto;
+    display: flex;
+    justify-content: center;
+    left: 0px;
+    top: 0px;
+    position: absolute;
+}
+
+.o_xhg_dashboard .o_welcome_message .o_welcome_image {
+    padding: 20px;
+}
+
+.o_xhg_dashboard .o_welcome_message .o_welcome_content > a {
+    color: white;
+    display: inline-block;
+}
+
+.o_xhg_dashboard > .o_demo {
+    opacity: 0.07;
+}
+
+.o_xhg_dashboard > div {
+    display: inline-block;
+    vertical-align: top;
+}
+
+.o_xhg_dashboard > div > table {
+    border-spacing: 10px 0;
+    table-layout: fixed;
+    border-collapse: separate;
+    margin-bottom: 0;
+}
+
+.o_xhg_dashboard > div > table > tbody > tr > td {
+    vertical-align: middle;
+    text-align: center;
+    border-top: 1px solid #FFF;
+    width: 16%;
+    height: 33px;
+}
+
+.o_xhg_dashboard > div > table > tbody > tr > td > span {
+    display: inline;
+}
+
+.o_xhg_dashboard > div > table > tbody > tr > td > a:hover {
+    text-decoration: none;
+}
+
+.o_xhg_dashboard .o_main {
+    .xb_blue_bg();
+}
+
+.o_xhg_dashboard .o_main a {
+    color: white;
+}
+
+.o_xhg_dashboard .o_warning {
+    .xb_orange_bg();
+}
+
+.o_xhg_dashboard .o_warning a {
+    color: black;
+}
+
+.o_xhg_dashboard .o_secondary a {
+    color: black;
+}
+
+.o_xhg_dashboard .o_secondary {
+    .xb_lightgray_bg();
+}
+
+.o_xhg_dashboard .o_secondary:hover{
+    .xb_darkgray_bg();
+}
+
+.o_xhg_dashboard .o_highlight {
+    font-size: 20px;
+    text-align: center;
+}
+
+.o_highlight {
+    font-size: 20px;
+}
+
+.o_xhg_dashboard .o_text {
+    text-align: left;
 }
