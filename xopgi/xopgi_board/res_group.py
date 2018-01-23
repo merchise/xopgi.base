@@ -37,4 +37,4 @@ class ResGroupWidget(models.Model):
         '''Returns the groups in which the current user is located
 
         '''
-        return self.search([('group.users', '=', self._uid)])
+        return self.sudo().search([('group.users', '=', self._uid)]).sudo(self._uid)

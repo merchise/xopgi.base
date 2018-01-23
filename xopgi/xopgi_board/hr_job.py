@@ -33,4 +33,4 @@ class HrJobWidget(models.Model):
 
     def get_user_widgets(self):
         user_id = 'job_position.contract_ids.employee_id.user_id'
-        return self.search([(user_id, '=', self._uid)])
+        return self.sudo().search([(user_id, '=', self._uid)]).sudo(self._uid)
