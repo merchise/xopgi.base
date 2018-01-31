@@ -25,18 +25,31 @@ class WorkDistributionSettings(models.TransientModel):
     _name = 'work.distribution.settings'
     _inherit = 'res.config.settings'
 
-    def _get_default_work_distribution_models(self):
+    @api.multi
+    def _set_work_distribution(self):
+        models = self.mapped('models_ids')
+        models.unlink_rest()
+        self.invalidate_cache()
+
+    def _compute_work_distribution_models(self):
+        for settings in self:
+            settings.models_ids = self._get_work_distribution_models()
+
+    @api.model
+    def _get_work_distribution_models(self):
         return self.env[WORKDIST_MODELNAME].search([]).ids
 
     models_ids = fields.Many2many(
-        WORKDIST_MODELNAME, 'work_distribution_settings_rel',
-        'setting_id', 'model_id', 'Models',
-        default=_get_default_work_distribution_models)
+        WORKDIST_MODELNAME,
+        string='Models',
+        compute=_compute_work_distribution_models,
+        inverse=_set_work_distribution,
+        default=_get_work_distribution_models
+    )
 
-    @api.guess
-    def install(self, *args, **kargs):
-        for wiz in self.browse(*args, **kargs):
-            wiz.models_ids.unlink_rest()
+    @api.multi
+    def install(self):
+        self._set_work_distribution()
         return RELOAD_UI
 
 
