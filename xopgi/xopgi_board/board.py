@@ -21,31 +21,6 @@ logger = logging.getLogger(__name__)
 del logging
 
 
-def lineal_color_scaling(value,  # 0-1 float
-                         start_point=(255, 0, 0),  # red
-                         end_point=(0, 255, 0)):  # green
-    from colorsys import rgb_to_hsv, hsv_to_rgb as _hsv_to_rgb
-    start_point = rgb_to_hsv(*start_point)
-    end_point = rgb_to_hsv(*end_point)
-
-    def hsv_to_rgb(*a):
-        res = _hsv_to_rgb(*a)
-        return tuple(int(x) for x in res)
-
-    def transition(value, start_point, end_point):
-        return start_point + (end_point - start_point) * value
-
-    def transition3(value, s, e):
-        s1, s2, s3 = s
-        e1, e2, e3 = e
-        r1 = transition(value, s1, e1)
-        r2 = transition(value, s2, e2)
-        r3 = transition(value, s3, e3)
-        return (r1, r2, r3)
-
-    return hsv_to_rgb(*transition3(value, start_point, end_point))
-
-
 def get_query_from_domain(self, domain):
     query = self._where_calc(domain)
     self._apply_ir_rules(query, 'read')
@@ -68,16 +43,20 @@ def get_targets(self, values, indicators=(), from_company=False,
 
 def get_indicator_color(target, value, inverted=False):
     value = value or 0.0
-    sector = 11
-    if target:
-        if target >= value:
-            sector = 1.0 if inverted else float(value) / target
+    if not target or target == 0 and value > 0:
+        color = 'xb_lightgray_bg'
+    if target > 0:
+        value_fill = float(value) / target
+        if inverted:
+            fill = 1 - value_fill
         else:
-            sector = 0.0 if inverted else 1.0
-    if sector > 1.0:
-        color = '#e2e2e0'
-    else:
-        color = 'rgb(%s, %s, %s)' % lineal_color_scaling(sector)
+            fill = value_fill
+        if 0 <= fill < 0.5:
+            color = 'xb_red_bg'
+        elif 0.5 <= fill < 1:
+            color = 'xb_orange_bg'
+        elif fill >= 1:
+            color = 'xb_green_bg'
     return color
 
 
