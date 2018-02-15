@@ -34,7 +34,7 @@ Create dashboard employee functions oriented.
 
     # MIGRATION POLICY: All addons are not included until someone work on them
     # and upgrade them.
-    'installable': 8 <= MAJOR_ODOO_VERSION < 11,   # noqa
+    'installable': 10 <= MAJOR_ODOO_VERSION < 11,   # noqa
 
     'auto_install': False,
 }
