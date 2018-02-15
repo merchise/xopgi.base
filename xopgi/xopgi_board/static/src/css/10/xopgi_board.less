@@ -23,22 +23,22 @@
 }
 
 .xb_dark {
+  color: black;
+  &:hover {
     color: black;
-    &:hover {
-	color: black;
-    }
+  }
 }
 
 .xb_light {
+  color: white;
+  &:hover {
     color: white;
-    &:hover {
-	color: white;
-    }
+  }
 }
 
 .xb_red_low {
   background-color: @red_low;
-  color: @black !important;
+  color: @white;
   &:hover {
     background-color: darken(@red_low, 5%);
   }
@@ -46,7 +46,7 @@
 
 .xb_red_medium {
   background-color: @red_medium;
-  color: @black !important;
+  color: @white !important;
   &:hover {
     background-color: darken(@red_medium, 5%);
   }
@@ -54,7 +54,7 @@
 
 .xb_red_bg {
   background-color: @red_strong;
-  color: @white !important;
+  color: @white;
   &:hover {
     background-color: darken(@red_strong, 5%);
   }
@@ -77,8 +77,8 @@
 }
 
 .xb_orange_bg {
-    background-color: @orange;
-    color: @black !important;
+  background-color: @orange;
+  color: @black !important;
   &:hover {
     background-color: darken(@orange, 5%);
   }
@@ -96,36 +96,36 @@
 }
 
 .xb_indicator {
-    &.xb_ok {
-	.xb_blue_bg();
-    }
-    &.xb_risk {
-	.xb_orange_bg();
-    }
-    &.xb_critical {
-	.xb_red_bg()
-    }
+  &.xb_ok {
+    .xb_blue_bg();
+  }
+  &.xb_risk {
+    .xb_orange_bg();
+  }
+  &.xb_critical {
+    .xb_red_bg()
+  }
 }
 
 .xb_debt {
-    &.xb_a_month {
-	.xb_red_low();
-    }
-    &.xb_more_a_month {
-	.xb_red_medium();
-    }
-    &.xb_more_two_month {
-	.xb_red_bg()
-    }
+  &.xb_a_month {
+    .xb_red_low();
+  }
+  &.xb_more_a_month {
+    .xb_red_medium();
+  }
+  &.xb_more_two_month {
+    .xb_red_bg()
+  }
 }
 
 .xb_invoice_indicator {
-    &.xb_open {
-	.xb_blue_bg();
-    }
-    &.xb_overdue {
-	.xb_red_bg()
-    }
+  &.xb_open {
+    .xb_blue_bg();
+  }
+  &.xb_overdue {
+    .xb_red_bg()
+  }
 }
 
 .o_web_client .oe_board {
@@ -189,9 +189,9 @@ o_web_client .oe_board .oe_board_widget .oe_header span {
 }
 
 input.oe_header_text {
-    visibility: hidden;
-    display: inline-block;
-    width:0 ;
+  visibility: hidden;
+  display: inline-block;
+  width:0 ;
 }
 
 input.oe_changing {
@@ -201,107 +201,107 @@ input.oe_changing {
 }
 
 .o_xhg_dashboard {
-    padding: 10px 6px;
-    position: relative;
-    background-color: white;
-    flex: 1 0 100%;
-    margin: -4px -12px 4px;
+  padding: 10px 6px;
+  position: relative;
+  background-color: white;
+  flex: 1 0 100%;
+  margin: -4px -12px 4px;
 }
 
 a.o_dashboard_action {
-    display: block;
-    max-width: 100%;
+  display: block;
+  max-width: 100%;
 }
 
 .o_dashboard .o_welcome_message {
-    width: 100%;
-    bottom: auto;
-    right: auto;
-    display: flex;
-    justify-content: center;
-    left: 0px;
-    top: 0px;
-    position: absolute;
+  width: 100%;
+  bottom: auto;
+  right: auto;
+  display: flex;
+  justify-content: center;
+  left: 0px;
+  top: 0px;
+  position: absolute;
 }
 
 .o_xhg_dashboard .o_welcome_message .o_welcome_image {
-    padding: 20px;
+  padding: 20px;
 }
 
 .o_xhg_dashboard .o_welcome_message .o_welcome_content > a {
-    color: white;
-    display: inline-block;
+  color: white;
+  display: inline-block;
 }
 
 .o_xhg_dashboard > .o_demo {
-    opacity: 0.07;
+  opacity: 0.07;
 }
 
 .o_xhg_dashboard > div {
-    display: inline-block;
-    vertical-align: top;
+  display: inline-block;
+  vertical-align: top;
 }
 
 .o_xhg_dashboard > div > table {
-    border-spacing: 10px 0;
-    table-layout: fixed;
-    border-collapse: separate;
-    margin-bottom: 0;
+  border-spacing: 10px 0;
+  table-layout: fixed;
+  border-collapse: separate;
+  margin-bottom: 0;
 }
 
 .o_xhg_dashboard > div > table > tbody > tr > td {
-    vertical-align: middle;
-    text-align: center;
-    border-top: 1px solid #FFF;
-    width: 16%;
-    height: 33px;
+  vertical-align: middle;
+  text-align: center;
+  border-top: 1px solid #FFF;
+  width: 16%;
+  height: 33px;
 }
 
 .o_xhg_dashboard > div > table > tbody > tr > td > span {
-    display: inline;
+  display: inline;
 }
 
 .o_xhg_dashboard > div > table > tbody > tr > td > a:hover {
-    text-decoration: none;
+  text-decoration: none;
 }
 
 .o_xhg_dashboard .o_main {
-    .xb_blue_bg();
+  .xb_blue_bg();
 }
 
 .o_xhg_dashboard .o_main a {
-    color: white;
+  color: white;
 }
 
 .o_xhg_dashboard .o_warning {
-    .xb_orange_bg();
+  .xb_orange_bg();
 }
 
 .o_xhg_dashboard .o_warning a {
-    color: black;
+  color: black;
 }
 
 .o_xhg_dashboard .o_secondary a {
-    color: black;
+  color: black;
 }
 
 .o_xhg_dashboard .o_secondary {
-    .xb_lightgray_bg();
+  .xb_lightgray_bg();
 }
 
 .o_xhg_dashboard .o_secondary:hover{
-    .xb_darkgray_bg();
+  .xb_darkgray_bg();
 }
 
 .o_xhg_dashboard .o_highlight {
-    font-size: 20px;
-    text-align: center;
+  font-size: 20px;
+  text-align: center;
 }
 
 .o_highlight {
-    font-size: 20px;
+  font-size: 20px;
 }
 
 .o_xhg_dashboard .o_text {
-    text-align: left;
+  text-align: left;
 }
