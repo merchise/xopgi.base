@@ -42,6 +42,7 @@ def get_targets(self, values, indicators=(), from_company=False,
 
 
 def get_indicator_color(target, value, inverted=False):
+    # TODO: Document.
     value = value or 0.0
     if not target or target == 0 and value > 0:
         color = 'xb_lightgray_bg'
@@ -57,6 +58,8 @@ def get_indicator_color(target, value, inverted=False):
             color = 'xb_orange_bg'
         elif fill >= 1:
             color = 'xb_green_bg'
+    else:
+        color = 'xb_lightgray_bg'
     return color
 
 
