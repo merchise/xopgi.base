@@ -42,24 +42,35 @@ def get_targets(self, values, indicators=(), from_company=False,
 
 
 def get_indicator_color(target, value, inverted=False):
-    # TODO: Document.
+    '''Return the name of CSS class which indicates the compliance of `value`
+    over target.
+
+    If the value of the indicator is less than zero, the color will be gray.
+
+    If the indicator is inverted the color scale is inverted. This means that
+    if its value increases your result will be worse. We subtract the
+    compliance from 1 to use the same scale to assign the colors and reverse
+    their result.
+
+    Compliance is given by the ratio `value/target`:
+
+    - 0%- 49,9..% is red
+    - 50%-99,9..% is orange
+    - 100% or greater- is green
+
+    '''
     value = value or 0.0
-    if not target or target == 0 and value > 0:
-        color = 'xb_lightgray_bg'
-    if target > 0:
-        value_fill = float(value) / target
+    color = 'xb_lightgray_bg'
+    if target and target > 0 and value >= 0:
+        compliance = 1 if value > target else float(value) / target
         if inverted:
-            fill = 1 - value_fill
-        else:
-            fill = value_fill
-        if 0 <= fill < 0.5:
+            compliance = 1 - compliance
+        if 0 <= compliance < 0.5:
             color = 'xb_red_bg'
-        elif 0.5 <= fill < 1:
+        elif 0.5 <= compliance < 1:
             color = 'xb_orange_bg'
-        elif fill >= 1:
+        elif compliance >= 1:
             color = 'xb_green_bg'
-    else:
-        color = 'xb_lightgray_bg'
     return color
 
 
