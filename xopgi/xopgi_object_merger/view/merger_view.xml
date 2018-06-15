@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<openerp>
+  <data>
+    <record id="view_merger_tree" model="ir.ui.view">
+      <field name="name">merger.tree</field>
+      <field name="model">object.merger.settings</field>
+      <field name="arch" type="xml">
+        <tree string="Merger">
+        </tree>
+      </field>
+    </record>
+  </data>
+</openerp>

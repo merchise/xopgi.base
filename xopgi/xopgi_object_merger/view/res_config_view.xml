@@ -23,6 +23,8 @@
                     <field name="name"/>
                     <field name="model"/>
                     <field name="merge_limit"/>
+                    <button name="action_merge_view" type="object"
+                            string="Merge" icon="fa-sign-in" class="oe_highlight"/>
                   </tree>
                 </field>
               </group>

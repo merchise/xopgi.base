@@ -17,6 +17,7 @@
         "view/res_config_view.xml",
         "view/%d/menu.xml" % MAJOR_ODOO_VERSION, # noqa
         "view/object_merger_view.xml",
+        "view/merger_view.xml",
         "data/know_informal_reference.xml",
         "data/predefine_field_merge_way.xml",
     ],
