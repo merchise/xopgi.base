@@ -42,7 +42,10 @@ class ir_model(models.Model):
         return res
 
     def _get_show_fields(self, active_model):
-        return [name for name, field in self.env[active_model]._fields.items() if not field.automatic]
+        fields_name = [name for name, field in self.env[active_model]._fields.items() if not field.automatic]
+        # Show the `id` field in the view of the merge wizard
+        fields_name.insert(0, 'id')
+        return fields_name
 
     def _get_model_merger_view(self, field_names, active_model):
         tree = self.env.ref('xopgi_object_merger.view_merger_tree')
