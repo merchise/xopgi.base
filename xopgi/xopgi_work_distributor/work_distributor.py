@@ -211,7 +211,9 @@ class WorkDistributionModel(models.Model):
 
         '''
         dist_model = self.env[WORKDIST_MODELNAME]
-        for item in dist_model.search([('model.model', '=', self._name)]):
+        # WARNING: Don't use `item` to alter (write or create), because we're
+        # sudo-ing.
+        for item in dist_model.sudo().search([('model.model', '=', self._name)]):
             if item.applicable(values):
                 strategy = False
                 if item.group_field:
