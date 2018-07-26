@@ -205,36 +205,6 @@ class WorkDistributionModel(models.Model):
         if not self.strategy_by_group:
             self.group_field = False
 
-    @signals.receiver(signals.pre_create)
-    def distribute(self, signal, values):
-        ''' Get all distribution configurations for model and apply each one.
-
-        '''
-        dist_model = self.env[WORKDIST_MODELNAME]
-        # WARNING: Don't use `item` to alter (write or create), because we're
-        # sudo-ing.
-        for item in dist_model.sudo().search([('model.model', '=', self._name)]):
-            if item.applicable(values):
-                strategy = False
-                if item.group_field:
-                    group_id = values.get(item.group_field.name, False)
-                    if group_id:
-                        group_model = item.group_field.relation
-                        group = self.env[group_model].browse(group_id)
-                        strategy = getattr(group, item.strategy_field.name,
-                                           False)
-                else:
-                    strategy = item.strategy_ids[0]
-                if strategy:
-                    other_fields = (safe_eval(item.other_fields)
-                                    if item.other_fields else {})
-                    # TODO: check if active user have access to destination
-                    # field
-                    val = strategy.apply(item, values, **dict(other_fields))
-                    if val is not None:
-                        values[item.destination_field.name] = val
-        return values
-
     def applicable(self, values):
         if not self.when_apply or self.when_apply == 'all':
             return True
@@ -454,6 +424,37 @@ class WorkDistributionModel(models.Model):
                 'lang': lang.code
             })
         return result
+
+
+@signals.receiver(signals.pre_create)
+def distribute(self, signal, values):
+    '''Get all distribution configurations for model and apply each one.
+
+    '''
+    dist_model = self.env[WORKDIST_MODELNAME]
+    for item in dist_model.sudo().search([('model.model', '=', self._name)]):
+        # WARNING: Don't use `item` to alter (write or create), because we're
+        # sudo-ing.
+        if item.applicable(values):
+            strategy = False
+            if item.group_field:
+                group_id = values.get(item.group_field.name, False)
+                if group_id:
+                    group_model = item.group_field.relation
+                    group = self.env[group_model].browse(group_id)
+                    strategy = getattr(group, item.strategy_field.name,
+                                       False)
+            else:
+                strategy = item.strategy_ids[0]
+            if strategy:
+                other_fields = (safe_eval(item.other_fields)
+                                if item.other_fields else {})
+                # TODO: check if active user have access to destination
+                # field
+                val = strategy.apply(item, values, **dict(other_fields))
+                if val is not None:
+                    values[item.destination_field.name] = val
+    return values
 
 
 class WorkDistributionStrategy(models.Model):
