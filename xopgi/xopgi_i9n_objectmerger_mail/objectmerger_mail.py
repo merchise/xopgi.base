@@ -39,7 +39,7 @@ class objectmerge_mail(models.TransientModel):
                     defaults_dict = {}
                 val = defaults_dict.get(field, False)
                 if not val:
-                    continue
+                    continue  # noqa
                 if ttype == 'many2one':
                     if val in sources.ids and val != target.id:
                         defaults_dict[field] = target.id
