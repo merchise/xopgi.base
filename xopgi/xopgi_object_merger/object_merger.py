@@ -289,15 +289,15 @@ class object_merger(models.TransientModel):
             # model_name that it's not in the registry.  Ignore it.
             model_registry = self.env.registry.get(model_name)
             if not model_registry:
-                continue
+                continue  # noqa
             if not getattr(model_registry, '_auto', False):
                 # The model is not created by the ORM
-                continue
+                continue  # noqa
             field = model_registry._fields.get(field_name, False)
             assert not field or field.relational
             if not field or not field.store:
                 # Fields which are not in the
-                continue
+                continue  # noqa
             if ttype == 'many2one':
                 if hasattr(model_registry, '_table'):
                     table = model_registry._table
@@ -364,13 +364,13 @@ class object_merger(models.TransientModel):
         for field_name, model_name in refks:
             model = self.env.registry(model_name)
             if not model:
-                continue
+                continue  # noqa
             if not getattr(model, '_auto', False):
-                continue
+                continue  # noqa
             if hasattr(model, '_fields'):
                 field = model._fields.get(field_name, False)
                 if not field or not field.store:
-                    continue
+                    continue  # noqa
             if hasattr(model, '_table'):
                 table = model._table
             else:
