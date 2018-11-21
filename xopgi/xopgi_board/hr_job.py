@@ -32,17 +32,21 @@ class HrJobWidget(models.Model):
     job_position = fields.Many2one('hr.job', required=True)
 
     @api.model
-    def get_user_widgets(self):
-        '''Get the widgets to which the current user has access if he is an
-        active employee and has active contracts.
+    def get_user_widgets(self, user=None):
+        '''Get the widgets to which the user has access.
+
+        If `user` is None, use the logged user.  The result is sudo-ed for the
+        current user always.
 
         '''
+        if not user:
+            user = self.env.user
         user_id = 'job_position.contract_ids.employee_id.user_id'
         employee_active = 'job_position.contract_ids.employee_id.active'
         contract_active = 'job_position.contract_ids.active'
         query = [
             (employee_active, '=', True),
             (contract_active, '=', True),
-            (user_id, '=', self._uid)
+            (user_id, '=', user.id)
         ]
         return self.sudo().search(query).sudo(self._uid)
