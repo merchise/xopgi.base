@@ -1,2 +1,2 @@
--e git+https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lahavane.com/mercurio/xopgi.hotfixes.git@master#egg=xopgi.hotfixes
--e git+https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lahavane.com/mercurio/xopgi.backports.git@master#egg=xopgi.backports
+-e git+https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.merchise.org/mercurio/xopgi.hotfixes.git@master#egg=xopgi.hotfixes
+-e git+https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.merchise.org/mercurio/xopgi.backports.git@master#egg=xopgi.backports
