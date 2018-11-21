@@ -39,14 +39,18 @@ class HrJobWidget(models.Model):
         current user always.
 
         '''
+        import operator
+        from functools import reduce
         if not user:
             user = self.env.user
-        user_id = 'job_position.contract_ids.employee_id.user_id'
-        employee_active = 'job_position.contract_ids.employee_id.active'
-        contract_active = 'job_position.contract_ids.active'
-        query = [
-            (employee_active, '=', True),
-            (contract_active, '=', True),
-            (user_id, '=', user.id)
-        ]
-        return self.sudo().search(query).sudo(self._uid)
+        widgets = reduce(
+            operator.add,
+            (widget
+             for employee in user.employee_ids
+             if employee.active
+             for contract in employee.contract_ids
+             if contract.active
+             for widget in contract.job_id.widgets),
+            self.browse()
+        )
+        return widgets.sudo(self._uid)
