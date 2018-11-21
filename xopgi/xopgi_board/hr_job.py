@@ -11,7 +11,7 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
-from xoeuf import fields, models
+from xoeuf import api, fields, models
 from .board_widget import WIDGET_REL_MODEL_NAME
 
 
@@ -31,6 +31,26 @@ class HrJobWidget(models.Model):
 
     job_position = fields.Many2one('hr.job', required=True)
 
-    def get_user_widgets(self):
-        user_id = 'job_position.contract_ids.employee_id.user_id'
-        return self.sudo().search([(user_id, '=', self._uid)]).sudo(self._uid)
+    @api.model
+    def get_user_widgets(self, user=None):
+        '''Get the widgets to which the user has access.
+
+        If `user` is None, use the logged user.  The result is sudo-ed for the
+        current user always.
+
+        '''
+        import operator
+        from functools import reduce
+        if not user:
+            user = self.env.user
+        widgets = reduce(
+            operator.add,
+            (widget
+             for employee in user.employee_ids
+             if employee.active
+             for contract in employee.contract_ids
+             if contract.active
+             for widget in contract.job_id.widgets),
+            self.browse()
+        )
+        return widgets.sudo(self._uid)
