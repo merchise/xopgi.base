@@ -149,7 +149,7 @@ class ControlVariable(models.Model):
                 value = var._evaluate(cycle.create_date)
             except SoftTimeLimitExceeded:
                 raise
-            except psycopg2.InterfaceError:
+            except (psycopg2.InterfaceError, psycopg2.InternalError):
                 # This means the cursor is unusable, so there's no point in
                 # trying to do anything else with it.
                 raise
