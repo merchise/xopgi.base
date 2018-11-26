@@ -141,12 +141,17 @@ class ControlVariable(models.Model):
         '''Evaluate the control variables in a evaluation cycle.
 
         '''
+        import psycopg2
         logger.debug('Start evaluation of %r, cycle: %r', self.mapped('name'), cycle)
         from celery.exceptions import SoftTimeLimitExceeded
         for var in self:
             try:
                 value = var._evaluate(cycle.create_date)
             except SoftTimeLimitExceeded:
+                raise
+            except (psycopg2.InterfaceError, psycopg2.InternalError):
+                # This means the cursor is unusable, so there's no point in
+                # trying to do anything else with it.
                 raise
             except Exception:
                 logger.exception(
