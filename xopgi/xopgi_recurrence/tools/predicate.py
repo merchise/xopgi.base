@@ -61,7 +61,6 @@ def build_predicate(domain):
             # We don't support child_of
             assert operator in ('like', 'ilike', 'not like', 'not ilike',
                                 '=like', '=ilike')
-
             if operator == 'like':
                 return '{value!r} in self.{attr}'.format(value=value, attr=attr)
             elif operator == 'ilike':
@@ -110,7 +109,7 @@ def build_predicate(domain):
     return 'lambda self: bool({})'.format(stack.pop(-1))
 
 
-# xouef.osv.expression.DomainTree will gain a powerful `walk` method.  We
+# xoeuf.osv.expression.DomainTree will gain a powerful `walk` method.  We
 # can't use it however due to bugs in DomainTree.
 def walk_domain(domain):
     '''Performs a post-fix walk of the 2nd normal form of `domain`.
