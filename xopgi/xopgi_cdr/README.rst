@@ -1,9 +1,10 @@
-==================
- A control system
-==================
+========================
+ A control system (CDR)
+========================
 
-The CDR is a control system.  It allows check the health of the organization
-and be responsive to signs of warning.
+The CDR is a control system.  It allows to check the health of the
+organization and be responsive to signs of warning.
+
 
 Overview
 ========
@@ -15,8 +16,8 @@ The entire system is divided in four group of components:
   liquidity' you have available.
 
   Control variables are evaluated when needed.  They hold a single "current"
-  value (which is actually the value of the `last evaluation <CDR cycle_>`__),
-  and history of past values, which may be discarded at any time.
+  value (which is actually the value of the last evaluation), and history of
+  past values, which may be discarded at any time.
 
 - The `evidences` are predicates over several `control variables`.  They test
   conditions which are *undesired* regarding those variables.  For example,

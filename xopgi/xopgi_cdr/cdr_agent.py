@@ -86,7 +86,6 @@ class EvaluationCycle(models.Model):
         :param evidences_to_evaluate: cdr.evidences recordset to evaluate
 
         '''
-
         res = super(EvaluationCycle, self).create({})
         if vars_to_evaluate or evidences_to_evaluate:
             if vars_to_evaluate:

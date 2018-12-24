@@ -37,7 +37,7 @@ EVENT_ACTIONS_SELECTION[0:0] = [
 
 
 class SystemEvent(models.Model):
-    ''' Generic cdr event definition. For specifics cdr events
+    '''Generic CDR event definition. For specifics CDR events
     implementations just need to inherit by delegation of this model and
     override evaluate method.
 
