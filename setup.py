@@ -55,6 +55,7 @@ setup(name=project_name,
           'xoeuf>=0.20.0',
           'xoutil>=1.8.4,<2.0',
           'celery>=4.2.0',
+          'enum34;python_version<"3.4"',
       ],
       entry_points="""
       [xoeuf.addons]

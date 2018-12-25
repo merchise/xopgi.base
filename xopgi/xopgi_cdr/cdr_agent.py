@@ -11,7 +11,9 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
-from xoeuf.odoo import api, models
+import enum
+
+from xoeuf import api, fields, models
 from xoeuf.odoo.jobs import DeferredType, queue
 from xoeuf.signals import Signal
 
@@ -67,8 +69,24 @@ class CDRAgent(models.TransientModel):
         return Deferred(Cycle.create)
 
 
+class CYCLE_STATE(enum.Enum):
+    CREATED = 0
+    STARTED = 1
+    ABORTED = 2
+    DONE = 3
+
+
+DEFAULT_CYCLE_STATE = CYCLE_STATE.CREATED
+
+
 class EvaluationCycle(models.Model):
     _name = 'cdr.evaluation.cycle'
+
+    state = fields.Enumeration(
+        CYCLE_STATE,
+        default=DEFAULT_CYCLE_STATE,
+        force_char_column=True
+    )
 
     @api.model
     @api.returns('self', lambda value: value.id)
@@ -106,4 +124,5 @@ class EvaluationCycle(models.Model):
                 [('next_call', '<=', cycle.create_date)]
             )
             events.evaluate(cycle)
+        cycle.state = CYCLE_STATE.DONE
         return cycle
