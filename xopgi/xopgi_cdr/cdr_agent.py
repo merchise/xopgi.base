@@ -86,16 +86,16 @@ class EvaluationCycle(models.Model):
         :param evidences_to_evaluate: cdr.evidences recordset to evaluate
 
         '''
-        res = super(EvaluationCycle, self).create({})
+        cycle = super(EvaluationCycle, self).create({})
         if vars_to_evaluate or evidences_to_evaluate:
             if vars_to_evaluate:
-                vars_to_evaluate.evaluate(res)
+                vars_to_evaluate.evaluate(cycle)
             if evidences_to_evaluate:
                 valid_var = (lambda var: not (vars_to_evaluate and
                                               var in vars_to_evaluate))
                 for evidence in evidences_to_evaluate:
-                    evidence.control_vars.filtered(valid_var).evaluate(res)
-                evidences_to_evaluate.evaluate(res)
+                    evidence.control_vars.filtered(valid_var).evaluate(cycle)
+                evidences_to_evaluate.evaluate(cycle)
         else:
             # Look for events that have the next_call less than the same as
             # the creation date of the last cycle that was created. The
@@ -103,18 +103,7 @@ class EvaluationCycle(models.Model):
             # To see function evaluate for BasicEvent and RecurrentEvent.
             # --The next_call conditions events to be evaluated or not!!.
             events = self.env['cdr.system.event'].search(
-                [('next_call', '<=', res.create_date)]
+                [('next_call', '<=', cycle.create_date)]
             )
-            events.evaluate(res)
-            for signal in EVENT_SIGNALS:
-                # Not use groupby because a recordset is needed on
-                # signaling send.
-                sender = events.filtered(lambda event: event.action == signal)
-                if sender:
-                    logger.debug(
-                        'Sending signal (%s) for Events: (%s)',
-                        signal,
-                        ', '.join(e.name for e in sender)
-                    )
-                    EVENT_SIGNALS[signal].send(sender=sender)
-        return res
+            events.evaluate(cycle)
+        return cycle

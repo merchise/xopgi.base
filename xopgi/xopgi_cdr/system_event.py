@@ -169,6 +169,17 @@ class SystemEvent(models.Model):
             # call specific event evaluate method to get each
             # corresponding behavior.
             event.specific_event.evaluate(cycle)
+        for signalname, signal in EVENT_SIGNALS.items():
+            # Do not use groupby because a recordset is needed on signaling
+            # send.
+            sender = self.filtered(lambda event: event.action == signalname)
+            if sender:
+                logger.debug(
+                    'Sending signal (%s) for Events: (%s)',
+                    signalname,
+                    ', '.join(e.name for e in sender)
+                )
+                signal.send(sender=sender)
 
 
 class BasicEvent(models.Model):
