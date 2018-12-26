@@ -271,15 +271,18 @@ and thus recomputed in the next cycle.
 Experimental reports
 ====================
 
-1. In some tests, cycles where a task is forcibly terminated (``kill -9`` to
-   the worker), the cycle remains in the state ERRORED.  Whereas if the job is
-   terminated with a SoftTimeLimitExceeded, the cycle is correctly set to
-   DONE_WITH_ERRORS.
+- Despite what's documented__ about Chords_ needing ``task_ignore_result`` set
+  to False; I haven't had the need to do it.
 
-   I think we can cope with that.
+- In some tests, cycles where a task is forcibly terminated (``kill -9`` to
+  the worker), the cycle remains in the state ERRORED.  Whereas if the job is
+  terminated with a SoftTimeLimitExceeded, the cycle is correctly set to
+  DONE_WITH_ERRORS.
+
+  I think we can cope with that.
 
 
-2. I have witnessed two cycles being run at the same time::
+- I have witnessed two cycles being run at the same time::
 
     [2018-12-26 16:23:55,822: INFO/ForkPoolWorker-1] Start job (d36e1ced-6636-4cd6-a020-e7a3afa4a53f): db=mercurio, uid=1, model=cdr.control.variable, ids=[23], method=evaluate
     [2018-12-26 16:23:55,823: DEBUG/ForkPoolWorker-1] Multiprocess signaling check: [Registry - 543 -> 543] [Cache - 115449 -> 115449]
@@ -296,7 +299,7 @@ Experimental reports
     [2018-12-26 16:25:43,916: DEBUG/ForkPoolWorker-1] Start evaluation of [u'partner_rotation_indicator'], cycle: cdr.evaluation.cycle(1253052,)
     [2018-12-26 16:25:43,917: DEBUG/ForkPoolWorker-1] Evaluating u'partner_rotation_indicator'
 
-   In psql::
+  In psql::
 
     mercurio=# select * from cdr_evaluation_cycle order by create_date desc limit 10;
        id    | create_uid |        create_date         |         write_date         | write_uid |  state
@@ -313,6 +316,11 @@ Experimental reports
      1253043 |          1 | 2018-12-21 03:54:10.418608 | 2018-12-21 03:54:10.418608 |         1 | DONE
     (10 rows)
 
-   I think this is because Celery is trying to make the job (which expires)
-   ``_new_evaluation_cycle`` to run before other jobs.  But that's just a
-   guess and the order of message delivery is not properly defined.
+  I think this is because Celery is trying to make the job (which expires)
+  ``_new_evaluation_cycle`` to run before other jobs.  But that's just a guess
+  and the order of message delivery is not properly defined.
+
+
+__ http://docs.celeryproject.org/en/latest/userguide/canvas.html#chord-important-notes
+
+.. _chords: http://docs.celeryproject.org/en/latest/userguide/canvas.html#chords
