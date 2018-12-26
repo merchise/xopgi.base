@@ -34,6 +34,8 @@ true analysis for another occasion and simply keep the single worker for the
 CDR.  The only point here is that jobs to compute variables, evidences and
 events cannot have a short expiration time.
 
+.. note:: We've already `witnessed concurrent cycles`_.
+
 
 Discussion
 ==========
@@ -271,56 +273,65 @@ and thus recomputed in the next cycle.
 Experimental reports
 ====================
 
-- Despite what's documented__ about Chords_ needing ``task_ignore_result`` set
-  to False; I haven't had the need to do it.
+We're still ignoring task results
+---------------------------------
 
-- In some tests, cycles where a task is forcibly terminated (``kill -9`` to
-  the worker), the cycle remains in the state ERRORED.  Whereas if the job is
-  terminated with a SoftTimeLimitExceeded, the cycle is correctly set to
-  DONE_WITH_ERRORS.
-
-  I think we can cope with that.
-
-
-- I have witnessed two cycles being run at the same time::
-
-    [2018-12-26 16:23:55,822: INFO/ForkPoolWorker-1] Start job (d36e1ced-6636-4cd6-a020-e7a3afa4a53f): db=mercurio, uid=1, model=cdr.control.variable, ids=[23], method=evaluate
-    [2018-12-26 16:23:55,823: DEBUG/ForkPoolWorker-1] Multiprocess signaling check: [Registry - 543 -> 543] [Cache - 115449 -> 115449]
-    [2018-12-26 16:23:55,845: DEBUG/ForkPoolWorker-1] Start evaluation of [u'partner_rotation_indicator'], cycle: cdr.evaluation.cycle(1253051,)
-    [2018-12-26 16:23:55,847: DEBUG/ForkPoolWorker-1] Evaluating u'partner_rotation_indicator'
-    [2018-12-26 16:25:39,293: DEBUG/ForkPoolWorker-1] Evaluated u'partner_rotation_indicator'
-    [2018-12-26 16:25:39,438: DEBUG/ForkPoolWorker-1] Done computing variable [u'partner_rotation_indicator']
-    [2018-12-26 16:25:41,767: INFO/ForkPoolWorker-1] Start job (d110589a-a97b-4aa9-9da6-b3aa97e88e50): db=mercurio, uid=1, model=cdr.agent, ids=[], method=_new_evaluation_cycle
-    [2018-12-26 16:25:41,769: DEBUG/ForkPoolWorker-1] Multiprocess signaling check: [Registry - 543 -> 543] [Cache - 115449 -> 115449]
-    [2018-12-26 16:25:41,899: INFO/ForkPoolWorker-1] Start job (936990b4-9901-4c2e-ae4b-8c4eb50f6142): db=mercurio, uid=1, model=cdr.evidence, ids=[11], method=evaluate
-    [2018-12-26 16:25:41,900: DEBUG/ForkPoolWorker-1] Multiprocess signaling check: [Registry - 543 -> 543] [Cache - 115449 -> 115449]
-    [2018-12-26 16:25:43,903: INFO/ForkPoolWorker-1] Start job (1edc161d-9571-4645-9f12-5fc6f35dedda): db=mercurio, uid=1, model=cdr.control.variable, ids=[23], method=evaluate
-    [2018-12-26 16:25:43,904: DEBUG/ForkPoolWorker-1] Multiprocess signaling check: [Registry - 543 -> 543] [Cache - 115449 -> 115449]
-    [2018-12-26 16:25:43,916: DEBUG/ForkPoolWorker-1] Start evaluation of [u'partner_rotation_indicator'], cycle: cdr.evaluation.cycle(1253052,)
-    [2018-12-26 16:25:43,917: DEBUG/ForkPoolWorker-1] Evaluating u'partner_rotation_indicator'
-
-  In psql::
-
-    mercurio=# select * from cdr_evaluation_cycle order by create_date desc limit 10;
-       id    | create_uid |        create_date         |         write_date         | write_uid |  state
-    ---------+------------+----------------------------+----------------------------+-----------+---------
-     1253052 |          1 | 2018-12-26 16:25:41.775158 | 2018-12-26 16:25:41.775158 |         1 | STARTED
-     1253051 |          1 | 2018-12-26 16:23:55.732041 | 2018-12-26 16:23:55.732041 |         1 | STARTED
-     1253050 |          1 | 2018-12-26 16:19:09.010186 | 2018-12-26 16:21:18.555825 |         1 | ERRORED
-     1253049 |          1 | 2018-12-21 03:59:37.673238 | 2018-12-21 03:59:37.673238 |         1 | DONE
-     1253048 |          1 | 2018-12-21 03:58:32.41712  | 2018-12-21 03:58:32.41712  |         1 | DONE
-     1253047 |          1 | 2018-12-21 03:57:29.341888 | 2018-12-21 03:57:29.341888 |         1 | DONE
-     1253046 |          1 | 2018-12-21 03:57:27.482704 | 2018-12-21 03:57:27.482704 |         1 | DONE
-     1253045 |          1 | 2018-12-21 03:56:20.560744 | 2018-12-21 03:56:20.560744 |         1 | DONE
-     1253044 |          1 | 2018-12-21 03:55:14.993131 | 2018-12-21 03:55:14.993131 |         1 | DONE
-     1253043 |          1 | 2018-12-21 03:54:10.418608 | 2018-12-21 03:54:10.418608 |         1 | DONE
-    (10 rows)
-
-  I think this is because Celery is trying to make the job (which expires)
-  ``_new_evaluation_cycle`` to run before other jobs.  But that's just a guess
-  and the order of message delivery is not properly defined.
-
+Despite what's documented__ about Chords_ needing ``task_ignore_result`` set
+to False; I haven't had the need to do it.
 
 __ http://docs.celeryproject.org/en/latest/userguide/canvas.html#chord-important-notes
 
 .. _chords: http://docs.celeryproject.org/en/latest/userguide/canvas.html#chords
+
+
+State ERRORED report
+--------------------
+
+In some tests, cycles where a task is forcibly terminated (``kill -9`` to
+the worker), the cycle remains in the state ERRORED.  Whereas if the job is
+terminated with a SoftTimeLimitExceeded, the cycle is correctly set to
+DONE_WITH_ERRORS.
+
+I think we can cope with that.
+
+
+Witnessed concurrent cycles
+---------------------------
+
+Unfortunately, I have spotted two cycles being run at the same time::
+
+  [2018-12-26 16:23:55,822: INFO/ForkPoolWorker-1] Start job (d36e1ced-6636-4cd6-a020-e7a3afa4a53f): db=mercurio, uid=1, model=cdr.control.variable, ids=[23], method=evaluate
+  [2018-12-26 16:23:55,823: DEBUG/ForkPoolWorker-1] Multiprocess signaling check: [Registry - 543 -> 543] [Cache - 115449 -> 115449]
+  [2018-12-26 16:23:55,845: DEBUG/ForkPoolWorker-1] Start evaluation of [u'partner_rotation_indicator'], cycle: cdr.evaluation.cycle(1253051,)
+  [2018-12-26 16:23:55,847: DEBUG/ForkPoolWorker-1] Evaluating u'partner_rotation_indicator'
+  [2018-12-26 16:25:39,293: DEBUG/ForkPoolWorker-1] Evaluated u'partner_rotation_indicator'
+  [2018-12-26 16:25:39,438: DEBUG/ForkPoolWorker-1] Done computing variable [u'partner_rotation_indicator']
+  [2018-12-26 16:25:41,767: INFO/ForkPoolWorker-1] Start job (d110589a-a97b-4aa9-9da6-b3aa97e88e50): db=mercurio, uid=1, model=cdr.agent, ids=[], method=_new_evaluation_cycle
+  [2018-12-26 16:25:41,769: DEBUG/ForkPoolWorker-1] Multiprocess signaling check: [Registry - 543 -> 543] [Cache - 115449 -> 115449]
+  [2018-12-26 16:25:41,899: INFO/ForkPoolWorker-1] Start job (936990b4-9901-4c2e-ae4b-8c4eb50f6142): db=mercurio, uid=1, model=cdr.evidence, ids=[11], method=evaluate
+  [2018-12-26 16:25:41,900: DEBUG/ForkPoolWorker-1] Multiprocess signaling check: [Registry - 543 -> 543] [Cache - 115449 -> 115449]
+  [2018-12-26 16:25:43,903: INFO/ForkPoolWorker-1] Start job (1edc161d-9571-4645-9f12-5fc6f35dedda): db=mercurio, uid=1, model=cdr.control.variable, ids=[23], method=evaluate
+  [2018-12-26 16:25:43,904: DEBUG/ForkPoolWorker-1] Multiprocess signaling check: [Registry - 543 -> 543] [Cache - 115449 -> 115449]
+  [2018-12-26 16:25:43,916: DEBUG/ForkPoolWorker-1] Start evaluation of [u'partner_rotation_indicator'], cycle: cdr.evaluation.cycle(1253052,)
+  [2018-12-26 16:25:43,917: DEBUG/ForkPoolWorker-1] Evaluating u'partner_rotation_indicator'
+
+In psql::
+
+  mercurio=# select * from cdr_evaluation_cycle order by create_date desc limit 10;
+     id    | create_uid |        create_date         |         write_date         | write_uid |  state
+  ---------+------------+----------------------------+----------------------------+-----------+---------
+   1253052 |          1 | 2018-12-26 16:25:41.775158 | 2018-12-26 16:25:41.775158 |         1 | STARTED
+   1253051 |          1 | 2018-12-26 16:23:55.732041 | 2018-12-26 16:23:55.732041 |         1 | STARTED
+   1253050 |          1 | 2018-12-26 16:19:09.010186 | 2018-12-26 16:21:18.555825 |         1 | ERRORED
+   1253049 |          1 | 2018-12-21 03:59:37.673238 | 2018-12-21 03:59:37.673238 |         1 | DONE
+   1253048 |          1 | 2018-12-21 03:58:32.41712  | 2018-12-21 03:58:32.41712  |         1 | DONE
+   1253047 |          1 | 2018-12-21 03:57:29.341888 | 2018-12-21 03:57:29.341888 |         1 | DONE
+   1253046 |          1 | 2018-12-21 03:57:27.482704 | 2018-12-21 03:57:27.482704 |         1 | DONE
+   1253045 |          1 | 2018-12-21 03:56:20.560744 | 2018-12-21 03:56:20.560744 |         1 | DONE
+   1253044 |          1 | 2018-12-21 03:55:14.993131 | 2018-12-21 03:55:14.993131 |         1 | DONE
+   1253043 |          1 | 2018-12-21 03:54:10.418608 | 2018-12-21 03:54:10.418608 |         1 | DONE
+  (10 rows)
+
+I think this is because Celery is trying to make the job (which expires)
+``_new_evaluation_cycle`` to run before other jobs.  But that's just a guess
+and the order of message delivery is not properly defined.
