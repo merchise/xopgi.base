@@ -168,8 +168,8 @@ Looking at the links between variables and events we notice that each variable
 job "notifies" or "enables" one or more evidence jobs.  But that some
 evidences need to be notified by several variables.
 
-.. note:: I conducted a little experiment to see if Celery signatures are good
-   to keep the jobs running only once::
+I conducted a little experiment to see if Celery signatures are good to keep
+the jobs running only once::
 
       @app.task(base=Task, bind=True)
       def variable_job(self, cycle, variable):
@@ -206,7 +206,7 @@ evidences need to be notified by several variables.
 
       group(var2, var3).delay('Cycle 1')
 
-   The log shows that Evidence 2 is run twice::
+The log shows that Evidence 2 is run twice::
 
      Variable job variable 2 in cycle Cycle 1
      Variable job variable 3 in cycle Cycle 1
@@ -222,12 +222,8 @@ This demonstrate that we **cannot represent** our run just once network with
 the primitives provided by Celery alone.  We would have to make the linking
 ourselves.
 
-.. warning:: In order to use GroupResult's ``ready()`` method, I had to change
-   the configuration option ``task_ignore_result`` to False in
-   ``odoo/jobs.py``.
-
-
-Now, look at the code of ``variable_job``.  Let's try with a doomed variable::
+Now, look again at the code of ``variable_job``.  Let's try with a doomed
+variable::
 
   Variable job variable 2 in cycle Cycle 1
   Variable job doomed variable 3 in cycle Cycle 1
