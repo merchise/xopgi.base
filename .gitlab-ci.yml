@@ -43,6 +43,26 @@ run all Odoo 10 tests:
     - branches
 
 
+run all Odoo 11 tests:
+  <<: *run_tests
+  variables:
+    PYTHON: python3
+    ODOO_WORKTREE: odoo11
+  allow_failure: true
+  only:
+    - branches
+
+
+run all Odoo 12 tests:
+  <<: *run_tests
+  variables:
+    PYTHON: python3
+    ODOO_WORKTREE: odoo12
+  allow_failure: true
+  only:
+    - branches
+
+
 build documentation:
   stage: build doc
   script:
