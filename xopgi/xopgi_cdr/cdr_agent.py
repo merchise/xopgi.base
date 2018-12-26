@@ -109,8 +109,7 @@ class CYCLE_STATE(enum.Enum):
     #: may has not started, but the jobs were issued.
     STARTED = 1
 
-    #: Some of the jobs had terminated with errors.  The cycle may still be
-    #: running.
+    #: Some of the jobs has detected errors.  The cycle may still be running.
     ERRORED = 2
 
     #: The cycle ended without errors.
@@ -138,7 +137,7 @@ class EvaluationCycle(models.Model):
 
     @api.requires_singleton
     def signal_done(self):
-        if self.state != CYCLE_STATE.ERRORED:
+        if self.state not in (CYCLE_STATE.ERRORED, CYCLE_STATE.DONE_WITH_ERRORS):
             self.state = CYCLE_STATE.DONE
         else:
             self.state = CYCLE_STATE.DONE_WITH_ERRORS
@@ -168,7 +167,14 @@ class EvaluationCycle(models.Model):
         # from evidences to events.  Then use those to create the jobs and
         # their links.
         if group is None:
-            from celery import group
+            # Celery's group does not protect it from grouping single-jobs.
+            def group(*jobs):
+                from celery import group as _group
+                if len(jobs) > 1:
+                    return _group(*jobs)
+                else:
+                    return jobs[0]
+
         if chain is None:
             from celery import chain
         if signature is None:
@@ -206,7 +212,16 @@ class EvaluationCycle(models.Model):
                     evs = varsmap.setdefault(var, [])
                     evs.append(evidence)
         jobs = [create_variable_job(var) for var in varsmap]
-        return chain(group(*jobs), signature(self.signal_done))
+        # I want the signal_done job to be executed after the entire cycle is
+        # done, even in the case of errors.  Otherwise, the cycle will remain
+        # in the ERRORED state, but I want it to be in DONE_WITH_ERRORS.
+        if jobs:
+            return chain(
+                group(*jobs).on_error(signature(self.signal_done)),
+                signature(self.signal_done)
+            )
+        else:
+            return signature(self.signal_done)
 
     @api.requires_singleton
     def _get_events_to_update(self):
