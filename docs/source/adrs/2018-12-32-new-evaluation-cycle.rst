@@ -2,6 +2,9 @@
  ADR 2018-12-23.  New evaluation cycle.
 ========================================
 
+.. contents::
+
+
 Context
 =======
 
@@ -109,9 +112,9 @@ There are two issues with this design:
 Mitigating the impact of failures
 ---------------------------------
 
-The goal of the CRD is to alert [#compute]_.  So it seems reasonable to reduce
-the amount of impact of errors in a variable.  An error should only affect the
-evidences and events involved.
+The goal of the CRD is to alert.  So it seems reasonable to reduce the amount
+of impact of errors in a variable.  An error should only affect the evidences
+and events involved.
 
 .. note:: We're also using the CDR to compute indicators shown in the Boards,
           even though the CDR was not designed for that purpose.
@@ -247,3 +250,30 @@ perform a simple comparison.
 This means that could allow running the same evidence more than once.  Events
 can run more than once as well because they only update its "firing"
 attribute.
+
+
+Status
+======
+
+Implemented.
+
+
+Consequences
+============
+
+The architecture remains stable.
+
+No unforeseen bad consequences.  In fact, there's a good non-anticipated
+consequence: if some variable fails its evidences and events won't be updated
+and thus recomputed in the next cycle.
+
+
+Experimental reports
+====================
+
+1. In some tests, cycles where a task is forcibly terminated (``kill -9`` to
+   the worker), the cycle remains in the state ERRORED.  Whereas if the job is
+   terminated with a SoftTimeLimitExceeded, the cycle is correctly set to
+   DONE_WITH_ERRORS.
+
+   I think we can cope with that.
