@@ -159,6 +159,8 @@ class Evidence(models.Model):
         '''Evaluate the evidences in a evaluation cycle.
 
         '''
+        if isinstance(cycle, int):
+            cycle = self.env['cdr.evaluation.cycle'].browse(cycle)
         for evidence in self:
             try:
                 value = evidence._evaluate()
@@ -182,6 +184,5 @@ class Evidence(models.Model):
     @api.returns('self', lambda value: value.id)
     def create(self, vals):
         res = super(Evidence, self).create(vals)
-        # evaluate by first time to get init value.
-        self.env['cdr.evaluation.cycle'].create(evidences_to_evaluate=res)
+        self.env['cdr.evaluation.cycle'].create_and_evaluate(evidences=res)
         return res

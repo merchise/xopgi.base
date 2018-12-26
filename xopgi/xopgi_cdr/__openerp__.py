@@ -9,7 +9,7 @@
 
 {
     'name': 'Vigilant Base',
-    'version': '2.0',
+    'version': '3.0',
     'category': 'Hidden',
     "author": "Merchise Autrement",
     "website": "http://xhg.ca.merchise.org/addons/xopgi_cdr",

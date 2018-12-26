@@ -31,6 +31,7 @@ def safe_read(*paths):
 class develop(_develop):
     pass
 
+
 setup(name=project_name,
       version=version,
       description="Extensions to `OpenERP` kernel for all dependant XOPGI components",
@@ -53,6 +54,8 @@ setup(name=project_name,
       install_requires=[
           'xoeuf>=0.20.0',
           'xoutil>=1.8.4,<2.0',
+          'celery>=4.2.0',
+          'enum34;python_version<"3.4"',
       ],
       entry_points="""
       [xoeuf.addons]

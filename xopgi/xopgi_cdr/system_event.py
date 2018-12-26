@@ -37,7 +37,7 @@ EVENT_ACTIONS_SELECTION[0:0] = [
 
 
 class SystemEvent(models.Model):
-    ''' Generic cdr event definition. For specifics cdr events
+    '''Generic CDR event definition. For specifics CDR events
     implementations just need to inherit by delegation of this model and
     override evaluate method.
 
@@ -140,15 +140,8 @@ class SystemEvent(models.Model):
             else:
                 event.evidences = evidences
 
-    def _get_vars_to_evaluate(self):
-        return self.mapped('evidences.control_vars')
-
     def _get_evidences_to_evaluate(self):
         return self.mapped('evidences')
-
-    def evaluate_dependences(self, cycle):
-        self._get_vars_to_evaluate().evaluate(cycle)
-        self._get_evidences_to_evaluate().evaluate(cycle)
 
     def _evaluate(self):
         return evaluate(self.definition, **self.evidences.get_bool_value())
@@ -164,11 +157,23 @@ class SystemEvent(models.Model):
                 )
 
     def evaluate(self, cycle):
-        self.evaluate_dependences(cycle)
+        if isinstance(cycle, int):
+            cycle = self.env['cdr.evaluation.cycle'].browse(cycle)
         for event in self:
             # call specific event evaluate method to get each
             # corresponding behavior.
             event.specific_event.evaluate(cycle)
+        for signalname, signal in EVENT_SIGNALS.items():
+            # Do not use groupby because a recordset is needed on signaling
+            # send.
+            sender = self.filtered(lambda event: event.action == signalname)
+            if sender:
+                logger.debug(
+                    'Sending signal (%s) for Events: (%s)',
+                    signalname,
+                    ', '.join(e.name for e in sender)
+                )
+                signal.send(sender=sender)
 
 
 class BasicEvent(models.Model):
@@ -235,6 +240,8 @@ class BasicEvent(models.Model):
         '''Evaluate the basic event in a evaluation cycle.
 
         '''
+        if isinstance(cycle, int):
+            cycle = self.env['cdr.evaluation.cycle'].browse(cycle)
         try:
             value = self.event_id._evaluate()
         except Exception:
@@ -288,6 +295,8 @@ class RecurrentEvent(models.Model):
         '''Evaluate the recurrent event in a evaluation cycle.
 
         '''
+        if isinstance(cycle, int):
+            cycle = self.env['cdr.evaluation.cycle'].browse(cycle)
         try:
             value = self.event_id._evaluate()
         except Exception:
