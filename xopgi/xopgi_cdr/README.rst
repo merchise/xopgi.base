@@ -1,9 +1,10 @@
-==================
- A control system
-==================
+========================
+ A control system (CDR)
+========================
 
-The CDR is a control system.  It allows check the health of the organization
-and be responsive to signs of warning.
+The CDR is a control system.  It allows to check the health of the
+organization and be responsive to signs of warning.
+
 
 Overview
 ========
@@ -15,8 +16,8 @@ The entire system is divided in four group of components:
   liquidity' you have available.
 
   Control variables are evaluated when needed.  They hold a single "current"
-  value (which is actually the value of the `last evaluation <CDR cycle_>`__),
-  and history of past values, which may be discarded at any time.
+  value (which is actually the value of the last evaluation), and history of
+  past values, which may be discarded at any time.
 
 - The `evidences` are predicates over several `control variables`.  They test
   conditions which are *undesired* regarding those variables.  For example,
@@ -35,7 +36,7 @@ The entire system is divided in four group of components:
   are constantly triggering an evidence.  In the example above, we may define
   the event 'low liquidity' to trigger after 24 hours of continuously
   witnessing the 'low liquidity' evidence.  We also define here at which pace
-  we must evaluate the evidence so that we can react as soon as it's needed.
+  we must evaluate the evidence so that we can react as soon as needed.
 
   Notice the system allows the organization to respond but it does not enforce
   immediate action.  Following the example, your organization may start the
@@ -50,19 +51,16 @@ The entire system is divided in four group of components:
 
   When an event occurs, a `notification` is issued.
 
-- `Notifications` are a broad concept of that what to do in the face of an
-  event.
+- `Notifications` are a broad concept of what to do in the face of an event.
 
 
 Technical overview
 ==================
 
 The core concepts are defined in the addon `xopgi_cdr`.  Different types of
-notifications are defined in `xopgi_cdr_notification`,
-`xopgi_cdr_system_action`.
-
-The addon `xopgi_web_notification` is used to send notifications to the web
-client.
+notifications are defined in `xopgi_cdr_notification`, and
+`xopgi_cdr_system_action`.  The addon `xopgi_web_notification` allows to send
+notifications to the web client.
 
 The addon `xopgi_recurrence` is used to define a recurrent event.
 

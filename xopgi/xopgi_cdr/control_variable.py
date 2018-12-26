@@ -106,7 +106,7 @@ class ControlVariable(models.Model):
         '''
         import warnings
         warnings.warn('The _value() method of control variables is '
-                      'deprecated.  Use the `result` property.')
+                      'deprecated.  Use the `result` property.', stacklevel=2)
         return self.result
 
     @api.requires_singleton
@@ -141,6 +141,8 @@ class ControlVariable(models.Model):
         '''Evaluate the control variables in a evaluation cycle.
 
         '''
+        if isinstance(cycle, int):
+            cycle = self.env['cdr.evaluation.cycle'].browse(cycle)
         import psycopg2
         logger.debug('Start evaluation of %r, cycle: %r', self.mapped('name'), cycle)
         from celery.exceptions import SoftTimeLimitExceeded
@@ -174,7 +176,7 @@ class ControlVariable(models.Model):
         res = super(ControlVariable, self).create(vals)
         logger.debug('Created variable %r', res.name)
         # evaluate by first time to get init value.
-        self.env['cdr.evaluation.cycle'].create(vars_to_evaluate=res)
+        self.env['cdr.evaluation.cycle'].create_and_evaluate(variables=res)
         logger.debug('Evaluated variable %r', res.name)
         return res
 

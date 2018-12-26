@@ -292,7 +292,7 @@ class RecurrentModel(models.AbstractModel):
         # and `or`, where the logical NOT will be `~`.
         #
         # For the predicate T ``(D or ~n) and (~D or n)``, Q can be ``~n or
-        # n``, with is the same as ``[]``.  For the predicate ``(D or n) and
+        # n``, which is the same as ``[]``.  For the predicate ``(D or n) and
         # (~D or n)``, we can find Q as ``n``.  Notice that both predicates
         # are in Conjunctive Normal Form (CNF).
         #
@@ -325,12 +325,14 @@ class RecurrentModel(models.AbstractModel):
     @api.multi
     def read(self, fields=None, load='_classic_read'):
         '''Return the list of dict with the [fields].
-        if [ids] contain virtual ids read data from real ids and create
+
+        If [ids] contain virtual ids read data from real ids and create
         virtual copies to return
 
-        If :param fields: have [date, date_from, date_to] return a list of dict
-        with this fields plus id. If :param calendar_duration: is include in
-        fields it will be add to the result else is exclude.
+        If `fields` have [date, date_from, date_to] return a list of dict with
+        this fields plus id. If :param calendar_duration: is include in fields
+        it will be add to the result else is exclude.
+
         '''
         if not fields:
             fields = []
@@ -391,8 +393,8 @@ class RecurrentModel(models.AbstractModel):
     def _iter_occurrences_dates(self, start=None):
         '''Produce **all** the occurrences.
 
-        Each item is pair of `(date, record)`, where `date` is the date of an
-        occurrence defined by `record.  Records are all the records in
+        Each item is a pair of `(date, record)`, where `date` is the date of
+        an occurrence defined by `record.  Records are all the records in
         `self`.  `date` is always a `datetime`:class: object.
 
         Items are produced from `start` to end in order of occurrence.  Thus,
@@ -402,7 +404,7 @@ class RecurrentModel(models.AbstractModel):
         items.
 
         If any record in `self` is not recurrent it will yield a single
-        instance with `date` to `date_from`.
+        instance with `date` equal to `date_from`.
 
         .. note:: This can be a potentially infinite iterator.
 
