@@ -26,11 +26,10 @@ class CDRHistory(models.Model):
         'cdr.identifier',
         required=True,
         ondelete='cascade',
-        help='Available python identifier. This can be a variable or evidences '
     )
 
     cycle = fields.Many2one(
         'cdr.evaluation.cycle',
         required=True,
-        help='<CDR_evaluation_cycle>'
+        ondelete='cascade',
     )
