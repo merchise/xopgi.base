@@ -34,7 +34,15 @@ true analysis for another occasion and simply keep the single worker for the
 CDR.  The only point here is that jobs to compute variables, evidences and
 events cannot have a short expiration time.
 
-.. note:: We've already `witnessed concurrent cycles`_.
+Control concurrent cycle clusters.  Update of 2018-12-27.
+---------------------------------------------------------
+
+We've already `witnessed concurrent cycles`_, and also `Cycles which are never
+done`_.  Therefore, I'm changing a bit the implementation to avoid creating
+new cycles if cycles from the last 10 min are still running.  After 15 min I
+will assume they're done but not signaled (I won't change their state,
+though).
+
 
 
 Discussion
@@ -331,3 +339,56 @@ In psql::
 I think this is because Celery is trying to make the job (which expires)
 ``_new_evaluation_cycle`` to run before other jobs.  But that's just a guess
 and the order of message delivery is not properly defined.
+
+
+Cycles which are never done
+---------------------------
+
+After deployment in stage, I see the following::
+
+  mercurio=# select * from cdr_evaluation_cycle where state != 'DONE' order by create_date desc limit 40;
+     id    | create_uid |        create_date         |... |  state
+  ---------+------------+----------------------------+...-+---------
+   1261075 |          1 | 2018-12-27 12:44:33.50522  |... | STARTED
+   1261074 |          1 | 2018-12-27 12:43:34.657041 |... | STARTED
+   1261073 |          1 | 2018-12-27 12:40:18.977142 |... | STARTED
+   1261072 |          1 | 2018-12-27 12:37:24.300689 |... | STARTED
+   1261019 |          1 | 2018-12-27 11:41:56.887034 |... | STARTED
+   1261015 |          1 | 2018-12-27 11:36:34.792374 |... | STARTED
+   1261014 |          1 | 2018-12-27 11:33:57.701072 |... | STARTED
+   1260963 |          1 | 2018-12-27 10:41:31.271828 |... | STARTED
+   1260962 |          1 | 2018-12-27 10:40:48.687491 |... | STARTED
+   1260961 |          1 | 2018-12-27 10:33:13.004285 |... | STARTED
+   1260960 |          1 | 2018-12-27 10:32:53.504362 |... | STARTED
+   1260959 |          1 | 2018-12-27 10:30:06.40884  |... | STARTED
+   1260904 |          1 | 2018-12-27 09:34:28.505108 |... | STARTED
+   1260903 |          1 | 2018-12-27 09:33:28.505619 |... | STARTED
+   1260902 |          1 | 2018-12-27 09:29:37.135205 |... | STARTED
+   1260872 |          1 | 2018-12-27 09:26:44.662991 |... | ERRORED
+   1260815 |          1 | 2018-12-27 08:29:55.476429 |... | STARTED
+   1260814 |          1 | 2018-12-27 08:25:55.74917  |... | STARTED
+   1260761 |          1 | 2018-12-27 07:25:10.742337 |... | STARTED
+   1260760 |          1 | 2018-12-27 07:22:19.823049 |... | STARTED
+   1260707 |          1 | 2018-12-27 06:21:57.962368 |... | STARTED
+   1260706 |          1 | 2018-12-27 06:19:02.815557 |... | STARTED
+   1260650 |          1 | 2018-12-27 05:18:32.246838 |... | STARTED
+   1260649 |          1 | 2018-12-27 05:15:33.955722 |... | STARTED
+   1260592 |          1 | 2018-12-27 04:14:48.500174 |... | STARTED
+   1260591 |          1 | 2018-12-27 04:11:47.920059 |... | STARTED
+   1260536 |          1 | 2018-12-27 03:11:10.726948 |... | STARTED
+   1260535 |          1 | 2018-12-27 03:08:20.659041 |... | STARTED
+   1260481 |          1 | 2018-12-27 02:07:51.754376 |... | STARTED
+   1260480 |          1 | 2018-12-27 02:05:01.079619 |... | STARTED
+   1260424 |          1 | 2018-12-27 01:04:35.267794 |... | STARTED
+   1260423 |          1 | 2018-12-27 01:01:40.011001 |... | STARTED
+   1260367 |          1 | 2018-12-27 00:00:59.58923  |... | STARTED
+   1260366 |          1 | 2018-12-26 23:58:03.906406 |... | STARTED
+   1260311 |          1 | 2018-12-26 22:57:50.984604 |... | STARTED
+   1260310 |          1 | 2018-12-26 22:54:52.5443   |... | STARTED
+   1260256 |          1 | 2018-12-26 21:54:03.504921 |... | STARTED
+   1260255 |          1 | 2018-12-26 21:53:55.749018 |... | STARTED
+   1260254 |          1 | 2018-12-26 21:51:07.42143  |... | STARTED
+   1260203 |          1 | 2018-12-26 20:51:06.888168 |... | STARTED
+  (40 rows)
+
+Notice that they seem to cluster by about 4 each hour.
