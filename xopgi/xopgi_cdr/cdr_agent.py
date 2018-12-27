@@ -11,11 +11,13 @@ from __future__ import (division as _py3_division,
                         print_function as _py3_print,
                         absolute_import as _py3_abs_import)
 
+import datetime
 import enum
 
 from xoeuf import api, fields, models
 from xoeuf.odoo.jobs import DeferredType, queue
 from xoeuf.signals import Signal
+from xoeuf.tools import normalize_date, date2str
 
 import logging
 logger = logging.getLogger(__name__)
@@ -146,6 +148,20 @@ class EvaluationCycle(models.Model):
         default=DEFAULT_CYCLE_STATE,
         force_char_column=True
     )
+
+    @api.model
+    def prune(self, date=None):
+        '''Prune old cycles.
+
+        A cycle is old if its creation date is older than `date`.  If `date`
+        is None, it defaults to 365 days before today.
+
+        '''
+        if date is None:
+            date = datetime.datetime.utcnow() - datetime.timedelta(365)
+        else:
+            date = normalize_date(date)
+        self.search([('create_date', '<', date2str(date))]).unlink()
 
     @api.requires_singleton
     def signal_error(self):

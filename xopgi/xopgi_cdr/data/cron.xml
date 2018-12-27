@@ -8,5 +8,13 @@
         <field name="model">cdr.agent</field>
         <field name="function">new_evaluation_cycle</field>
       </record>
+
+      <record id="prune_old_cycles" model="ir.cron">
+        <field name="name">Prune old CDR cycles</field>
+        <field name="interval_type">months</field>
+        <field name="numbercall">-1</field>
+        <field name="model">cdr.evaluation.cycle</field>
+        <field name="function">prune</field>
+      </record>
     </data>
 </openerp>
