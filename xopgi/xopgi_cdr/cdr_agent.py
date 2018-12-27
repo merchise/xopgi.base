@@ -99,7 +99,6 @@ class CDRAgent(models.TransientModel):
         Cycle = self.env['cdr.evaluation.cycle']
         if not rows:
             cycle = Cycle.create({})
-            cycle.state = CYCLE_STATE.STARTED
             # I should send the evaluation plan after commiting the new cycle to
             # the CDR, otherwise there's a chance to start a job without the cycle
             # in the DB yet.  But that, requires me to create a new environment.
@@ -164,6 +163,10 @@ class EvaluationCycle(models.Model):
         self.search([('create_date', '<', date2str(date))]).unlink()
 
     @api.requires_singleton
+    def signal_start(self):
+        self.state = CYCLE_STATE.STARTED
+
+    @api.requires_singleton
     def signal_error(self):
         self.state = CYCLE_STATE.ERRORED
 
@@ -218,7 +221,7 @@ class EvaluationCycle(models.Model):
             )
 
         def create_event_job(event):
-            return signature(event.evaluate, self.id)
+            return evaljob(event)
 
         # We don't really care about "sharing" the same signature for events
         # and evidences job; they will be duplicated anyways.
@@ -249,6 +252,7 @@ class EvaluationCycle(models.Model):
         # in the ERRORED state, but I want it to be in DONE_WITH_ERRORS.
         if jobs:
             return chain(
+                signature(self.signal_start),
                 group(*jobs).on_error(signature(self.signal_done)),
                 signature(self.signal_done)
             )
