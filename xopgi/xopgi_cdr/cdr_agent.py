@@ -221,7 +221,7 @@ class EvaluationCycle(models.Model):
             )
 
         def create_event_job(event):
-            return signature(event.evaluate, self.id)
+            return evaljob(event)
 
         # We don't really care about "sharing" the same signature for events
         # and evidences job; they will be duplicated anyways.
