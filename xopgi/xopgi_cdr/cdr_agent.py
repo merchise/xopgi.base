@@ -81,24 +81,40 @@ class CDRAgent(models.TransientModel):
 
     @api.model
     def _new_evaluation_cycle(self):
+        # If a recent cycle is not yet DONE, defer the creation of a new
+        # cycle.  This is just a counter measure to avoid possible
+        # concurrency.  We cannot be sure the cycle is actually running (it
+        # may have stopped forcibly and not signaled); that's why we keep a
+        # "small window" of 15 minutes.
+        self.env.cr.execute(
+            '''SELECT id FROM cdr_evaluation_cycle
+               WHERE state != 'DONE' AND state != 'DONE_WITH_ERRORS'
+                     AND create_date >= (now() at time zone 'UTC') - '15 minutes'::interval
+               LIMIT 1;
+            '''
+        )
+        rows = self.env.cr.fetchall()
         Cycle = self.env['cdr.evaluation.cycle']
-        cycle = Cycle.create({})
-        cycle.state = CYCLE_STATE.STARTED
-        # I should send the evaluation plan after commiting the new cycle to
-        # the CDR, otherwise there's a chance to start a job without the cycle
-        # in the DB yet.  But that, requires me to create a new environment.
-        cycle_id = cycle.id
-        args = self.env.args
+        if not rows:
+            cycle = Cycle.create({})
+            cycle.state = CYCLE_STATE.STARTED
+            # I should send the evaluation plan after commiting the new cycle to
+            # the CDR, otherwise there's a chance to start a job without the cycle
+            # in the DB yet.  But that, requires me to create a new environment.
+            cycle_id = cycle.id
+            args = self.env.args
 
-        def start():
-            with api.Environment.manage():
-                env = api.Environment(*args)
-                Cycle = env['cdr.evaluation.cycle']
-                cycle = Cycle.browse(cycle_id)
-                cycle._create_evaluation_plan().delay()
+            def start():
+                with api.Environment.manage():
+                    env = api.Environment(*args)
+                    Cycle = env['cdr.evaluation.cycle']
+                    cycle = Cycle.browse(cycle_id)
+                    cycle._create_evaluation_plan().delay()
 
-        self.env.cr.after('commit', start)
-        return cycle
+            self.env.cr.after('commit', start)
+            return cycle
+        else:
+            return Cycle.browse(int(rows[0][0]))
 
 
 class CYCLE_STATE(enum.Enum):
